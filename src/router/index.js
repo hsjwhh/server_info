@@ -24,6 +24,11 @@ const routes = [
       // 将来可以在这里继续添加更多子页面，例如：
       // { path: 'sn', component: () => import('../views/SnQuery.vue') }
       // 那么访问 '/sn' 时，就会在 AdminLayout 内部渲染 SnQuery 页面
+      {
+        // ✅ 新增 SN 查询路由
+        path: 'sn',
+        component: () => import('../views/SnQuery.vue'),
+      },
     ],
   },
 
