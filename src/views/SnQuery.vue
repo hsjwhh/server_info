@@ -1,58 +1,84 @@
 <template>
-  <!-- 页面整体容器 -->
-  <div>
-    <!-- 标题 -->
-    <h2>SN 查询</h2>
+  <div class="sn-query-page">
 
-    <!-- 查询输入框 + 按钮 -->
-    <el-input
-      v-model="sn"
-      placeholder="请输入 SN"
-      style="width: 300px; margin-right: 10px"
-    />
+    <!-- SN 输入框（自动补全） -->
+    <el-autocomplete v-model="sn" :fetch-suggestions="handleAutocomplete" placeholder="请输入 SN" clearable
+      @select="handleSelect" style="width: 300px" />
 
-    <el-button type="primary" @click="handleSearch">
+    <el-button type="primary" @click="handleSearch" style="margin-left: 10px">
       查询
     </el-button>
 
-    <!-- 查询结果展示区域 -->
-    <div style="margin-top: 20px">
-      <el-card v-if="result">
-        <p>查询结果：</p>
-        <pre>{{ result }}</pre>
-      </el-card>
-    </div>
+    <!-- SN 详情卡片 -->
+    <el-card v-if="info" class="detail-card" shadow="hover">
+
+      <!-- 基本信息 -->
+      <div class="section-title">基本信息</div>
+
+      <el-descriptions :column="3" border>
+        <el-descriptions-item label="日期">{{ fullDate }}</el-descriptions-item>
+        <el-descriptions-item label="出机客户">{{ info.出机客户 }}</el-descriptions-item>
+        <el-descriptions-item label="业务">{{ info.业务 }}</el-descriptions-item>
+
+        <el-descriptions-item label="SN">{{ info.SN }}</el-descriptions-item>
+        <el-descriptions-item label="数量">{{ info.数量 }}</el-descriptions-item>
+        <el-descriptions-item label="备注">{{ info.备注 }}</el-descriptions-item>
+      </el-descriptions>
+
+      <!-- 硬件配置 -->
+      <div class="section-title" style="margin-top: 20px;">硬件配置</div>
+
+      <el-table :data="hardwareList" border style="width: 100%">
+        <el-table-column prop="name" label="硬件" width="180" />
+        <el-table-column label="型号" width="200" :formatter="(row) => info[row.model]" />
+        <el-table-column label="数量" width="120" :formatter="(row) => row.count ? info[row.count] : ''" />
+      </el-table>
+
+    </el-card>
+
   </div>
 </template>
 
 <script setup>
-// 使用 Vue3 的组合式 API
 import { ref } from 'vue'
-import request from '../utils/request'
+import debounce from 'lodash.debounce'
+import { getSn, searchSn, getSnDetail } from '../api/sn'
 
-// 输入框绑定的 SN 值
 const sn = ref('')
-// 查询结果
-const result = ref('')
-// 点击查询按钮时触发
-const handleSearch = async () => {
-  if (!sn.value) {
-    result.value = '请输入 SN'
-    return
-  }
+const tableData = ref([])
 
-  try {
-    // ✅ 调用后端 API
-    const res = await request.get(`/sn/${sn.value}`)
-    // ✅ 后端返回的数据直接赋值,假设后端返回 JSON
-    result.value = res
-  } catch (err) {
-    result.value = '查询失败：' + err.message
-  }
+// ✅ 原始自动补全逻辑
+const fetchSuggestions = async (query, cb) => {
+  if (!query) return cb([])
+
+  const list = await searchSn(query)
+
+  if (!Array.isArray(list)) return cb([])
+
+  cb(list.map(item => ({ value: item })))
 }
 
+// ✅ 加防抖（300ms）
+const handleAutocomplete = debounce(fetchSuggestions, 1000)
+
+// ✅ 自动补全选择
+const handleSelect = async (item) => {
+  const res = await getSnDetail(item.value)
+  tableData.value = res ? [res] : []
+}
+
+// ✅ 点击查询按钮
+const handleSearch = async () => {
+  if (!sn.value) return
+
+  const res = await getSn(sn.value)
+  tableData.value = res?.data ? [res.data] : []
+}
 </script>
 
+
 <style scoped>
-/* 页面级样式（可选） */
+.sn-query-page {
+  padding: 20px;
+}
 </style>
