@@ -32,7 +32,7 @@ app.get("/api/sn/search", async (req, res) => {
 
     try {
         const rows = await query(
-            "SELECT SN FROM  MachineInfo WHERE SN LIKE ? LIMIT 20",
+            "SELECT SN FROM  server_info WHERE SN LIKE ? LIMIT 20",
             [`%${keyword}%`]
         );
         res.json(rows.map(r => r.SN));
@@ -51,7 +51,7 @@ app.get("/api/sn/detail", async (req, res) => {
 
     try {
         const rows = await query(
-            "SELECT * FROM MachineInfo WHERE SN = ? LIMIT 1",
+            "SELECT * FROM server_info WHERE SN = ? LIMIT 1",
             [sn]
         );
         res.json(rows[0] || {});
@@ -72,8 +72,7 @@ app.get('/api/sn/:sn', async (req, res) => {
     }
 
     try {
-        const conn = await query();
-        const [rows] = await conn.execute(
+        const [rows] = await query(
             "SELECT * FROM server_info WHERE SN = ? LIMIT 1",
             [sn]
         );

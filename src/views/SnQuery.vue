@@ -40,40 +40,66 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import debounce from 'lodash.debounce'
 import { getSn, searchSn, getSnDetail } from '../api/sn'
 
 const sn = ref('')
-const tableData = ref([])
 
-// ✅ 原始自动补全逻辑
+// 页面真正要展示的数据
+const info = ref(null)
+
+// 你定义的硬件配置表（根据你的字段名调整）
+const hardwareList = [
+  { name: "机箱", model: "机箱", count: "" },
+  { name: "电源", model: "电源", count: "" },
+  { name: "主板", model: "主板", count: "" },
+  { name: "BMC密码", model: "BMC密码", count: "" },
+  { name: "CPU", model: "CPU", count: "CPU数量" },
+  { name: "内存", model: "内存", count: "内存数量" },
+  { name: "M.2", model: "M2", count: "M2数量" },
+  { name: "SSD", model: "SSD", count: "SSD数量" },
+  { name: "HDD", model: "HDD", count: "HDD数量" },
+  { name: "阵列卡", model: "阵列卡", count: "阵列卡数量" },
+  { name: "网卡", model: "网卡", count: "网卡数量" },
+  { name: "显卡", model: "显卡", count: "显卡数量" },
+  { name: "系统", model: "系统", count: "" }
+]
+
+// 日期格式化
+const fullDate = computed(() => {
+  if (!info.value) return ''
+
+  const y = info.value.年份
+  const m = String(info.value.月份).padStart(2, '0')
+  const d = String(info.value.日期).padStart(2, '0')
+
+  return `${y}-${m}-${d}`
+})
+
+
+// 自动补全
 const fetchSuggestions = async (query, cb) => {
   if (!query) return cb([])
-
   const list = await searchSn(query)
-
-  if (!Array.isArray(list)) return cb([])
-
   cb(list.map(item => ({ value: item })))
 }
 
-// ✅ 加防抖（300ms）
-const handleAutocomplete = debounce(fetchSuggestions, 1000)
+const handleAutocomplete = debounce(fetchSuggestions, 500)
 
-// ✅ 自动补全选择
+// 自动补全选择
 const handleSelect = async (item) => {
   const res = await getSnDetail(item.value)
-  tableData.value = res ? [res] : []
+  info.value = res || null
 }
 
-// ✅ 点击查询按钮
+// 点击查询按钮
 const handleSearch = async () => {
   if (!sn.value) return
-
   const res = await getSn(sn.value)
-  tableData.value = res?.data ? [res.data] : []
+  info.value = res?.data || null
 }
+
 </script>
 
 
