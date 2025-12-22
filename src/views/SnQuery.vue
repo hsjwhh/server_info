@@ -10,15 +10,15 @@
     </el-button>
 
     <!-- SN 详情卡片 -->
-    <el-card v-if="info" class="detail-card" shadow="hover">
+    <el-card v-if="info" class="detail-card" shadow="hover" width="800">
 
       <!-- 基本信息 -->
       <div class="section-title">基本信息</div>
 
       <el-descriptions :column="3" border>
-        <el-descriptions-item label="日期">{{ fullDate }}</el-descriptions-item>
-        <el-descriptions-item label="出机客户">{{ info.出机客户 }}</el-descriptions-item>
-        <el-descriptions-item label="业务">{{ info.业务 }}</el-descriptions-item>
+        <el-descriptions-item label="日期" width="100">{{ fullDate }}</el-descriptions-item>
+        <el-descriptions-item label="出机客户" width="100">{{ info.出机客户 }}</el-descriptions-item>
+        <el-descriptions-item label="业务" width="100">{{ info.业务 }}</el-descriptions-item>
 
         <el-descriptions-item label="SN">{{ info.SN }}</el-descriptions-item>
         <el-descriptions-item label="数量">{{ info.数量 }}</el-descriptions-item>
@@ -29,9 +29,9 @@
       <div class="section-title" style="margin-top: 20px;">硬件配置</div>
 
       <el-table :data="hardwareList" border style="width: 100%">
-        <el-table-column prop="name" label="硬件" width="180" />
-        <el-table-column label="型号" width="200" :formatter="(row) => info[row.model]" />
-        <el-table-column label="数量" width="120" :formatter="(row) => row.count ? info[row.count] : ''" />
+        <el-table-column prop="name" label="硬件" width="120" />
+        <el-table-column label="型号" min-width="200" :formatter="(row) => info[row.model]" />
+        <el-table-column label="数量" width="100" :formatter="(row) => row.count ? info[row.count] : ''" />
       </el-table>
 
     </el-card>
@@ -106,5 +106,13 @@ const handleSearch = async () => {
 <style scoped>
 .sn-query-page {
   padding: 20px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.detail-card {
+  margin: 20px auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 </style>
