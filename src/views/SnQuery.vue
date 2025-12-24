@@ -3,11 +3,11 @@
 
     <!-- SN 输入框（自动补全） -->
     <el-autocomplete v-model="sn" :fetch-suggestions="handleAutocomplete" placeholder="请输入 SN" clearable
-      @select="handleSelect" style="width: 300px" />
+      @select="handleSearch" style="width: 300px" />
 
-    <el-button type="primary" @click="handleSearch" style="margin-left: 10px">
+    <!-- <el-button type="primary" @click="handleSearch" style="margin-left: 10px">
       查询
-    </el-button>
+    </el-button> -->
 
     <!-- SN 详情卡片 -->
     <el-card v-if="info" class="detail-card" shadow="hover" width="800">
@@ -42,7 +42,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import debounce from 'lodash.debounce'
-import { getSn, searchSn, getSnDetail } from '../api/sn'
+import { getSn, searchSn } from '../api/sn'
 
 const sn = ref('')
 
@@ -88,11 +88,6 @@ const fetchSuggestions = async (query, cb) => {
 const handleAutocomplete = debounce(fetchSuggestions, 500)
 
 // 自动补全选择
-const handleSelect = async (item) => {
-  const res = await getSnDetail(item.value)
-  info.value = res || null
-}
-
 // 点击查询按钮
 const handleSearch = async () => {
   if (!sn.value) return

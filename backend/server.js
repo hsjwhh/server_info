@@ -26,7 +26,7 @@ function query(sql, params = []) {
 }
 
 // ✅ 搜索 SN
-app.get("/api/sn/search", async (req, res) => {
+app.get("/api/sn", async (req, res) => {
     const keyword = req.query.keyword || "";
     if (!keyword) return res.json([]);
 
@@ -43,24 +43,6 @@ app.get("/api/sn/search", async (req, res) => {
 });
 
 // ✅ 根据 SN 获取详情
-app.get("/api/sn/detail", async (req, res) => {
-    const sn = req.query.sn;
-    if (!sn) {
-        return res.json({ error: "SN required" });
-    }
-
-    try {
-        const rows = await query(
-            "SELECT * FROM server_info WHERE SN = ? LIMIT 1",
-            [sn]
-        );
-        res.json(rows[0] || {});
-    } catch (err) {
-        console.error("getBySn error:", err);
-        res.status(500).json({ error: "server error" });
-    }
-});
-
 app.get('/api/sn/:sn', async (req, res) => {
     const sn = req.params.sn;
 
@@ -72,7 +54,7 @@ app.get('/api/sn/:sn', async (req, res) => {
     }
 
     try {
-        const [rows] = await query(
+        const rows = await query(
             "SELECT * FROM server_info WHERE SN = ? LIMIT 1",
             [sn]
         );
