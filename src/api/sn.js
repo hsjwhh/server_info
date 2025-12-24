@@ -11,7 +11,7 @@ export function getSn(sn) {
 }
 
 // ✅ 2. 自动补全（模糊搜索）
-// GET /api/sn/search?keyword=xxx
+// GET /api/sn?keyword=xxx
 export function searchSn(keyword) {
   return request.get('/sn', {
     params: { keyword }

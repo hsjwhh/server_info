@@ -28,7 +28,7 @@
       <!-- 硬件配置 -->
       <div class="section-title" style="margin-top: 20px;">硬件配置</div>
 
-      <el-table :data="hardwareList" border style="width: 100%">
+      <el-table :data="hardwareList" border style="width: 100%" header-cell-class-name="hardware-header">
         <el-table-column prop="name" label="硬件" width="120" />
         <el-table-column label="型号" min-width="200" :formatter="(row) => info[row.model]" />
         <el-table-column label="数量" width="100" :formatter="(row) => row.count ? info[row.count] : ''" />
@@ -109,5 +109,12 @@ const handleSearch = async () => {
   margin: 20px auto;
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+
+:deep(.hardware-header) {
+  font-weight: 700 !important;
+  background-color: #f5f7fa !important;
+  color: #333 !important;
 }
 </style>
