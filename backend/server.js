@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors")
 const snRouter = require("./routes/sn");
 
-// 非常干净，只负责启动 + 中间件 + 挂在路由
+// 非常干净，只负责启动 + 中间件 + 挂载路由
 
 const app = express();
 
