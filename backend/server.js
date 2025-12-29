@@ -1,3 +1,5 @@
+require('dotenv').config({ path: __dirname + '/.env' }); // 必须顶部
+
 const express = require("express");
 const cors = require("cors")
 const authMiddleware = require('./middleware/authMiddleware');
@@ -8,7 +10,12 @@ const snRouter = require("./routes/sn");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+    })
+);
 app.use(express.json());
 
 // 登录路由 

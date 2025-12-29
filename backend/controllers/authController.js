@@ -12,7 +12,7 @@ exports.login = (req, res) => {
   if (username === USER.username && password === USER.password) {
     const token = jwt.sign(
       { username },
-      process.env.JWT_SECRET || 'your-secret-key',
+      process.env.JWT_SECRET, // || 'your-secret-key',
       { expiresIn: '12h' }
     );
 
