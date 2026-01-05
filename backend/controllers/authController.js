@@ -1,23 +1,118 @@
-const jwt = require('jsonwebtoken');
+/**
+ * controllers/authController.js
+ *
+ * 控制器（Controller）层：
+ *   - 负责解析 HTTP 请求
+ *   - 调用 service 层处理业务逻辑
+ *   - 统一返回响应（成功或错误）
+ *
+ * 注意：
+ *   - Controller 不写任何业务逻辑
+ *   - 不生成 token、不查数据库、不做权限判断
+ *   - 所有业务逻辑都放在 service 层（authService.js）
+ */
 
-// 你可以先写死账号密码，后面再接 MySQL
-const USER = {
-  username: 'admin',
-  password: '123456'
-};
+const authService = require('../services/authService')
 
-exports.login = (req, res) => {
-  const { username, password } = req.body;
+/**
+ * 登录接口
+ * POST /api/auth/login
+ *
+ * 请求体：
+ *   { username, password }
+ *
+ * 返回：
+ *   {
+ *     user: { id, username, role },
+ *     accessToken: "...",
+ *     refreshToken: "..."
+ *   }
+ */
+async function login(req, res) {
+  try {
+    const { username, password } = req.body
 
-  if (username === USER.username && password === USER.password) {
-    const token = jwt.sign(
-      { username },
-      process.env.JWT_SECRET, // || 'your-secret-key',
-      { expiresIn: '12h' }
-    );
+    // 调用 service 层处理登录逻辑
+    const result = await authService.login(username, password)
 
-    return res.json({ token });
+    // 登录成功，返回用户信息 + token
+    res.json(result)
+
+  } catch (error) {
+    // 如果 service 层设置了 statusCode，则使用它
+    const status = error.statusCode || 500
+
+    res.status(status).json({
+      message: error.message || '登录失败'
+    })
   }
+}
 
-  res.status(401).json({ message: '账号或密码错误' });
-};
+/**
+ * 刷新 accessToken
+ * POST /api/auth/refresh
+ *
+ * 请求体：
+ *   { refreshToken }
+ *
+ * 返回：
+ *   { accessToken }
+ *
+ * 用途：
+ *   - accessToken 过期后，前端自动调用此接口
+ *   - refreshToken 长期有效，用于换取新的 accessToken
+ */
+async function refresh(req, res) {
+  try {
+    const { refreshToken } = req.body
+
+    // 调用 service 层生成新的 accessToken
+    const result = await authService.refreshAccessToken(refreshToken)
+
+    res.json(result)
+
+  } catch (error) {
+    const status = error.statusCode || 500
+
+    res.status(status).json({
+      message: error.message || '刷新 token 失败'
+    })
+  }
+}
+
+/**
+ * 登出接口
+ * POST /api/auth/logout
+ *
+ * 请求体：
+ *   { refreshToken }
+ *
+ * 返回：
+ *   { message: '已登出' }
+ *
+ * 用途：
+ *   - 删除 refreshToken，使其无法再刷新 accessToken
+ *   - 相当于彻底退出登录
+ */
+async function logout(req, res) {
+  try {
+    const { refreshToken } = req.body
+
+    await authService.logout(refreshToken)
+
+    res.json({ message: '已登出' })
+
+  } catch (error) {
+    const status = error.statusCode || 500
+
+    res.status(status).json({
+      message: error.message || '登出失败'
+    })
+  }
+}
+
+module.exports = {
+  login,
+  refresh,
+  logout
+}

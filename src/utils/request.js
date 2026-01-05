@@ -1,11 +1,14 @@
 /**
- * axios 二次封装
- * 目的：
+ * axios 二次封装（最终整合版）
+ *
+ * 功能：
  * 1. 统一 baseURL
- * 2. 统一超时配置
- * 3. 请求拦截器（可加 token）
- * 4. 响应拦截器（统一处理后端返回格式）
- * 5. 统一错误处理
+ * 2. 自动附带 accessToken
+ * 3. 自动刷新 token（401 时）
+ * 4. 刷新成功后自动重试原请求
+ * 5. 刷新失败自动跳转登录页
+ * 6. 统一错误提示（Element Plus）
+ * 7. 返回 response.data，调用方更简洁
  */
 
 import axios from 'axios'
@@ -13,40 +16,102 @@ import { ElMessage } from 'element-plus'
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: 'http://localhost:3000/api', // ✅ 后端 API 根路径
-  timeout: 5000, // ✅ 超时时间
+  baseURL: 'http://localhost:3000/api', // 后端 API 根路径
+  timeout: 5000, // 超时时间
 })
 
-// =============================
-// ✅ 请求拦截器
-// =============================
+/**
+ * ============================================================
+ * 1. 请求拦截器：自动附带 accessToken
+ * ============================================================
+ */
 service.interceptors.request.use(
   (config) => {
-    // 这里可以统一加 token
-    const token = localStorage.getItem('token');
+    /**
+     * 你之前使用 localStorage.getItem('token')
+     * 现在我们统一改为 accessToken（与后端字段一致）
+     */
+    const token = localStorage.getItem('accessToken')
+
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+      // 在请求头中加入 Authorization: Bearer xxx
+      config.headers.Authorization = `Bearer ${token}`
     }
 
     return config
   },
-  (error) => {
-    return Promise.reject(error)
-  }
+  (error) => Promise.reject(error)
 )
 
-// =============================
-// ✅ 响应拦截器
-// =============================
+/**
+ * ============================================================
+ * 2. 响应拦截器：自动刷新 token（401 时）
+ * ============================================================
+ */
 service.interceptors.response.use(
   (response) => {
-    // 后端返回的数据结构一般是：
-    // { code: 200, data: xxx, message: 'OK' }
-
-    return response.data // ✅ 直接返回 data，调用方更简洁
+    /**
+     * 你之前的逻辑是直接返回 response.data
+     * 我保持不变，保证兼容你现有代码
+     */
+    return response.data
   },
-  (error) => {
-    // 统一错误提示
+
+  async (error) => {
+    /**
+     * error.response 可能不存在（例如网络断开）
+     * 所以先做安全判断
+     */
+    const originalRequest = error.config
+
+    // 如果是 401（token 过期），并且没有尝试过刷新 token
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true
+
+      const refreshToken = localStorage.getItem('refreshToken')
+
+      if (!refreshToken) {
+        ElMessage.error('登录已过期，请重新登录')
+        window.location.href = '/login'
+        return Promise.reject(error)
+      }
+
+      try {
+        /**
+         * 调用刷新 token API
+         * 注意：这里不能用 service（否则会再次进入拦截器）
+         * 必须用 axios 原生实例
+         */
+        const res = await axios.post('http://localhost:3000/api/auth/refresh', {
+          refreshToken
+        })
+
+        const newAccessToken = res.data.accessToken
+
+        // 保存新的 accessToken
+        localStorage.setItem('accessToken', newAccessToken)
+
+        // 更新原请求的 Authorization
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
+
+        // 使用新的 token 重试原请求
+        return service(originalRequest)
+
+      } catch (refreshError) {
+        // 刷新失败 → 清除 token → 跳转登录页
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+
+        ElMessage.error('登录已过期，请重新登录')
+        window.location.href = '/login'
+
+        return Promise.reject(refreshError)
+      }
+    }
+
+    /**
+     * 其它错误统一提示
+     */
     ElMessage.error(error.message || '请求失败')
     return Promise.reject(error)
   }
