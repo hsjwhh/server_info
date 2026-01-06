@@ -1,28 +1,44 @@
-// src/api/sn.js
-// SN 模块前端 API 封装
-// 使用统一的 axios 实例（src/utils/request.js）
+/**
+ * api/sn.js
+ *
+ * SN 查询模块前端 API 封装：
+ *   - 所有 SN 相关接口统一从这里调用
+ *   - 自动带 token（因为 utils/request.js 已经处理）
+ *   - 自动刷新 token（401 时自动处理）
+ *
+ * 后端接口：
+ *   GET /api/sn?keyword=xxx     → SN 搜索（自动补全）
+ *   GET /api/sn/:sn             → SN 详情查询
+ */
 
 import request from '../utils/request'
 
-// ✅ 1. 查询详情（RESTful）
-// GET /api/sn/:sn
-export function getSn(sn) {
-  return request.get(`/sn/${sn}`)
-}
-
-// ✅ 2. 自动补全（模糊搜索）
-// GET /api/sn?keyword=xxx
-export function searchSn(keyword) {
+/**
+ * SN 搜索（自动补全）
+ *
+ * @param {string} keyword - 搜索关键字，可为空
+ * @returns {Promise<Array>}
+ *
+ * 示例：
+ *   searchSn('R730')
+ *   → GET /api/sn?keyword=R730
+ */
+export function searchSn(keyword = '') {
   return request.get('/sn', {
     params: { keyword }
   })
 }
 
-// ✅ 3. 查询详情（Query 版本）
-// GET /api/sn/detail?sn=xxx
-// export function getSnDetail(sn) {
-//   return request.get('/sn/detail', {
-//     params: { sn }
-//   })
-// }
-
+/**
+ * SN 详情查询
+ *
+ * @param {string} sn - SN 编号
+ * @returns {Promise<Object>}
+ *
+ * 示例：
+ *   getSnDetail('R730-001')
+ *   → GET /api/sn/R730-001
+ */
+export function getSnDetail(sn) {
+  return request.get(`/sn/${sn}`)
+}

@@ -5,10 +5,6 @@
     <el-autocomplete v-model="sn" :fetch-suggestions="handleAutocomplete" placeholder="请输入 SN" clearable
       @select="handleSearch" style="width: 300px" />
 
-    <!-- <el-button type="primary" @click="handleSearch" style="margin-left: 10px">
-      查询
-    </el-button> -->
-
     <!-- SN 详情卡片 -->
     <el-card v-if="info" class="detail-card" shadow="hover" width="800">
 
@@ -16,9 +12,9 @@
       <div class="section-title">基本信息</div>
 
       <el-descriptions :column="3" border>
-        <el-descriptions-item label="日期" width="100">{{ fullDate }}</el-descriptions-item>
-        <el-descriptions-item label="出机客户" width="100">{{ info.出机客户 }}</el-descriptions-item>
-        <el-descriptions-item label="业务" width="100">{{ info.业务 }}</el-descriptions-item>
+        <el-descriptions-item label="日期">{{ fullDate }}</el-descriptions-item>
+        <el-descriptions-item label="出机客户">{{ info.出机客户 }}</el-descriptions-item>
+        <el-descriptions-item label="业务">{{ info.业务 }}</el-descriptions-item>
 
         <el-descriptions-item label="SN">{{ info.SN }}</el-descriptions-item>
         <el-descriptions-item label="数量">{{ info.数量 }}</el-descriptions-item>
@@ -40,16 +36,30 @@
 </template>
 
 <script setup>
+/**
+ * SnQuery.vue（RESTful 最终版）
+ *
+ * 后端返回结构：
+ *   GET /api/sn/:sn → 直接返回 SN 对象
+ *
+ * axios 封装：
+ *   response.data → 直接返回 data
+ *
+ * 所以：
+ *   const res = await getSnDetail(sn)
+ *   info.value = res
+ */
+
 import { ref, computed } from 'vue'
 import debounce from 'lodash.debounce'
-import { getSn, searchSn } from '../api/sn'
+import { searchSn, getSnDetail } from '../api/sn'
 
 const sn = ref('')
-
-// 页面真正要展示的数据
 const info = ref(null)
 
-// 你定义的硬件配置表（根据你的字段名调整）
+/**
+ * 硬件配置表（根据你的字段名）
+ */
 const hardwareList = [
   { name: "机箱", model: "机箱", count: "" },
   { name: "电源", model: "电源", count: "" },
@@ -66,37 +76,43 @@ const hardwareList = [
   { name: "系统", model: "系统", count: "" }
 ]
 
-// 日期格式化
+/**
+ * 日期格式化
+ */
 const fullDate = computed(() => {
   if (!info.value) return ''
-
   const y = info.value.年份
   const m = String(info.value.月份).padStart(2, '0')
   const d = String(info.value.日期).padStart(2, '0')
-
   return `${y}-${m}-${d}`
 })
 
-
-// 自动补全
+/**
+ * 自动补全
+ */
 const fetchSuggestions = async (query, cb) => {
   if (!query) return cb([])
+
   const list = await searchSn(query)
-  cb(list.map(item => ({ value: item })))
+
+  // list = ["R730-001", "R730-002"]
+  cb(list.map(sn => ({ value: sn })))
 }
 
 const handleAutocomplete = debounce(fetchSuggestions, 500)
 
-// 自动补全选择
-// 点击查询按钮
+/**
+ * 自动补全选择后触发查询
+ */
 const handleSearch = async () => {
   if (!sn.value) return
-  const res = await getSn(sn.value)
-  info.value = res?.data || null
+
+  const res = await getSnDetail(sn.value)
+
+  // RESTful：res 就是 SN 对象
+  info.value = res
 }
-
 </script>
-
 
 <style scoped>
 .sn-query-page {
@@ -110,7 +126,6 @@ const handleSearch = async () => {
   border-radius: 10px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
-
 
 :deep(.hardware-header) {
   font-weight: 700 !important;
