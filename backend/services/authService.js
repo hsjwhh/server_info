@@ -7,7 +7,7 @@
  *   - 不处理权限验证（那是 middleware 的职责）
  *
  * 本文件只负责：
- *   ✔ 用户验证（示例用 mock 数据，可替换为 MySQL）
+ *   ✔ 用户验证（从 MySQL 查询 + bcrypt 校验）
  *   ✔ 生成 accessToken（短期有效）
  *   ✔ 生成 refreshToken（长期有效）
  *   ✔ 存储 refreshToken（内存示例，可替换为数据库）
@@ -16,46 +16,12 @@
  */
 
 const jwt = require('jsonwebtoken')
+const bcrypt = require('bcryptjs')
+const userService = require('./userService')   // 使用数据库查询用户
 
 /**
  * ================================
- * 1. 模拟用户数据库（示例）
- * ================================
- *
- * 你未来可以替换为：
- *   - MySQL 查询
- *   - bcrypt 密码哈希验证
- *   - 用户表（users）
- *
- * 这里先用 mock 数据让整个系统跑通
- */
-const mockUsers = [
-  {
-    id: 1,
-    username: 'admin',
-    password: '123456', // 真实项目不要明文存储密码
-    role: 'admin'
-  },
-  {
-    id: 2,
-    username: 'user',
-    password: '123456',
-    role: 'user'
-  }
-]
-
-/**
- * 根据用户名查找用户
- * @param {string} username
- * @returns {object|null}
- */
-function findUserByUsername(username) {
-  return mockUsers.find((u) => u.username === username)
-}
-
-/**
- * ================================
- * 2. Token 生成函数
+ * 1. Token 生成函数
  * ================================
  */
 
@@ -83,7 +49,7 @@ function generateRefreshToken(payload) {
 
 /**
  * ================================
- * 3. refreshToken 存储（示例）
+ * 2. refreshToken 存储（示例）
  * ================================
  *
  * 这里使用内存数组存储 refreshToken：
@@ -99,7 +65,7 @@ let refreshTokensStore = []
 
 /**
  * ================================
- * 4. 登录逻辑
+ * 3. 登录逻辑（数据库版本）
  * ================================
  *
  * @param {string} username
@@ -107,8 +73,8 @@ let refreshTokensStore = []
  * @returns {object} { user, accessToken, refreshToken }
  */
 async function login(username, password) {
-  // 1. 查找用户
-  const user = findUserByUsername(username)
+  // 1. 从数据库查询用户
+  const user = await userService.findUserByUsername(username)
 
   if (!user) {
     const error = new Error('用户不存在')
@@ -116,8 +82,10 @@ async function login(username, password) {
     throw error
   }
 
-  // 2. 校验密码（示例为明文比对）
-  if (user.password !== password) {
+  // 2. 校验密码（bcrypt 对比明文密码 vs 哈希）
+  const isMatch = await bcrypt.compare(password, user.password_hash)
+
+  if (!isMatch) {
     const error = new Error('用户名或密码错误')
     error.statusCode = 401
     throw error
@@ -134,7 +102,7 @@ async function login(username, password) {
   const accessToken = generateAccessToken(payload)
   const refreshToken = generateRefreshToken(payload)
 
-  // 5. 存储 refreshToken
+  // 5. 存储 refreshToken（未来会改成数据库）
   refreshTokensStore.push(refreshToken)
 
   // 6. 返回给 controller
@@ -147,7 +115,7 @@ async function login(username, password) {
 
 /**
  * ================================
- * 5. 刷新 accessToken
+ * 4. 刷新 accessToken
  * ================================
  *
  * @param {string} refreshToken
@@ -200,7 +168,7 @@ async function refreshAccessToken(refreshToken) {
 
 /**
  * ================================
- * 6. 登出逻辑
+ * 5. 登出逻辑
  * ================================
  *
  * @param {string} refreshToken

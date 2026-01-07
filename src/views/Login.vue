@@ -43,6 +43,7 @@
 
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 import request from '../utils/request' // 你封装的 axios 实例
 
 const router = useRouter()
