@@ -28,7 +28,7 @@ const authService = require('../services/authService')
  *     refreshToken: "..."
  *   }
  */
-async function login(req, res) {
+async function login(req, res, next) {
   try {
     const { username, password } = req.body
 
@@ -39,12 +39,7 @@ async function login(req, res) {
     res.json(result)
 
   } catch (error) {
-    // 如果 service 层设置了 statusCode，则使用它
-    const status = error.statusCode || 500
-
-    res.status(status).json({
-      message: error.message || '登录失败'
-    })
+    next(error)
   }
 }
 
@@ -62,7 +57,7 @@ async function login(req, res) {
  *   - accessToken 过期后，前端自动调用此接口
  *   - refreshToken 长期有效，用于换取新的 accessToken
  */
-async function refresh(req, res) {
+async function refresh(req, res, next) {
   try {
     const { refreshToken } = req.body
 
@@ -72,11 +67,7 @@ async function refresh(req, res) {
     res.json(result)
 
   } catch (error) {
-    const status = error.statusCode || 500
-
-    res.status(status).json({
-      message: error.message || '刷新 token 失败'
-    })
+    next(error)
   }
 }
 
@@ -94,7 +85,7 @@ async function refresh(req, res) {
  *   - 删除 refreshToken，使其无法再刷新 accessToken
  *   - 相当于彻底退出登录
  */
-async function logout(req, res) {
+async function logout(req, res, next) {
   try {
     const { refreshToken } = req.body
 
@@ -103,11 +94,7 @@ async function logout(req, res) {
     res.json({ message: '已登出' })
 
   } catch (error) {
-    const status = error.statusCode || 500
-
-    res.status(status).json({
-      message: error.message || '登出失败'
-    })
+    next(error)
   }
 }
 

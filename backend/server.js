@@ -24,6 +24,9 @@ const authRoutes = require('./routes/authRoutes')
 // 路由：SN 查询（受保护）
 const snRouter = require("./routes/sn")
 
+// 全局路由错误信息
+const { AppError } = require('./utils/errors')
+
 // 创建 Express 应用实例
 const app = express()
 
@@ -35,7 +38,8 @@ const app = express()
 app.use(cors({
     origin: '*',  // 允许所有域名访问
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],  // 允许的 HTTP 方法
-    allowedHeaders: ['Content-Type', 'Authorization']  // 允许携带的请求头
+    allowedHeaders: ['Content-Type', 'Authorization'],  // 允许携带的请求头
+    exposedHeaders: ['Content-Type', 'Authorization']
 }))
 
 /**
@@ -64,6 +68,35 @@ app.use('/api/auth', authRoutes)
  * 验证通过后才会进入 snRouter
  */
 app.use("/api/sn", authMiddleware, snRouter)
+
+/* 全局错误处理中间件（必须放在所有路由之后）
+作用：统一捕获后端抛出的所有错误，并返回结构化的 JSON 给前端 */
+app.use((err, req, res, next) => {
+
+  // 打印错误到后台控制台，方便开发调试
+  // 包含 message、code、status、stack 等信息
+  console.error('❌ Error:', err)
+
+  // 如果错误是我们自定义的 AppError 或其子类（如 AuthError、ValidationError）
+  // 说明这是“可预期的业务错误”，我们应该把错误信息原样返回给前端
+  if (err instanceof AppError) {
+    return res.status(err.status).json({
+      // 自定义错误码（如 AUTH_USER_NOT_FOUND）
+      code: err.code,
+      // 错误信息（如 “用户不存在”）
+      message: err.message
+    })
+  }
+
+  // 如果不是 AppError（例如代码 bug、数据库异常、未捕获异常）
+  // 说明这是“未知错误”，不能把内部细节暴露给前端
+  // 所以返回一个通用的 500 错误
+  res.status(500).json({
+    code: 'SERVER_ERROR',        // 固定错误码
+    message: '服务器内部错误'     // 给用户的友好提示
+  })
+})
+
 
 /**
  * 启动 HTTP 服务

@@ -64,7 +64,22 @@ service.interceptors.response.use(
      */
     const originalRequest = error.config
 
-    // 如果是 401（token 过期），并且没有尝试过刷新 token
+    const status = error.response?.status
+    const url = originalRequest?.url || ''
+    const isLoginAPI = url.includes('/auth/login')
+
+    // ============================
+    // 1. 登录接口的 401（用户名不存在 / 密码错误）
+    // ============================
+    if (isLoginAPI && status === 401) {
+      const msg = error.response?.data?.message || '登录失败'
+      ElMessage.error(msg)
+      return Promise.reject(error)
+    }    
+
+    // ============================
+    // 2. 其它接口的 401 → 刷新 token
+    // ============================
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 
@@ -109,10 +124,11 @@ service.interceptors.response.use(
       }
     }
 
-    /**
-     * 其它错误统一提示
-     */
-    ElMessage.error(error.message || '请求失败')
+    // ============================
+    // 3. 其它错误
+    // ============================
+    const msg = error.response?.data?.message || error.message || '请求失败'
+    ElMessage.error(msg)
     return Promise.reject(error)
   }
 )

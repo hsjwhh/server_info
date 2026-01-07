@@ -18,6 +18,7 @@
 const jwt = require('jsonwebtoken')
 const bcrypt = require('bcryptjs')
 const userService = require('./userService')   // 使用数据库查询用户
+const { AuthError } = require('../utils/errors')
 
 /**
  * ================================
@@ -77,18 +78,14 @@ async function login(username, password) {
   const user = await userService.findUserByUsername(username)
 
   if (!user) {
-    const error = new Error('用户不存在')
-    error.statusCode = 401
-    throw error
+    throw new AuthError('用户不存在', 'AUTH_USER_NOT_FOUND')
   }
 
   // 2. 校验密码（bcrypt 对比明文密码 vs 哈希）
   const isMatch = await bcrypt.compare(password, user.password_hash)
 
   if (!isMatch) {
-    const error = new Error('用户名或密码错误')
-    error.statusCode = 401
-    throw error
+    throw new AuthError('用户名或密码错误', 'AUTH_INVALID_CREDENTIALS')
   }
 
   // 3. 构造写入 token 的 payload（不要包含密码）
@@ -124,16 +121,12 @@ async function login(username, password) {
 async function refreshAccessToken(refreshToken) {
   // 1. 是否提供 refreshToken
   if (!refreshToken) {
-    const error = new Error('缺少 refresh token')
-    error.statusCode = 401
-    throw error
+    throw new AuthError('缺少 refresh token', 'AUTH_REFRESH_TOKEN_MISSING')
   }
 
   // 2. refreshToken 是否存在于服务器记录中
   if (!refreshTokensStore.includes(refreshToken)) {
-    const error = new Error('refresh token 无效或已登出')
-    error.statusCode = 403
-    throw error
+    throw new AuthError('refresh token 无效或已登出', 'AUTH_REFRESH_TOKEN_INVALID')
   }
 
   // 3. 验证 refreshToken 是否有效
@@ -143,9 +136,7 @@ async function refreshAccessToken(refreshToken) {
       process.env.JWT_REFRESH_SECRET,
       (err, decodedUser) => {
         if (err) {
-          const error = new Error('refresh token 无效或已过期')
-          error.statusCode = 403
-          return reject(error)
+          new AuthError('refresh token 无效或已过期', 'AUTH_REFRESH_TOKEN_EXPIRED')
         }
 
         // decodedUser = { id, username, role, iat, exp }
