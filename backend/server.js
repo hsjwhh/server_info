@@ -38,8 +38,7 @@ const app = express()
 app.use(cors({
     origin: '*',  // 允许所有域名访问
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],  // 允许的 HTTP 方法
-    allowedHeaders: ['Content-Type', 'Authorization'],  // 允许携带的请求头
-    exposedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization']  // 允许携带的请求头
 }))
 
 /**
