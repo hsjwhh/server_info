@@ -36,9 +36,7 @@ function authMiddleware(req, res, next) {
 
   // 如果没有 Authorization 字段，直接拒绝访问
   if (!authHeader) {
-    return res.status(401).json({
-      message: '未提供 Authorization 请求头，拒绝访问'
-    })
+    return next(new AuthError('未提供 Authorization 请求头', 'AUTH_HEADER_MISSING'))
   }
 
   /**
@@ -50,9 +48,7 @@ function authMiddleware(req, res, next) {
 
   // 如果格式不正确（例如没有 Bearer 或没有 token）
   if (!token) {
-    return res.status(401).json({
-      message: 'Authorization 格式错误，应为 Bearer <token>'
-    })
+    return next(new AuthError('Authorization 格式错误，应为 Bearer <token>', 'AUTH_TOKEN_FORMAT_ERROR'))
   }
 
   /**
@@ -64,9 +60,7 @@ function authMiddleware(req, res, next) {
   jwt.verify(token, process.env.JWT_SECRET, (err, decodedUser) => {
     if (err) {
       // token 无效或已过期
-      return res.status(401).json({
-        message: 'token 无效或已过期，请重新登录或刷新 token'
-      })
+      return next(new AuthError('token 无效或已过期', 'AUTH_TOKEN_INVALID'))
     }
 
     /**
