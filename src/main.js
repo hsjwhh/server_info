@@ -3,6 +3,7 @@ import App from './App.vue'                 // 引入根组件 App.vue，整个�
 
 import ElementPlus from 'element-plus'      // 引入 Element Plus 组件库本体（JS 部分）
 import 'element-plus/dist/index.css'        // 引入 Element Plus 的全局样式（CSS 部分）
+import './style.css'
 
 import router from './router'           // 引入我们自己定义的路由实例（在 router/index.js 里创建并导出）
 createApp(App)                              // 创建一个 Vue 应用实例，根组件是 App.vue
