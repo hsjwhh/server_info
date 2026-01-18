@@ -7,7 +7,7 @@
 
 <template>
   <!-- 顶层路由出口：Vue Router 会把当前匹配到的“顶层路由组件”渲染到这里 -->
-  <!-- 在当前项目结构中，这里会渲染 AdminLayout 这个布局组件 -->
+  <!-- 在当前项目结构中，这里会渲染 Layout 这个布局组件 -->
   <router-view />
 </template>
 

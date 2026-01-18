@@ -14,10 +14,10 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
 // 页面组件
-import Home from '../views/Home.vue'
-import SnQuery from '../views/SnQuery.vue'
-import Login from '../views/Login.vue'
-import Layout from '../layouts/Layout.vue'
+import Home from '@/views/Home.vue'
+import SnQuery from '@/views/SnQuery.vue'
+import Login from '@/views/Login.vue'
+import Layout from '@/layouts/Layout.vue'
 
 // 定义路由表
 const routes = [
