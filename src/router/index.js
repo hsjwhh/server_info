@@ -17,7 +17,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 import SnQuery from '../views/SnQuery.vue'
 import Login from '../views/Login.vue'
-import AdminLayout from '../layouts/AdminLayout.vue'
+import Layout from '../layouts/Layout.vue'
 
 // 定义路由表
 const routes = [
@@ -30,7 +30,7 @@ const routes = [
 
   {
     path: '/',
-    component: AdminLayout, // 登录后的主布局
+    component: Layout, // 登录后的主布局
     children: [
       {
         path: '',
