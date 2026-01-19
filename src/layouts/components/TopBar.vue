@@ -44,6 +44,24 @@ defineProps({
     justify-content: space-between;
     padding: 0 20px;
 }
+/* 关键：强制内部元素高度 = 56px */
+.topbar > * {
+  height: 56px !important;
+  display: flex;
+  align-items: center;
+}
+
+/* 强制图标大小 */
+.topbar svg {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+/* 强制文字行高 */
+.topbar span {
+  line-height: 56px !important;
+  font-size: 16px !important;
+}
 
 .title {
     font-size: 18px;
