@@ -13,36 +13,47 @@
 
 import { createRouter, createWebHistory } from 'vue-router'
 
-// 页面组件
-import Home from '@/views/Home.vue'
-import SnQuery from '@/views/SnQuery.vue'
-import Login from '@/views/Login.vue'
-import Layout from '@/layouts/Layout.vue'
-
 // 定义路由表
 const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: Login,
+    component: () => import('../pages/Login.vue'),
     meta: { public: true } // 标记为公开页面，不需要 token
   },
 
   {
     path: '/',
-    component: Layout, // 登录后的主布局
+    component: () => import('../layouts/Layout.vue'), // 登录后的主布局
     children: [
       {
         path: '',
-        name: 'Home',
-        component: Home,
-        meta: { requiresAuth: true } // 需要登录
+        name: 'Dashboard',
+        component: () => import('../pages/DashboardPage.vue'),
+        meta: {
+          title: 'Dashboard',
+          icon: 'mdi-view-dashboard',
+          showInMenu: true,  // 👈 显示在菜单中
+          breadcrumbs: [
+            { label: '首页', to: '/' }
+          ],
+          requiresAuth: true // 需要登录
+        },
       },
       {
         path: 'sn',
         name: 'SnQuery',
-        component: SnQuery,
-        meta: { requiresAuth: true } // 需要登录
+        component: () => import('../pages/SnQuery.vue'),
+        meta: { 
+          title: 'SN查询',
+          icon: 'mdi-file-search-outline',
+          showInMenu: true,  // 👈 显示在菜单中
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: 'SN查询', to: '/sn' }
+          ],
+          requiresAuth: true // 需要登录
+        }
       }
     ]
   }

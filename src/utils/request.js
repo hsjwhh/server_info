@@ -16,7 +16,7 @@ import { ElMessage } from 'element-plus'
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: 'http://192.168.1.15:3001/api', // 后端 API 根路径
+  baseURL: 'http://192.168.1.6:3001/api', // 后端 API 根路径
   timeout: 5000, // 超时时间
 })
 
