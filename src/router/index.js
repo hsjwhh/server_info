@@ -1,5 +1,5 @@
+// src/router/index.js
 /**
- * router/index.js
  *
  * Vue Router 配置：
  *   - 定义前端路由

@@ -1,3 +1,4 @@
+<!-- src/pages/SnQuery.vue -->
 <template>
   <div class="sn-query-page">
 

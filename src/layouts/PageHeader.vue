@@ -28,8 +28,10 @@ defineProps<{
 const route = useRoute()
 
 // 自动从当前路由读取 meta.breadcrumbs
-const breadcrumbs = computed(() => {
-  return route.meta?.breadcrumbs || [
+type Breadcrumb = { label: string; to?: string }
+
+const breadcrumbs = computed<Breadcrumb[]>(() => {
+  return (route.meta?.breadcrumbs as Breadcrumb[]) || [
     { label: '首页', to: '/' }
   ]
 })

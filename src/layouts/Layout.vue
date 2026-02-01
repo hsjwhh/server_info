@@ -1,3 +1,4 @@
+<!-- src/layouts/Layout.vue -->
 <template>
   <div class="app-layout">
     <!-- 左侧 Sidebar -->

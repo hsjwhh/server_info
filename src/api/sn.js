@@ -1,5 +1,5 @@
+//  rc/api/sn.js
 /**
- * api/sn.js
  *
  * SN 查询模块前端 API 封装：
  *   - 所有 SN 相关接口统一从这里调用
