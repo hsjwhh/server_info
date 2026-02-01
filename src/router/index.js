@@ -11,6 +11,7 @@
  *   - 后端所有受保护接口都需要 token
  */
 
+import { pa } from 'element-plus/es/locales.mjs'
 import { createRouter, createWebHistory } from 'vue-router'
 
 // 定义路由表
@@ -56,7 +57,7 @@ const routes = [
         }
       },
       {
-        path: 'servers',
+        path: 'server',
         name: 'ServerList',
         component: () => import('../pages/server/ServerListPage.vue'),
         meta: { 
@@ -71,7 +72,7 @@ const routes = [
         }
       },
       {
-        path: 'servers/:sn',
+        path: 'server/:sn',
         name: 'ServerDetail',
         component: () => import('../pages/server/ServerDetailPage.vue'),
         meta: { 
@@ -82,6 +83,37 @@ const routes = [
             { label: '首页', to: '/' },
             { label: '服务器列表', to: '/servers' },
             { label: '服务器详情' }
+          ],
+          requiresAuth: true // 需要登录
+        }
+      },
+      {
+        path: 'test',
+        name: 'ServerList1',
+        component: () => import('../pages/test/ServerListPage.vue'),
+        meta: { 
+          title: '服务器列表1',
+          icon: 'mdi-server-network',
+          showInMenu: true,  // 👈 显示在菜单中
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '服务器列表1', to: '/test' }
+          ],
+          requiresAuth: true // 需要登录
+        }
+      },
+      {
+        path: 'test/:sn',
+        name: 'ServerDetail1',
+        component: () => import('../pages/test/ServerDetailPage.vue'),
+        meta: { 
+          title: '服务器详情1',
+          icon: 'mdi-server',
+          showInMenu: false,  // 👈 不显示在菜单中
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '服务器列表1', to: '/test' },
+            { label: '服务器详情1' }
           ],
           requiresAuth: true // 需要登录
         }

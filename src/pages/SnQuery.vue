@@ -10,8 +10,7 @@
       <VaCardContent>
         <!-- SN 输入框（自动补全） -->
         <div class="search-container">
-          <VaInput v-model="sn" placeholder="输入 SN 编号进行查询" clearable @keyup.enter="handleSearch"
-            class="search-input">
+          <VaInput v-model="sn" placeholder="输入 SN 编号进行查询" clearable @keyup.enter="handleSearch" class="search-input">
             <template #prepend>
               <VaIcon name="mdi-magnify" />
             </template>
