@@ -45,12 +45,12 @@ const routes = [
         name: 'SnQuery',
         component: () => import('../pages/SnQuery.vue'),
         meta: { 
-          title: 'SN查询',
+          title: '序列号查询',
           icon: 'mdi-file-search-outline',
           showInMenu: true,  // 👈 显示在菜单中
           breadcrumbs: [
             { label: '首页', to: '/' },
-            { label: 'SN查询', to: '/sn' }
+            { label: '序列号查询', to: '/sn' }
           ],
           requiresAuth: true // 需要登录
         }

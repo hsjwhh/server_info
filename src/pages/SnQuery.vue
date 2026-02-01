@@ -1,28 +1,22 @@
 <!-- src/pages/SnQuery.vue -->
 <template>
   <div class="sn-query-page">
+    <div class="page-header">
+      <h1 class="page-title">序列号查询</h1>
+    </div>
+
     <VaCard>
-      <VaCardTitle>SN 查询</VaCardTitle>
+      <!-- <VaCardTitle>SN 查询</VaCardTitle> -->
       <VaCardContent>
         <!-- SN 输入框（自动补全） -->
         <div class="search-container">
-          <VaInput
-            v-model="sn"
-            label="请输入 SN"
-            placeholder="输入 SN 编号进行查询"
-            clearable
-            @keyup.enter="handleSearch"
-            class="search-input"
-          >
+          <VaInput v-model="sn" placeholder="输入 SN 编号进行查询" clearable @keyup.enter="handleSearch"
+            class="search-input">
             <template #prepend>
               <VaIcon name="mdi-magnify" />
             </template>
           </VaInput>
-          <VaButton
-            @click="handleSearch"
-            :disabled="!sn"
-            class="search-button"
-          >
+          <VaButton @click="handleSearch" :disabled="!sn" class="search-button">
             查询
           </VaButton>
         </div>
@@ -30,12 +24,8 @@
         <!-- 自动补全建议列表 -->
         <div v-if="suggestions.length > 0 && showSuggestions" class="suggestions-dropdown">
           <VaList>
-            <VaListItem
-              v-for="suggestion in suggestions"
-              :key="suggestion"
-              @click="selectSuggestion(suggestion)"
-              clickable
-            >
+            <VaListItem v-for="suggestion in suggestions" :key="suggestion" @click="selectSuggestion(suggestion)"
+              clickable>
               <VaListItemSection icon>
                 <VaIcon name="mdi-server" size="small" />
               </VaListItemSection>
@@ -85,12 +75,7 @@
 
         <!-- 硬件配置 -->
         <div class="section-title">硬件配置</div>
-        <VaDataTable
-          :items="hardwareTableData"
-          :columns="hardwareColumns"
-          striped
-          hoverable
-        >
+        <VaDataTable :items="hardwareTableData" :columns="hardwareColumns" striped hoverable>
           <template #cell(model)="{ rowData }">
             <span class="hardware-model">{{ info[rowData.modelKey] || '-' }}</span>
           </template>
@@ -269,9 +254,24 @@ const handleSearch = async () => {
 </script>
 
 <style scoped>
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 700;
+  color: #111827;
+}
+
 .sn-query-page {
-  max-width: 1200px;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .search-container {
