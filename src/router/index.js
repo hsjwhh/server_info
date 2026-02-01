@@ -54,6 +54,37 @@ const routes = [
           ],
           requiresAuth: true // 需要登录
         }
+      },
+      {
+        path: 'servers',
+        name: 'ServerList',
+        component: () => import('../pages/server/ServerListPage.vue'),
+        meta: { 
+          title: '服务器列表',
+          icon: 'mdi-server-network',
+          showInMenu: true,  // 👈 显示在菜单中
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '服务器列表', to: '/servers' }
+          ],
+          requiresAuth: true // 需要登录
+        }
+      },
+      {
+        path: 'servers/:sn',
+        name: 'ServerDetail',
+        component: () => import('../pages/server/ServerDetailPage.vue'),
+        meta: { 
+          title: '服务器详情',
+          icon: 'mdi-server',
+          showInMenu: false,  // 👈 不显示在菜单中
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '服务器列表', to: '/servers' },
+            { label: '服务器详情' }
+          ],
+          requiresAuth: true // 需要登录
+        }
       }
     ]
   }

@@ -8,12 +8,22 @@
  * 3. 自动刷新 token（401 时）
  * 4. 刷新成功后自动重试原请求
  * 5. 刷新失败自动跳转登录页
- * 6. 统一错误提示（Element Plus）
+ * 6. 统一错误提示（Vuestic UI Toast）
  * 7. 返回 response.data，调用方更简洁
  */
 
 import axios from 'axios'
-import { ElMessage } from 'element-plus'
+import { useToast } from 'vuestic-ui'
+
+// 创建 toast 实例
+let toastInstance = null
+const getToast = () => {
+  if (!toastInstance) {
+    const { init } = useToast()
+    toastInstance = init
+  }
+  return toastInstance
+}
 
 // 创建 axios 实例
 const service = axios.create({
@@ -28,10 +38,6 @@ const service = axios.create({
  */
 service.interceptors.request.use(
   (config) => {
-    /**
-     * 你之前使用 localStorage.getItem('token')
-     * 现在我们统一改为 accessToken（与后端字段一致）
-     */
     const token = localStorage.getItem('accessToken')
 
     if (token) {
@@ -51,18 +57,11 @@ service.interceptors.request.use(
  */
 service.interceptors.response.use(
   (response) => {
-    /**
-     * 你之前的逻辑是直接返回 response.data
-     * 我保持不变，保证兼容你现有代码
-     */
+    // 直接返回 response.data
     return response.data
   },
 
   async (error) => {
-    /**
-     * error.response 可能不存在（例如网络断开）
-     * 所以先做安全判断
-     */
     const originalRequest = error.config
 
     const status = error.response?.status
@@ -74,7 +73,11 @@ service.interceptors.response.use(
     // ============================
     if (isLoginAPI && status === 401) {
       const msg = error.response?.data?.message || '登录失败'
-      ElMessage.error(msg)
+      const notify = getToast()
+      notify({
+        message: msg,
+        color: 'danger'
+      })
       return Promise.reject(error)
     }    
 
@@ -87,7 +90,11 @@ service.interceptors.response.use(
       const refreshToken = localStorage.getItem('refreshToken')
 
       if (!refreshToken) {
-        ElMessage.error('登录已过期，请重新登录')
+        const notify = getToast()
+        notify({
+          message: '登录已过期，请重新登录',
+          color: 'danger'
+        })
         window.location.href = '/login'
         return Promise.reject(error)
       }
@@ -98,7 +105,7 @@ service.interceptors.response.use(
          * 注意：这里不能用 service（否则会再次进入拦截器）
          * 必须用 axios 原生实例
          */
-        const res = await axios.post('http://localhost:3000/api/auth/refresh', {
+        const res = await axios.post('http://192.168.1.6:3001/api/auth/refresh', {
           refreshToken
         })
 
@@ -118,7 +125,11 @@ service.interceptors.response.use(
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
 
-        ElMessage.error('登录已过期，请重新登录')
+        const notify = getToast()
+        notify({
+          message: '登录已过期，请重新登录',
+          color: 'danger'
+        })
         window.location.href = '/login'
 
         return Promise.reject(refreshError)
@@ -129,7 +140,11 @@ service.interceptors.response.use(
     // 3. 其它错误
     // ============================
     const msg = error.response?.data?.message || error.message || '请求失败'
-    ElMessage.error(msg)
+    const notify = getToast()
+    notify({
+      message: msg,
+      color: 'danger'
+    })
     return Promise.reject(error)
   }
 )
