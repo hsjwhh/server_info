@@ -23,7 +23,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import type { MenuItem } from '../types'
 
 defineProps<{ 
   collapsed: boolean 
@@ -35,7 +34,7 @@ const route = useRoute()
 /**
  * 从路由配置自动生成菜单
  */
-const menu = computed<MenuItem[]>(() => {
+const menu = computed(() => {
   // 获取根路由的子路由
   const rootRoute = router.options.routes.find(r => r.path === '/')
   // const rootRoute = router.getRoutes().find(r => r.path === '/')
