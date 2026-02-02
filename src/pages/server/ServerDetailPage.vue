@@ -655,6 +655,7 @@ watch(() => route.params.sn, (newSn) => {
 
 /* 操作按钮 */
 .actions-card {
+  margin-top: 1rem;
   border-radius: 0.75rem;
 }
 
