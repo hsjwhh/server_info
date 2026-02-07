@@ -48,7 +48,7 @@ const routes = [
         meta: { 
           title: '序列号查询',
           icon: 'mdi-file-search-outline',
-          showInMenu: true,  // 👈 显示在菜单中
+          showInMenu: false,  // 👈 显示在菜单中
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '序列号查询', to: '/sn' }

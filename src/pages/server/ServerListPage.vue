@@ -149,20 +149,6 @@
             </VaChip>
           </template>
 
-          <template #cell(hardware)="{ rowData }">
-            <div class="hardware-summary">
-              <VaChip v-if="rowData.CPU" size="small" class="mr-1">
-                CPU: {{ rowData.CPU数量 || 1 }}
-              </VaChip>
-              <VaChip v-if="rowData.内存" size="small" class="mr-1">
-                内存: {{ rowData.内存数量 || 1 }}
-              </VaChip>
-              <VaChip v-if="rowData.SSD" size="small">
-                SSD: {{ rowData.SSD数量 || 1 }}
-              </VaChip>
-            </div>
-          </template>
-
           <template #cell(actions)="{ rowData }">
             <div class="action-buttons">
               <VaButton
@@ -297,7 +283,6 @@ const columns = [
   { key: 'date', label: '日期', sortable: true },
   { key: 'customer', label: '出机客户', sortable: true },
   { key: 'business', label: '业务', sortable: true },
-  { key: 'hardware', label: '硬件摘要', sortable: false },
   { key: 'actions', label: '操作', width: 150 }
 ]
 
@@ -606,31 +591,10 @@ const handleEdit = (server) => {
  * 删除服务器
  */
 const handleDelete = async (server) => {
-  const agreed = await confirm({
-    title: '确认删除',
-    message: `确定要删除服务器 ${server.SN} 吗？此操作不可恢复。`,
-    okText: '删除',
-    cancelText: '取消',
-    size: 'small'
+  notify({
+    message: '删除功能开发中',
+    color: 'info'
   })
-
-  if (agreed) {
-    try {
-      // TODO: 调用删除 API
-      servers.value = servers.value.filter(s => s.SN !== server.SN)
-      totalRecords.value = servers.value.length
-      
-      // 保存更新后的状态
-      saveState()
-      
-      notify({
-        message: `服务器 ${server.SN} 已删除`,
-        color: 'success'
-      })
-    } catch (error) {
-      console.error('删除失败:', error)
-    }
-  }
 }
 
 // 组件挂载时恢复状态
