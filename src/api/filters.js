@@ -24,9 +24,9 @@ import request from '../utils/request'
 - 或简化格式:
 - [“阿里云”, “腾讯云”, “华为云”]
   */
-  export function getCustomerList() {
+export function getCustomerList() {
   return request.get('/filters/customers')
-  }
+}
 
 /**
 
@@ -44,9 +44,9 @@ import request from '../utils/request'
 - 或简化格式:
 - [“云计算”, “大数据”, “AI训练”]
   */
-  export function getBusinessList() {
+export function getBusinessList() {
   return request.get('/filters/businesses')
-  }
+}
 
 /**
 
@@ -54,9 +54,9 @@ import request from '../utils/request'
 - 
 - @returns {Promise<Array>} 机房列表
   */
-  export function getIdcList() {
+export function getIdcList() {
   return request.get('/filters/idcs')
-  }
+}
 
 /**
 
@@ -71,6 +71,6 @@ import request from '../utils/request'
 - idcs: [“LAX-DC-1”, “LAX-DC-2”]
 - }
   */
-  export function getAllFilters() {
+export function getAllFilters() {
   return request.get('/filters/all')
-  }
+}

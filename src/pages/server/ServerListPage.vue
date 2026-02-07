@@ -41,13 +41,6 @@
             <VaButtonGroup>
               <VaButton
                 preset="secondary"
-                icon="mdi-filter-variant"
-                @click="toggleFilter"
-              >
-                筛选
-              </VaButton>
-              <VaButton
-                preset="secondary"
                 icon="mdi-refresh"
                 @click="handleRefresh"
                 :loading="loading"
@@ -57,56 +50,6 @@
             </VaButtonGroup>
           </div>
         </div>
-
-        <!-- 筛选面板 -->
-        <VaCollapse v-model="showFilter" class="mt-3">
-          <div class="filter-panel">
-            <VaSelect
-              v-model="filters.customer"
-              label="出机客户"
-              placeholder="选择客户"
-              :options="customerOptions"
-              clearable
-              class="filter-input"
-              :loading="loadingCustomers"
-            />
-
-            <VaSelect
-              v-model="filters.business"
-              label="业务类型"
-              placeholder="选择业务"
-              :options="businessOptions"
-              clearable
-              class="filter-input"
-              :loading="loadingBusinesses"
-            />
-
-            <VaDateInput
-              v-model="filters.dateRange"
-              label="日期范围"
-              mode="range"
-              clearable
-              class="filter-input"
-            />
-
-            <div class="filter-actions">
-              <VaButton
-                preset="primary"
-                size="small"
-                @click="applyFilters"
-              >
-                应用筛选
-              </VaButton>
-              <VaButton
-                preset="secondary"
-                size="small"
-                @click="resetFilters"
-              >
-                重置
-              </VaButton>
-            </div>
-          </div>
-        </VaCollapse>
       </VaCardContent>
     </VaCard>
 
