@@ -27,7 +27,7 @@ const getToast = () => {
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: 'http://192.168.1.6:3001/api', // 后端 API 根路径
+  baseURL: '/api', // 后端 API 根路径
   timeout: 5000, // 超时时间
 })
 
@@ -105,7 +105,7 @@ service.interceptors.response.use(
          * 注意：这里不能用 service（否则会再次进入拦截器）
          * 必须用 axios 原生实例
          */
-        const res = await axios.post('http://192.168.1.6:3001/api/auth/refresh', {
+        const res = await axios.post('/api/auth/refresh', {
           refreshToken
         })
 
