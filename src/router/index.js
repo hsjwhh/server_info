@@ -87,6 +87,21 @@ const routes = [
           requiresAuth: true // 需要登录
         }
       },
+      {
+        path: 'config-plan',
+        name: 'ConfigPlan',
+        component: () => import('../pages/ConfigPlanPage.vue'),
+        meta: {
+          title: '配置方案',
+          icon: 'mdi-clipboard-text-outline',
+          showInMenu: true,  // 👈 显示在菜单中
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '配置方案', to: '/config-plan' }
+          ],
+          requiresAuth: true // 需要登录
+        }
+      },
     ]
   }
 ]

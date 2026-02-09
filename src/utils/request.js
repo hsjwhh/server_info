@@ -27,7 +27,7 @@ const getToast = () => {
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: '/api', // 后端 API 根路径
+  baseURL: 'http://localhost:3000/api', // 后端 API 根路径
   timeout: 5000, // 超时时间
 })
 

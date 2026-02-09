@@ -42,7 +42,7 @@
                     <VaChip size="small" color="info">{{ cpu.tdp }}W</VaChip>
                   </div>
                   <div class="suggestion-sub">
-                    {{ cpu.cores }}C/{{ cpu.threads }}T · {{ cpu.base_freq }}GHz
+                    {{ cpu.cores }}C/{{ cpu.threads }}T · {{ cpu.base_freq }}
                   </div>
                 </div>
               </div>
@@ -65,7 +65,7 @@
                   </div>
                   <div class="detail-row">
                     <span class="label">基频/睿频:</span>
-                    <span>{{ selectedCpu.base_freq }}GHz / {{ selectedCpu.turbo_freq }}GHz</span>
+                    <span>{{ selectedCpu.base_freq }} / {{ selectedCpu.max_turbo }}</span>
                   </div>
                   <div class="detail-row">
                     <span class="label">TDP:</span>
@@ -73,7 +73,11 @@
                   </div>
                   <div class="detail-row">
                     <span class="label">支持内存:</span>
-                    <span>{{ selectedCpu.memory_type }} {{ selectedCpu.max_memory_speed }}MHz</span>
+                    <span>{{ selectedCpu.memory_type }} {{ selectedCpu.memory_speed }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="label">接口:</span>
+                    <span>{{ selectedCpu.socket }}</span>
                   </div>
                 </div>
 
@@ -82,7 +86,7 @@
                   v-model="cpuCount"
                   label="数量"
                   :min="1"
-                  :max="8"
+                  :max="6"
                   class="mt-3"
                 />
               </div>
@@ -527,7 +531,7 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { debounce } from 'lodash'
+import debounce from 'lodash.debounce'
 import {
   VaCard,
   VaCardTitle,
@@ -567,7 +571,7 @@ const handleCpuSearch = debounce(async () => {
   } catch (err) {
     console.error('CPU 搜索失败:', err)
   }
-}, 300)
+}, 1000)
 
 const selectCpu = async (cpu: any) => {
   selectedCpu.value = cpu
