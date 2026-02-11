@@ -19,6 +19,7 @@ import request from '../utils/request'
  * 返回格式示例：
  * [
  *   {
+ *     id: 123,  // 👈 数据库自增 ID（主键）
  *     cpu_short_name: "Intel Xeon E5-2680 v4",
  *     cores: 14,
  *     threads: 28,
@@ -32,7 +33,7 @@ import request from '../utils/request'
  * ]
  */
 export function searchCpu(keyword) {
-  return request.get('/hw/cpu', {
+  return request.get('/hardware/cpu/search', {
     params: { keyword }
   })
 }
@@ -40,22 +41,27 @@ export function searchCpu(keyword) {
 /**
  * 获取 CPU 详细信息
  * 
- * @param {number} cpuId - CPU ID
+ * @param {number} cpuId - CPU ID（数据库主键）
  * @returns {Promise<Object>} CPU 详细信息
+ * 
+ * 示例：
+ *   getCpuDetail(123)
+ *   → GET /api/hardware/cpu/123
  */
-export function getCpuDetail(id) {
-  return request.get(`/hardware/cpu/${id}`)
+export function getCpuDetail(cpuId) {
+  return request.get(`/hardware/cpu/${cpuId}`)
 }
 
 /**
  * 获取兼容的主板列表
  * 
- * @param {string} cpuShortName - CPU 型号
+ * @param {number} cpuId - CPU ID（数据库主键）
  * @returns {Promise<Array>} 兼容主板列表
  * 
  * 返回格式示例：
  * [
  *   {
+ *     id: 456,  // 👈 主板 ID
  *     model: "Supermicro X10DRi",
  *     chipset: "Intel C612",
  *     socket: "LGA2011-3",
@@ -67,10 +73,14 @@ export function getCpuDetail(id) {
  *     power: 50
  *   }
  * ]
+ * 
+ * 示例：
+ *   getCompatibleMotherboards(123)
+ *   → GET /api/hardware/motherboard/compatible?cpu_id=123
  */
-export function getCompatibleMotherboards(cpuShortName) {
+export function getCompatibleMotherboards(cpuId) {
   return request.get('/hardware/motherboard/compatible', {
-    params: { cpu: cpuShortName }
+    params: { cpu_id: cpuId }
   })
 }
 

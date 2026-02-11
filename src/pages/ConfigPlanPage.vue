@@ -15,12 +15,14 @@
                 <VaIcon name="mdi-chip" size="small" />
                 处理器 (CPU)
               </h3>
+              <!-- CPU 输入框 -->
               <div class="form-row">
                 <VaInput
                   v-model="cpuKeyword"
                   label="CPU 型号"
                   placeholder="输入 CPU 关键字搜索..."
                   clearable
+                  :loading="loadingCpuDetail"
                   @input="handleCpuSearch"
                 >
                   <template #prependInner>
@@ -33,7 +35,7 @@
               <div v-if="cpuSuggestions.length > 0" class="suggestions-list">
                 <div
                   v-for="cpu in cpuSuggestions"
-                  :key="cpu.cpu_short_name"
+                  :key="cpu.id"
                   class="suggestion-item"
                   @click="selectCpu(cpu)"
                 >
@@ -42,7 +44,7 @@
                     <VaChip size="small" color="info">{{ cpu.tdp }}W</VaChip>
                   </div>
                   <div class="suggestion-sub">
-                    {{ cpu.cores }}C/{{ cpu.threads }}T · {{ cpu.base_freq }}
+                    {{ cpu.cores }}C/{{ cpu.threads }}T · {{ cpu.base_freq }}GHz
                   </div>
                 </div>
               </div>
@@ -65,7 +67,7 @@
                   </div>
                   <div class="detail-row">
                     <span class="label">基频/睿频:</span>
-                    <span>{{ selectedCpu.base_freq }} / {{ selectedCpu.max_turbo }}</span>
+                    <span>{{ selectedCpu.base_freq }}GHz / {{ selectedCpu.turbo_freq }}GHz</span>
                   </div>
                   <div class="detail-row">
                     <span class="label">TDP:</span>
@@ -73,22 +75,30 @@
                   </div>
                   <div class="detail-row">
                     <span class="label">支持内存:</span>
-                    <span>{{ selectedCpu.memory_type }} {{ selectedCpu.memory_speed }}</span>
-                  </div>
-                  <div class="detail-row">
-                    <span class="label">接口:</span>
-                    <span>{{ selectedCpu.socket }}</span>
+                    <span>{{ selectedCpu.memory_type }} {{ selectedCpu.max_memory_speed }}MHz</span>
                   </div>
                 </div>
 
                 <!-- CPU 数量 -->
                 <VaCounter
                   v-model="cpuCount"
-                  label="数量"
-                  :min="1"
-                  :max="6"
+                  :label="cpuCountLabel"
+                  :min="cpuScalability.min"
+                  :max="cpuScalability.max"
+                  :disabled="cpuScalability.disabled"
                   class="mt-3"
                 />
+                
+                <!-- CPU 扩展性提示 -->
+                <VaAlert 
+                  v-if="selectedCpu && cpuScalability.max > 1"
+                  color="info" 
+                  border="left"
+                  class="mt-2"
+                  dense
+                >
+                  此 CPU 支持最多 {{ cpuScalability.max }} 路配置
+                </VaAlert>
               </div>
             </div>
 
@@ -548,17 +558,94 @@ import {
   VaProgressBar,
   useToast
 } from 'vuestic-ui'
-import { searchCpu, getCompatibleMotherboards } from '../api/configPlan'
+import { searchCpu, getCpuDetail, getCompatibleMotherboards } from '../api/configPlan'
 
 const { init: notify } = useToast()
 
-// ==================== CPU 相关 ====================
-const cpuKeyword = ref('')
-const cpuSuggestions = ref<any[]>([])
-const selectedCpu = ref<any>(null)
-const cpuCount = ref(1)
+/**
+ * ==================== CPU 相关状态管理 ====================
+ * 
+ * 架构说明:
+ * 1. cpuSuggestions: 搜索结果列表 (轻量级数据，仅包含关键字段用于列表展示)
+ * 2. selectedCpu: 完整的 CPU 详细数据 (重量级数据，包含所有字段)
+ * 
+ * 性能优化:
+ * - 搜索接口只返回必要字段 (id, cpu_short_name, cores, threads, tdp)
+ * - 选择后通过 getCpuDetail(id) 获取完整数据
+ * - 避免搜索时传输大量无用数据
+ */
 
-// CPU 搜索
+const cpuKeyword = ref('')
+const cpuSuggestions = ref<any[]>([])  // 搜索结果 - 轻量级
+const selectedCpu = ref<any>(null)      // 选中的 CPU - 完整数据
+const cpuCount = ref(1)
+const loadingCpuDetail = ref(false)     // 加载详情状态
+
+/**
+ * CPU 可扩展性计算属性
+ * 
+ * 根据 CPU 的 scalability 字段判断：
+ * - 1P/1S: 单路 CPU，只能使用 1 颗，禁止修改
+ * - 2P/2S: 双路 CPU，默认 2 颗，可选 1/2
+ * - 4P/4S: 四路 CPU，默认 4 颗，可选 1/2/4
+ * - 8P/8S: 八路 CPU，默认 8 颗，可选 1/2/4/8
+ */
+const cpuScalability = computed(() => {
+  if (!selectedCpu.value?.scalability) {
+    return { min: 1, max: 1, default: 1, disabled: true }
+  }
+
+  const scalability = selectedCpu.value.scalability.toUpperCase()
+
+  // 解析 scalability 字段
+  // 支持格式: "1P", "1S", "2P", "2S", "4P", "4S", "8P", "8S"
+  const match = scalability.match(/(\d+)[PS]/)
+  
+  if (!match) {
+    // 无法解析，默认单路
+    return { min: 1, max: 1, default: 1, disabled: true }
+  }
+
+  const maxSockets = parseInt(match[1])
+
+  if (maxSockets === 1) {
+    // 单路 CPU: 固定 1 颗，禁止修改
+    return { min: 1, max: 1, default: 1, disabled: true }
+  } else {
+    // 多路 CPU: 默认最大值，可手动调整
+    return { 
+      min: 1, 
+      max: maxSockets, 
+      default: maxSockets, 
+      disabled: false 
+    }
+  }
+})
+
+/**
+ * CPU 数量提示文本
+ */
+const cpuCountLabel = computed(() => {
+  if (!selectedCpu.value) return '数量'
+  
+  const { max, disabled } = cpuScalability.value
+  
+  if (disabled) {
+    return '数量 (单路CPU，固定1颗)'
+  } else {
+    return `数量 (最多${max}路)`
+  }
+})
+
+/**
+ * CPU 搜索 (自动补全)
+ * 
+ * 后端应只返回列表展示所需的关键字段:
+ * - id (必需，用于后续查询)
+ * - cpu_short_name (展示)
+ * - cores, threads, base_freq (展示)
+ * - tdp (展示)
+ */
 const handleCpuSearch = debounce(async () => {
   if (!cpuKeyword.value || cpuKeyword.value.length < 2) {
     cpuSuggestions.value = []
@@ -571,23 +658,67 @@ const handleCpuSearch = debounce(async () => {
   } catch (err) {
     console.error('CPU 搜索失败:', err)
   }
-}, 1000)
+}, 300)
 
-const selectCpu = async (cpu: any) => {
-  selectedCpu.value = cpu
-  cpuKeyword.value = cpu.cpu_short_name
-  cpuSuggestions.value = []
+/**
+ * 选择 CPU (两阶段加载策略)
+ * 
+ * 第一阶段: 从搜索结果中选择 (已有 id 和基本信息)
+ * 第二阶段: 通过 getCpuDetail(id) 获取完整数据
+ * 
+ * @param {Object} cpuSummary - 搜索结果中的 CPU 摘要数据
+ * 
+ * 为什么这样设计:
+ * 1. 性能优化: 搜索时只传输必要数据,减少网络传输
+ * 2. 数据一致性: 详情数据来自单一数据源,避免同步问题
+ * 3. 扩展性: 如果 CPU 详情很复杂(如规格书、测试数据),搜索时不需要传输
+ * 4. 缓存友好: 可以对详情数据做缓存(本例未实现)
+ */
+const selectCpu = async (cpuSummary: any) => {
+  try {
+    // 第一阶段: 立即更新 UI,显示基本信息
+    cpuKeyword.value = cpuSummary.cpu_short_name
+    cpuSuggestions.value = []
+    loadingCpuDetail.value = true
 
-  // 自动设置内存类型
-  memoryType.value = cpu.memory_type || 'DDR4'
+    // 第二阶段: 获取完整的 CPU 详细数据
+    // 👇 这里调用 getCpuDetail API,通过 ID 获取所有字段
+    const cpuDetail = await getCpuDetail(cpuSummary.id)
+    
+    // 保存完整数据到 selectedCpu
+    selectedCpu.value = cpuDetail
 
-  // 加载兼容主板
-  await loadCompatibleMotherboards()
+    // 根据 CPU 详情自动设置内存类型
+    memoryType.value = cpuDetail.memory_type || 'DDR4'
+
+    // 根据 CPU 可扩展性设置默认数量
+    cpuCount.value = cpuScalability.value.default
+
+    // 加载兼容主板 (依赖完整的 CPU 数据)
+    await loadCompatibleMotherboards()
+
+    notify({
+      message: `已选择 ${cpuDetail.cpu_short_name}`,
+      color: 'success'
+    })
+
+  } catch (err) {
+    console.error('加载 CPU 详情失败:', err)
+    notify({
+      message: '加载 CPU 详情失败',
+      color: 'danger'
+    })
+    // 失败时清空选择
+    selectedCpu.value = null
+  } finally {
+    loadingCpuDetail.value = false
+  }
 }
 
 const clearCpu = () => {
   selectedCpu.value = null
   cpuKeyword.value = ''
+  cpuCount.value = 1
   selectedMotherboard.value = null
   compatibleMotherboards.value = []
 }
@@ -600,7 +731,8 @@ const loadCompatibleMotherboards = async () => {
   if (!selectedCpu.value) return
 
   try {
-    const boards = await getCompatibleMotherboards(selectedCpu.value.cpu_short_name)
+    // 👈 使用 CPU ID 而不是 cpu_short_name
+    const boards = await getCompatibleMotherboards(selectedCpu.value.id)
     compatibleMotherboards.value = boards
   } catch (err) {
     console.error('加载兼容主板失败:', err)
@@ -754,8 +886,11 @@ const compatibilityWarnings = computed(() => {
 // ==================== 导出配置 ====================
 const exportConfig = () => {
   const config = {
-    cpu: selectedCpu.value?.cpu_short_name,
-    cpuCount: cpuCount.value,
+    cpu: {
+      id: selectedCpu.value?.id,  // 👈 保存 CPU ID
+      name: selectedCpu.value?.cpu_short_name,
+      count: cpuCount.value
+    },
     motherboard: selectedMotherboard.value,
     memory: {
       type: memoryType.value,
