@@ -33,7 +33,7 @@ import request from '../utils/request'
  * ]
  */
 export function searchCpu(keyword) {
-  return request.get('/hardware/cpu/search', {
+  return request.get('/hw/cpu', {
     params: { keyword }
   })
 }
@@ -46,10 +46,10 @@ export function searchCpu(keyword) {
  * 
  * 示例：
  *   getCpuDetail(123)
- *   → GET /api/hardware/cpu/123
+ *   → GET /api/hw/cpu/123
  */
 export function getCpuDetail(cpuId) {
-  return request.get(`/hardware/cpu/${cpuId}`)
+  return request.get(`/hw/cpu/${cpuId}`)
 }
 
 /**
@@ -76,10 +76,10 @@ export function getCpuDetail(cpuId) {
  * 
  * 示例：
  *   getCompatibleMotherboards(123)
- *   → GET /api/hardware/motherboard/compatible?cpu_id=123
+ *   → GET /api/hw/motherboard/compatible?cpu_id=123
  */
 export function getCompatibleMotherboards(cpuId) {
-  return request.get('/hardware/motherboard/compatible', {
+  return request.get('/hw/motherboard/compatible', {
     params: { cpu_id: cpuId }
   })
 }
@@ -91,7 +91,7 @@ export function getCompatibleMotherboards(cpuId) {
  * @returns {Promise<Array>} 主板列表
  */
 export function searchMotherboard(keyword) {
-  return request.get('/hardware/motherboard/search', {
+  return request.get('/hw/motherboard/search', {
     params: { keyword }
   })
 }
@@ -138,9 +138,9 @@ export function deleteConfig(configId) {
 /**
  * 计算功耗（可选，如果后端有专门的计算接口）
  * 
- * @param {Object} hardware - 硬件配置
+ * @param {Object} hw - 硬件配置
  * @returns {Promise<Object>} 功耗计算结果
  */
-export function calculatePower(hardware) {
-  return request.post('/hardware/power-calculation', hardware)
+export function calculatePower(hw) {
+  return request.post('/hw/power-calculation', hw)
 }
