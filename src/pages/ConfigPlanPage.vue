@@ -44,7 +44,7 @@
                     <VaChip size="small" color="info">{{ cpu.tdp }}W</VaChip>
                   </div>
                   <div class="suggestion-sub">
-                    {{ cpu.cores }}C/{{ cpu.threads }}T · {{ cpu.base_freq }}GHz
+                    {{ cpu.cores }}C/{{ cpu.threads }}T · {{ cpu.base_freq }}
                   </div>
                 </div>
               </div>
@@ -67,7 +67,7 @@
                   </div>
                   <div class="detail-row">
                     <span class="label">基频/睿频:</span>
-                    <span>{{ selectedCpu.base_freq }}GHz / {{ selectedCpu.turbo_freq }}GHz</span>
+                    <span>{{ selectedCpu.base_freq }} / {{ selectedCpu.turbo_freq }}</span>
                   </div>
                   <div class="detail-row">
                     <span class="label">TDP:</span>
@@ -75,19 +75,40 @@
                   </div>
                   <div class="detail-row">
                     <span class="label">支持内存:</span>
-                    <span>{{ selectedCpu.memory_type }} {{ selectedCpu.max_memory_speed }}MHz</span>
+                    <span>{{ selectedCpu.memory_speed }} {{ selectedCpu.max_memory_speed }}</span>
+                  </div>
+                  <div class="detail-row">
+                    <span class="label">封装接口:</span>
+                    <span>{{ selectedCpu.socket }}</span>
                   </div>
                 </div>
 
                 <!-- CPU 数量 -->
-                <VaCounter
-                  v-model="cpuCount"
-                  :label="cpuCountLabel"
-                  :min="cpuScalability.min"
-                  :max="cpuScalability.max"
-                  :disabled="cpuScalability.disabled"
-                  class="mt-3"
-                />
+                <div class="cpu-count-control">
+                  <label class="va-input-label">{{ cpuCountLabel }}</label>
+                  <div class="count-input-group">
+                    <VaButton
+                      :disabled="cpuScalability.disabled || cpuCount <= cpuScalability.min"
+                      icon="mdi-minus"
+                      size="small"
+                      @click="cpuCount--"
+                    />
+                    <VaInput
+                      v-model.number="cpuCount"
+                      :disabled="cpuScalability.disabled"
+                      inputmode="numeric"
+                      style="width: 80px; text-align: center;"
+                      class="mx-2"
+                      @blur="validateCpuCount"
+                    />
+                    <VaButton
+                      :disabled="cpuScalability.disabled || cpuCount >= cpuScalability.max"
+                      icon="mdi-plus"
+                      size="small"
+                      @click="cpuCount++"
+                    />
+                  </div>
+                </div>
                 
                 <!-- CPU 扩展性提示 -->
                 <VaAlert 
@@ -723,6 +744,36 @@ const clearCpu = () => {
   compatibleMotherboards.value = []
 }
 
+/**
+ * 验证 CPU 数量输入
+ * 确保值在有效范围内且为整数
+ */
+const validateCpuCount = () => {
+  const { min, max, disabled } = cpuScalability.value
+  
+  if (disabled) {
+    cpuCount.value = 1
+    return
+  }
+  
+  // 转换为整数
+  let value = Math.round(cpuCount.value)
+  
+  // 限制在有效范围内
+  if (value < min) {
+    value = min
+  } else if (value > max) {
+    value = max
+  }
+  
+  // 处理 NaN 或无效输入
+  if (isNaN(value)) {
+    value = min
+  }
+  
+  cpuCount.value = value
+}
+
 // ==================== 主板相关 ====================
 const selectedMotherboard = ref<string | null>(null)
 const compatibleMotherboards = ref<any[]>([])
@@ -755,9 +806,21 @@ const memoryType = ref('DDR4')
 const memoryCapacity = ref('32GB')
 const memoryCount = ref(2)
 
+function extractMemoryTypes(memorySpeed?: string): string[] {
+  if (!memorySpeed) return []
+  // 匹配 DDR4 / DDR5 / DDR6（未来扩展）
+  const matches = memorySpeed.match(/DDR\d+/gi)
+  if (!matches) return []
+  // 去重 + 转大写
+  return Array.from(new Set(matches.map(m => m.toUpperCase())))
+}
+
 const memoryOptions = computed(() => {
-  if (!selectedCpu.value) return ['DDR4', 'DDR5']
-  return [selectedCpu.value.memory_type || 'DDR4']
+  if (!selectedCpu.value?.memory_speed) {
+    return ['DDR4']
+  }
+  const types = extractMemoryTypes(selectedCpu.value.memory_speed)
+  return types.length ? types : ['DDR4']
 })
 
 const memoryCapacityOptions = ['8GB', '16GB', '32GB', '64GB', '128GB']
@@ -1220,5 +1283,44 @@ const exportConfig = () => {
   .summary-panel {
     max-height: none;
   }
+}
+
+/* CPU 数量控件 */
+.cpu-count-control {
+  margin-top: 12px;
+}
+
+.cpu-count-control .va-input-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.count-input-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.count-input-group .va-input {
+  flex-shrink: 0;
+}
+
+.count-input-group .va-input input {
+  text-align: center;
+  font-weight: 600;
+}
+
+/* 隐藏数字输入框的浏览器默认上下箭头 */
+.count-input-group .va-input input::-webkit-outer-spin-button,
+.count-input-group .va-input input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.count-input-group .va-input input[type=number] {
+  -moz-appearance: textfield;
 }
 </style>
