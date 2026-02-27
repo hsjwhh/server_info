@@ -85,6 +85,20 @@ export function getCompatibleMotherboards(cpuId) {
 }
 
 /**
+ * 通过 CPU 型号获取主板列表
+ *  
+ * @param {string} cpu - CPU 型号
+ * @returns {Promise<Object>} 兼容主板列表
+ * 
+ * 示例：
+ *   getMbByCpu(Amd 9654)
+ *   → GET /api/sn/cpu2mb/Amd%209654
+ */
+export function getMbByCpu(cpu) {
+  return request.get(`/sn/cpu2mb/${cpu}`)
+}
+
+/**
  * 搜索主板
  * 
  * @param {string} keyword - 主板型号关键字

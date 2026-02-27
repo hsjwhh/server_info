@@ -143,8 +143,8 @@
                   label="选择主板"
                   placeholder="选择兼容的主板..."
                   :options="compatibleMotherboards"
-                  text-by="model"
-                  value-by="model"
+                  text-by="主板"
+                  value-by="主板"
                   searchable
                   clearable
                 >
@@ -579,7 +579,7 @@ import {
   VaProgressBar,
   useToast
 } from 'vuestic-ui'
-import { searchCpu, getCpuDetail, getCompatibleMotherboards } from '../api/configPlan'
+import { searchCpu, getCpuDetail, getMbByCpu, getCompatibleMotherboards } from '../api/configPlan'
 
 const { init: notify } = useToast()
 
@@ -620,14 +620,19 @@ const cpuScalability = computed(() => {
 
   // 解析 scalability 字段
   // 支持格式: "1P", "1S", "2P", "2S", "4P", "4S", "8P", "8S"
-  const match = scalability.match(/(\d+)[PS]/)
+  const matches = scalability.match(/(\d+)[PS]/g)  // 👈 添加 'g' 全局匹配
+  // '1P / 2P' → ['1P', '2P']
   
-  if (!match) {
+  if (!matches) {
     // 无法解析，默认单路
     return { min: 1, max: 1, default: 1, disabled: true }
   }
 
-  const maxSockets = parseInt(match[1])
+  const socketCounts = matches.map(m => parseInt(m.match(/\d+/)[0]))
+  // ['1P', '2P'] → [1, 2]
+
+  const maxSockets = Math.max(...socketCounts)
+  // Math.max(1, 2) → 2 ✅
 
   if (maxSockets === 1) {
     // 单路 CPU: 固定 1 颗，禁止修改
@@ -783,7 +788,7 @@ const loadCompatibleMotherboards = async () => {
 
   try {
     // 👈 使用 CPU ID 而不是 cpu_short_name
-    const boards = await getCompatibleMotherboards(selectedCpu.value.id)
+    const boards = await getMbByCpu(selectedCpu.value.cpu_short_name)
     compatibleMotherboards.value = boards
   } catch (err) {
     console.error('加载兼容主板失败:', err)
@@ -793,7 +798,7 @@ const loadCompatibleMotherboards = async () => {
 const selectedMotherboardDetail = computed(() => {
   if (!selectedMotherboard.value) return null
   return compatibleMotherboards.value.find(
-    (board) => board.model === selectedMotherboard.value
+    (board) => board.主板 === selectedMotherboard.value
   )
 })
 
