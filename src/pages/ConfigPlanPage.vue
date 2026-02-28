@@ -17,14 +17,8 @@
               </h3>
               <!-- CPU 输入框 -->
               <div class="form-row">
-                <VaInput
-                  v-model="cpuKeyword"
-                  label="CPU 型号"
-                  placeholder="输入 CPU 关键字搜索..."
-                  clearable
-                  :loading="loadingCpuDetail"
-                  @input="handleCpuSearch"
-                >
+                <VaInput v-model="cpuKeyword" label="CPU 型号" placeholder="输入 CPU 关键字搜索..." clearable
+                  :loading="loadingCpuDetail" @input="handleCpuSearch">
                   <template #prependInner>
                     <VaIcon name="mdi-magnify" size="small" />
                   </template>
@@ -33,12 +27,7 @@
 
               <!-- CPU 搜索结果下拉列表 -->
               <div v-if="cpuSuggestions.length > 0" class="suggestions-list">
-                <div
-                  v-for="cpu in cpuSuggestions"
-                  :key="cpu.id"
-                  class="suggestion-item"
-                  @click="selectCpu(cpu)"
-                >
+                <div v-for="cpu in cpuSuggestions" :key="cpu.id" class="suggestion-item" @click="selectCpu(cpu)">
                   <div class="suggestion-main">
                     <strong>{{ cpu.cpu_short_name }}</strong>
                     <VaChip size="small" color="info">{{ cpu.tdp }}W</VaChip>
@@ -53,12 +42,7 @@
               <div v-if="selectedCpu" class="selected-item">
                 <div class="selected-header">
                   <span class="selected-name">{{ selectedCpu.cpu_short_name }}</span>
-                  <VaButton
-                    preset="plain"
-                    icon="mdi-close"
-                    size="small"
-                    @click="clearCpu"
-                  />
+                  <VaButton preset="plain" icon="mdi-close" size="small" @click="clearCpu" />
                 </div>
                 <div class="selected-details">
                   <div class="detail-row">
@@ -87,37 +71,17 @@
                 <div class="cpu-count-control">
                   <label class="va-input-label">{{ cpuCountLabel }}</label>
                   <div class="count-input-group">
-                    <VaButton
-                      :disabled="cpuScalability.disabled || cpuCount <= cpuScalability.min"
-                      icon="mdi-minus"
-                      size="small"
-                      @click="cpuCount--"
-                    />
-                    <VaInput
-                      v-model.number="cpuCount"
-                      :disabled="cpuScalability.disabled"
-                      inputmode="numeric"
-                      style="width: 80px; text-align: center;"
-                      class="mx-2"
-                      @blur="validateCpuCount"
-                    />
-                    <VaButton
-                      :disabled="cpuScalability.disabled || cpuCount >= cpuScalability.max"
-                      icon="mdi-plus"
-                      size="small"
-                      @click="cpuCount++"
-                    />
+                    <VaButton :disabled="cpuScalability.disabled || cpuCount <= cpuScalability.min" icon="mdi-minus"
+                      size="small" @click="cpuCount--" />
+                    <VaInput v-model.number="cpuCount" :disabled="cpuScalability.disabled" inputmode="numeric"
+                      style="width: 80px; text-align: center;" class="mx-2" @blur="validateCpuCount" />
+                    <VaButton :disabled="cpuScalability.disabled || cpuCount >= cpuScalability.max" icon="mdi-plus"
+                      size="small" @click="cpuCount++" />
                   </div>
                 </div>
-                
+
                 <!-- CPU 扩展性提示 -->
-                <VaAlert 
-                  v-if="selectedCpu && cpuScalability.max > 1"
-                  color="info" 
-                  border="left"
-                  class="mt-2"
-                  dense
-                >
+                <VaAlert v-if="selectedCpu && cpuScalability.max > 1" color="info" border="left" class="mt-2" dense>
                   此 CPU 支持最多 {{ cpuScalability.max }} 路配置
                 </VaAlert>
               </div>
@@ -131,23 +95,15 @@
                 <VaIcon name="mdi-resistor-nodes" size="small" />
                 主板
               </h3>
-              
+
               <VaAlert v-if="!selectedCpu" color="info" border="top">
                 请先选择 CPU 型号
               </VaAlert>
 
               <div v-else>
                 <!-- 主板搜索/选择 -->
-                <VaSelect
-                  v-model="selectedMotherboard"
-                  label="选择主板"
-                  placeholder="选择兼容的主板..."
-                  :options="compatibleMotherboards"
-                  text-by="主板"
-                  value-by="主板"
-                  searchable
-                  clearable
-                >
+                <VaSelect v-model="selectedMotherboard" label="选择主板" placeholder="选择兼容的主板..."
+                  :options="compatibleMotherboards" text-by="mb" value-by="mb" searchable clearable>
                   <template #prepend>
                     <VaIcon name="mdi-expansion-card" size="small" />
                   </template>
@@ -165,7 +121,8 @@
                     </div>
                     <div class="detail-row">
                       <span class="label">内存插槽:</span>
-                      <span>{{ selectedMotherboardDetail.memory_slots }} × {{ selectedMotherboardDetail.memory_type }}</span>
+                      <span>{{ selectedMotherboardDetail.memory_slots }} × {{ selectedMotherboardDetail.memory_type
+                        }}</span>
                     </div>
                     <div class="detail-row">
                       <span class="label">最大内存:</span>
@@ -198,35 +155,19 @@
               </VaAlert>
 
               <div v-else class="form-group">
-                <VaSelect
-                  v-model="memoryType"
-                  label="内存类型"
-                  :options="memoryOptions"
-                  :disabled="!!selectedCpu"
-                >
+                <VaSelect v-model="memoryType" label="内存类型" :options="memoryOptions" :disabled="!!selectedCpu">
                   <template #prepend>
                     <VaIcon name="mdi-chip" size="small" />
                   </template>
                 </VaSelect>
 
-                <VaSelect
-                  v-model="memoryCapacity"
-                  label="单条容量"
-                  :options="memoryCapacityOptions"
-                  class="mt-3"
-                >
+                <VaSelect v-model="memoryCapacity" label="单条容量" :options="memoryCapacityOptions" class="mt-3">
                   <template #prepend>
                     <VaIcon name="mdi-database" size="small" />
                   </template>
                 </VaSelect>
 
-                <VaCounter
-                  v-model="memoryCount"
-                  label="数量"
-                  :min="1"
-                  :max="maxMemorySlots"
-                  class="mt-3"
-                />
+                <VaCounter v-model="memoryCount" label="数量" :min="1" :max="maxMemorySlots" class="mt-3" />
 
                 <div class="memory-summary mt-3">
                   <VaChip color="primary">
@@ -252,12 +193,7 @@
               <div class="storage-group">
                 <VaCheckbox v-model="hasM2" label="M.2 NVMe SSD" />
                 <div v-if="hasM2" class="storage-config">
-                  <VaSelect
-                    v-model="m2Capacity"
-                    label="容量"
-                    :options="['256GB', '512GB', '1TB', '2TB']"
-                    size="small"
-                  />
+                  <VaSelect v-model="m2Capacity" label="容量" :options="['256GB', '512GB', '1TB', '2TB']" size="small" />
                   <VaCounter v-model="m2Count" :min="1" :max="4" size="small" />
                 </div>
               </div>
@@ -266,12 +202,8 @@
               <div class="storage-group">
                 <VaCheckbox v-model="hasSSD" label="SATA SSD" />
                 <div v-if="hasSSD" class="storage-config">
-                  <VaSelect
-                    v-model="ssdCapacity"
-                    label="容量"
-                    :options="['480GB', '960GB', '1.92TB', '3.84TB']"
-                    size="small"
-                  />
+                  <VaSelect v-model="ssdCapacity" label="容量" :options="['480GB', '960GB', '1.92TB', '3.84TB']"
+                    size="small" />
                   <VaCounter v-model="ssdCount" :min="1" :max="8" size="small" />
                 </div>
               </div>
@@ -280,12 +212,8 @@
               <div class="storage-group">
                 <VaCheckbox v-model="hasHDD" label="HDD 机械硬盘" />
                 <div v-if="hasHDD" class="storage-config">
-                  <VaSelect
-                    v-model="hddCapacity"
-                    label="容量"
-                    :options="['2TB', '4TB', '8TB', '10TB', '12TB']"
-                    size="small"
-                  />
+                  <VaSelect v-model="hddCapacity" label="容量" :options="['2TB', '4TB', '8TB', '10TB', '12TB']"
+                    size="small" />
                   <VaCounter v-model="hddCount" :min="1" :max="12" size="small" />
                 </div>
               </div>
@@ -309,48 +237,22 @@
               <!-- 网卡 -->
               <div class="form-row">
                 <VaCheckbox v-model="hasNIC" label="独立网卡" />
-                <VaCounter
-                  v-if="hasNIC"
-                  v-model="nicCount"
-                  :min="1"
-                  :max="4"
-                  size="small"
-                  class="ml-3"
-                />
+                <VaCounter v-if="hasNIC" v-model="nicCount" :min="1" :max="4" size="small" class="ml-3" />
               </div>
 
               <!-- 显卡 -->
               <div class="form-row mt-2">
                 <VaCheckbox v-model="hasGPU" label="显卡" />
-                <VaSelect
-                  v-if="hasGPU"
-                  v-model="gpuModel"
-                  :options="gpuOptions"
-                  size="small"
-                  class="ml-3"
-                  style="width: 200px;"
-                />
-                <VaCounter
-                  v-if="hasGPU"
-                  v-model="gpuCount"
-                  :min="1"
-                  :max="4"
-                  size="small"
-                  class="ml-2"
-                />
+                <VaSelect v-if="hasGPU" v-model="gpuModel" :options="gpuOptions" size="small" class="ml-3"
+                  style="width: 200px;" />
+                <VaCounter v-if="hasGPU" v-model="gpuCount" :min="1" :max="4" size="small" class="ml-2" />
               </div>
 
               <!-- RAID 卡 -->
               <div class="form-row mt-2">
                 <VaCheckbox v-model="hasRAID" label="RAID 卡" />
-                <VaSelect
-                  v-if="hasRAID"
-                  v-model="raidModel"
-                  :options="['基础 RAID', 'HBA', '高级 RAID']"
-                  size="small"
-                  class="ml-3"
-                  style="width: 150px;"
-                />
+                <VaSelect v-if="hasRAID" v-model="raidModel" :options="['基础 RAID', 'HBA', '高级 RAID']" size="small"
+                  class="ml-3" style="width: 150px;" />
               </div>
             </div>
           </div>
@@ -364,11 +266,7 @@
           <VaCardTitle>
             <div class="card-title-with-action">
               <span>配置总览</span>
-              <VaButton
-                size="small"
-                @click="exportConfig"
-                :disabled="!selectedCpu"
-              >
+              <VaButton size="small" @click="exportConfig" :disabled="!selectedCpu">
                 导出配置
               </VaButton>
             </div>
@@ -517,20 +415,11 @@
                 </div>
               </div>
 
-              <VaProgressBar
-                :model-value="(totalPower / recommendedPSU) * 100"
-                :color="powerColor"
-                class="mt-3"
-              >
+              <VaProgressBar :model-value="(totalPower / recommendedPSU) * 100" :color="powerColor" class="mt-3">
                 负载率: {{ Math.round((totalPower / recommendedPSU) * 100) }}%
               </VaProgressBar>
 
-              <VaAlert
-                v-if="totalPower / recommendedPSU > 0.85"
-                color="warning"
-                border="top"
-                class="mt-3"
-              >
+              <VaAlert v-if="totalPower / recommendedPSU > 0.85" color="warning" border="top" class="mt-3">
                 功耗较高,建议选择更大功率电源或优化配置
               </VaAlert>
             </div>
@@ -544,13 +433,8 @@
             兼容性提示
           </VaCardTitle>
           <VaCardContent>
-            <VaAlert
-              v-for="(warning, index) in compatibilityWarnings"
-              :key="index"
-              color="warning"
-              border="left"
-              class="mb-2"
-            >
+            <VaAlert v-for="(warning, index) in compatibilityWarnings" :key="index" color="warning" border="left"
+              class="mb-2">
               {{ warning }}
             </VaAlert>
           </VaCardContent>
@@ -622,7 +506,7 @@ const cpuScalability = computed(() => {
   // 支持格式: "1P", "1S", "2P", "2S", "4P", "4S", "8P", "8S"
   const matches = scalability.match(/(\d+)[PS]/g)  // 👈 添加 'g' 全局匹配
   // '1P / 2P' → ['1P', '2P']
-  
+
   if (!matches) {
     // 无法解析，默认单路
     return { min: 1, max: 1, default: 1, disabled: true }
@@ -639,11 +523,11 @@ const cpuScalability = computed(() => {
     return { min: 1, max: 1, default: 1, disabled: true }
   } else {
     // 多路 CPU: 默认最大值，可手动调整
-    return { 
-      min: 1, 
-      max: maxSockets, 
-      default: maxSockets, 
-      disabled: false 
+    return {
+      min: 1,
+      max: maxSockets,
+      default: maxSockets,
+      disabled: false
     }
   }
 })
@@ -653,9 +537,9 @@ const cpuScalability = computed(() => {
  */
 const cpuCountLabel = computed(() => {
   if (!selectedCpu.value) return '数量'
-  
+
   const { max, disabled } = cpuScalability.value
-  
+
   if (disabled) {
     return '数量 (单路CPU，固定1颗)'
   } else {
@@ -710,7 +594,7 @@ const selectCpu = async (cpuSummary: any) => {
     // 第二阶段: 获取完整的 CPU 详细数据
     // 👇 这里调用 getCpuDetail API,通过 ID 获取所有字段
     const cpuDetail = await getCpuDetail(cpuSummary.id)
-    
+
     // 保存完整数据到 selectedCpu
     selectedCpu.value = cpuDetail
 
@@ -719,6 +603,11 @@ const selectCpu = async (cpuSummary: any) => {
 
     // 根据 CPU 可扩展性设置默认数量
     cpuCount.value = cpuScalability.value.default
+
+    // 👇 新增：清空主板详情
+    selectedMotherboard.value = null
+    selectedMotherboardDetail.value = null  // ⭐ 关键：清空主板详情
+    compatibleMotherboards.value = []
 
     // 加载兼容主板 (依赖完整的 CPU 数据)
     await loadCompatibleMotherboards()
@@ -746,6 +635,7 @@ const clearCpu = () => {
   cpuKeyword.value = ''
   cpuCount.value = 1
   selectedMotherboard.value = null
+  selectedMotherboardDetail.value = null  // ⭐ 关键：清空主板详情
   compatibleMotherboards.value = []
 }
 
@@ -755,27 +645,27 @@ const clearCpu = () => {
  */
 const validateCpuCount = () => {
   const { min, max, disabled } = cpuScalability.value
-  
+
   if (disabled) {
     cpuCount.value = 1
     return
   }
-  
+
   // 转换为整数
   let value = Math.round(cpuCount.value)
-  
+
   // 限制在有效范围内
   if (value < min) {
     value = min
   } else if (value > max) {
     value = max
   }
-  
+
   // 处理 NaN 或无效输入
   if (isNaN(value)) {
     value = min
   }
-  
+
   cpuCount.value = value
 }
 

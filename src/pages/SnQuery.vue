@@ -50,23 +50,23 @@
           </div>
           <div class="info-item">
             <span class="info-label">出机客户</span>
-            <span class="info-value">{{ info.出机客户 }}</span>
+            <span class="info-value">{{ info.chassis }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">业务</span>
-            <span class="info-value">{{ info.业务 }}</span>
+            <span class="info-value">{{ info.owner }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">SN</span>
-            <span class="info-value">{{ info.SN }}</span>
+            <span class="info-value">{{ info.sn }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">数量</span>
-            <span class="info-value">{{ info.数量 }}</span>
+            <span class="info-value">{{ info.number }}</span>
           </div>
           <div class="info-item">
             <span class="info-label">备注</span>
-            <span class="info-value">{{ info.备注 || '-' }}</span>
+            <span class="info-value">{{ info.note || '-' }}</span>
           </div>
         </div>
 
@@ -146,19 +146,19 @@ const hardwareColumns = [
  * 硬件配置表格数据
  */
 const hardwareTableData = [
-  { name: '机箱', modelKey: '机箱', countKey: '' },
-  { name: '电源', modelKey: '电源', countKey: '' },
-  { name: '主板', modelKey: '主板', countKey: '' },
-  { name: 'BMC密码', modelKey: 'BMC密码', countKey: '' },
-  { name: 'CPU', modelKey: 'CPU', countKey: 'CPU数量' },
-  { name: '内存', modelKey: '内存', countKey: '内存数量' },
-  { name: 'M.2', modelKey: 'M2', countKey: 'M2数量' },
-  { name: 'SSD', modelKey: 'SSD', countKey: 'SSD数量' },
-  { name: 'HDD', modelKey: 'HDD', countKey: 'HDD数量' },
-  { name: '阵列卡', modelKey: '阵列卡', countKey: '阵列卡数量' },
-  { name: '网卡', modelKey: '网卡', countKey: '网卡数量' },
-  { name: '显卡', modelKey: '显卡', countKey: '显卡数量' },
-  { name: '系统', modelKey: '系统', countKey: '' }
+  { name: '机箱', modelKey: 'chassis', countKey: '' },
+  { name: '电源', modelKey: 'psu', countKey: '' },
+  { name: '主板', modelKey: 'mb', countKey: '' },
+  { name: 'BMC密码', modelKey: 'bmcpwd', countKey: '' },
+  { name: 'CPU', modelKey: 'cpu', countKey: 'cpun' },
+  { name: '内存', modelKey: 'mem', countKey: 'memn' },
+  { name: 'M.2', modelKey: 'm2', countKey: 'm2n' },
+  { name: 'SSD', modelKey: 'ssd', countKey: 'ssdn' },
+  { name: 'HDD', modelKey: 'hdd', countKey: 'hddn' },
+  { name: '阵列卡', modelKey: 'raid', countKey: 'raidn' },
+  { name: '网卡', modelKey: 'lan', countKey: 'lann' },
+  { name: '显卡', modelKey: 'gpu', countKey: 'gpun' },
+  { name: '系统', modelKey: 'os', countKey: '' }
 ]
 
 /**
@@ -166,9 +166,9 @@ const hardwareTableData = [
  */
 const fullDate = computed(() => {
   if (!info.value) return ''
-  const y = info.value.年份
-  const m = String(info.value.月份).padStart(2, '0')
-  const d = String(info.value.日期).padStart(2, '0')
+  const y = info.value.y
+  const m = String(info.value.m).padStart(2, '0')
+  const d = String(info.value.d).padStart(2, '0')
   return `${y}-${m}-${d}`
 })
 

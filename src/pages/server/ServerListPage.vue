@@ -19,7 +19,7 @@
           <div class="search-container">
             <VaInput
               v-model="searchQuery"
-              placeholder="请输入 SN、主机名或 IP 进行搜索..."
+              placeholder="请输入 SN 进行搜索..."
               clearable
               class="search-input"
               @keyup.enter="handleSearch"
@@ -70,9 +70,9 @@
           @row:click="handleRowClick"
         >
           <template #cell(sn)="{ rowData }">
-            <div class="sn-cell" @click.stop="viewDetail(rowData.SN)">
+            <div class="sn-cell" @click.stop="viewDetail(rowData.sn)">
               <VaIcon name="mdi-server" size="small" color="primary" />
-              <span class="sn-text">{{ rowData.SN }}</span>
+              <span class="sn-text">{{ rowData.sn }}</span>
             </div>
           </template>
 
@@ -82,13 +82,13 @@
 
           <template #cell(customer)="{ rowData }">
             <VaChip size="small" color="info" outline>
-              {{ rowData.出机客户 }}
+              {{ rowData.customer }}
             </VaChip>
           </template>
 
           <template #cell(business)="{ rowData }">
             <VaChip size="small" color="success" outline>
-              {{ rowData.业务 }}
+              {{ rowData.owner }}
             </VaChip>
           </template>
 
@@ -201,7 +201,7 @@ const loading = ref(false)
 // 分页相关
 const currentPage = ref(1)
 const pageSize = ref(10)
-const sortBy = ref('SN')
+const sortBy = ref('sn')
 const sortingOrder = ref('asc')
 
 // 筛选相关
@@ -225,7 +225,7 @@ const columns = [
   { key: 'sn', label: 'SN', sortable: true },
   { key: 'date', label: '日期', sortable: true },
   { key: 'customer', label: '出机客户', sortable: true },
-  { key: 'business', label: '业务', sortable: true },
+  { key: 'owner', label: '业务', sortable: true },
   { key: 'actions', label: '操作', width: 150 }
 ]
 
@@ -233,10 +233,10 @@ const columns = [
  * 格式化日期
  */
 const formatDate = (server) => {
-  if (!server.年份) return '-'
-  const y = server.年份
-  const m = String(server.月份).padStart(2, '0')
-  const d = String(server.日期).padStart(2, '0')
+  if (!server.y) return '-'
+  const y = server.y
+  const m = String(server.m).padStart(2, '0')
+  const d = String(server.d).padStart(2, '0')
   return `${y}-${m}-${d}`
 }
 
@@ -348,7 +348,7 @@ const handleSearch = async () => {
     // 调用 searchSn API - 返回符合条件的 SN 列表
     const results = await searchSn(searchQuery.value.trim(), {
       customer: filters.value.customer,
-      business: filters.value.business,
+      owner: filters.value.owner,
       dateRange: filters.value.dateRange
     })
 

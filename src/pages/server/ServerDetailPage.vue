@@ -52,7 +52,7 @@
               <div class="title-content">
                 <VaIcon name="mdi-server" size="large" color="primary" />
                 <div>
-                  <h1 class="card-main-title">{{ server.SN }}</h1>
+                  <h1 class="card-main-title">{{ server.sn }}</h1>
                 </div>
               </div>
               <div class="title-actions">
@@ -82,7 +82,7 @@
                   </div>
                   <div class="info-content">
                     <span class="info-label">出机客户</span>
-                    <span class="info-value">{{ server.出机客户 }}</span>
+                    <span class="info-value">{{ server.customer }}</span>
                   </div>
                 </div>
 
@@ -91,8 +91,8 @@
                     <VaIcon name="mdi-briefcase" size="large" />
                   </div>
                   <div class="info-content">
-                    <span class="info-label">业务类型</span>
-                    <span class="info-value">{{ server.业务 }}</span>
+                    <span class="info-label">业务</span>
+                    <span class="info-value">{{ server.owner }}</span>
                   </div>
                 </div>
 
@@ -102,7 +102,7 @@
                   </div>
                   <div class="info-content">
                     <span class="info-label">SN 编号</span>
-                    <span class="info-value">{{ server.SN }}</span>
+                    <span class="info-value">{{ server.sn }}</span>
                   </div>
                 </div>
 
@@ -112,7 +112,7 @@
                   </div>
                   <div class="info-content">
                     <span class="info-label">数量</span>
-                    <span class="info-value">{{ server.数量 }}</span>
+                    <span class="info-value">{{ server.number }}</span>
                   </div>
                 </div>
 
@@ -122,7 +122,7 @@
                   </div>
                   <div class="info-content">
                     <span class="info-label">备注</span>
-                    <span class="info-value">{{ server.备注 || '-' }}</span>
+                    <span class="info-value">{{ server.note || '-' }}</span>
                   </div>
                 </div>
               </div>
@@ -145,21 +145,21 @@
                 </VaCardTitle>
                 <VaCardContent>
                   <div class="hardware-items">
-                    <div v-if="server.机箱" class="hardware-item">
+                    <div v-if="server.chassis" class="hardware-item">
                       <span class="hw-label">机箱</span>
-                      <VaChip size="small" color="primary">{{ server.机箱 }}</VaChip>
+                      <VaChip size="small" color="primary">{{ server.chassis }}</VaChip>
                     </div>
-                    <div v-if="server.电源" class="hardware-item">
+                    <div v-if="server.psu" class="hardware-item">
                       <span class="hw-label">电源</span>
-                      <VaChip size="small" color="primary">{{ server.电源 }}</VaChip>
+                      <VaChip size="small" color="primary">{{ server.psu }}</VaChip>
                     </div>
-                    <div v-if="server.主板" class="hardware-item">
+                    <div v-if="server.mb" class="hardware-item">
                       <span class="hw-label">主板</span>
-                      <VaChip size="small" color="primary">{{ server.主板 }}</VaChip>
+                      <VaChip size="small" color="primary">{{ server.mb }}</VaChip>
                     </div>
-                    <div v-if="server.BMC密码" class="hardware-item">
+                    <div v-if="server.bmcpwd" class="hardware-item">
                       <span class="hw-label">BMC密码</span>
-                      <VaChip size="small" color="warning">{{ server.BMC密码 }}</VaChip>
+                      <VaChip size="small" color="warning">{{ server.bmcpwd }}</VaChip>
                     </div>
                   </div>
                 </VaCardContent>
@@ -173,18 +173,18 @@
                 </VaCardTitle>
                 <VaCardContent>
                   <div class="hardware-items">
-                    <div v-if="server.CPU" class="hardware-item">
+                    <div v-if="server.cpu" class="hardware-item">
                       <span class="hw-label">CPU</span>
                       <div class="hw-value-group">
-                        <VaChip size="small" color="success">{{ server.CPU }}</VaChip>
-                        <VaBadge v-if="server.CPU数量" :text="`x${server.CPU数量}`" color="success" />
+                        <VaChip size="small" color="success">{{ server.cpu }}</VaChip>
+                        <VaBadge v-if="server.cpun" :text="`x${server.cpun}`" color="success" />
                       </div>
                     </div>
-                    <div v-if="server.内存" class="hardware-item">
+                    <div v-if="server.mem" class="hardware-item">
                       <span class="hw-label">内存</span>
                       <div class="hw-value-group">
-                        <VaChip size="small" color="success">{{ server.内存 }}</VaChip>
-                        <VaBadge v-if="server.内存数量" :text="`x${server.内存数量}`" color="success" />
+                        <VaChip color="success">{{ server.mem }}</VaChip>
+                        <VaBadge v-if="server.memn" :text="`x${server.memn}`" color="success" />
                       </div>
                     </div>
                   </div>
@@ -199,32 +199,32 @@
                 </VaCardTitle>
                 <VaCardContent>
                   <div class="hardware-items">
-                    <div v-if="server.M2" class="hardware-item">
+                    <div v-if="server.m2" class="hardware-item">
                       <span class="hw-label">M.2</span>
                       <div class="hw-value-group">
-                        <VaChip size="small" color="info">{{ server.M2 }}</VaChip>
-                        <VaBadge v-if="server.M2数量" :text="`x${server.M2数量}`" color="info" />
+                        <VaChip size="small" color="info">{{ server.m2 }}</VaChip>
+                        <VaBadge v-if="server.m2n" :text="`x${server.m2n}`" color="info" />
                       </div>
                     </div>
-                    <div v-if="server.SSD" class="hardware-item">
+                    <div v-if="server.ssd" class="hardware-item">
                       <span class="hw-label">SSD</span>
                       <div class="hw-value-group">
-                        <VaChip size="small" color="info">{{ server.SSD }}</VaChip>
-                        <VaBadge v-if="server.SSD数量" :text="`x${server.SSD数量}`" color="info" />
+                        <VaChip color="info">{{ server.ssd }}</VaChip>
+                        <VaBadge v-if="server.ssdn" :text="`x${server.ssdn}`" color="info" />
                       </div>
                     </div>
-                    <div v-if="server.HDD" class="hardware-item">
+                    <div v-if="server.hdd" class="hardware-item">
                       <span class="hw-label">HDD</span>
                       <div class="hw-value-group">
-                        <VaChip size="small" color="info">{{ server.HDD }}</VaChip>
-                        <VaBadge v-if="server.HDD数量" :text="`x${server.HDD数量}`" color="info" />
+                        <VaChip color="info">{{ server.hdd }}</VaChip>
+                        <VaBadge v-if="server.hddn" :text="`x${server.hddn}`" color="info" />
                       </div>
                     </div>
-                    <div v-if="server.阵列卡" class="hardware-item">
+                    <div v-if="server.raid" class="hardware-item">
                       <span class="hw-label">阵列卡</span>
                       <div class="hw-value-group">
-                        <VaChip size="small" color="warning">{{ server.阵列卡 }}</VaChip>
-                        <VaBadge v-if="server.阵列卡数量" :text="`x${server.阵列卡数量}`" color="warning" />
+                        <VaChip size="small" color="warning">{{ server.raid }}</VaChip>
+                        <VaBadge v-if="server.raidn" :text="`x${server.raidn}`" color="warning" />
                       </div>
                     </div>
                   </div>
@@ -239,23 +239,23 @@
                 </VaCardTitle>
                 <VaCardContent>
                   <div class="hardware-items">
-                    <div v-if="server.网卡" class="hardware-item">
+                    <div v-if="server.lan" class="hardware-item">
                       <span class="hw-label">网卡</span>
                       <div class="hw-value-group">
-                        <VaChip size="small" color="primary">{{ server.网卡 }}</VaChip>
-                        <VaBadge v-if="server.网卡数量" :text="`x${server.网卡数量}`" color="primary" />
+                        <VaChip size="small" color="primary">{{ server.lan }}</VaChip>
+                        <VaBadge v-if="server.lann" :text="`x${server.lann}`" color="primary" />
                       </div>
                     </div>
-                    <div v-if="server.显卡" class="hardware-item">
+                    <div v-if="server.gpu" class="hardware-item">
                       <span class="hw-label">显卡</span>
                       <div class="hw-value-group">
-                        <VaChip size="small" color="danger">{{ server.显卡 }}</VaChip>
-                        <VaBadge v-if="server.显卡数量" :text="`x${server.显卡数量}`" color="danger" />
+                        <VaChip size="small" color="danger">{{ server.gpu }}</VaChip>
+                        <VaBadge v-if="server.gpun" :text="`x${server.gpun}`" color="danger" />
                       </div>
                     </div>
-                    <div v-if="server.系统" class="hardware-item">
+                    <div v-if="server.os" class="hardware-item">
                       <span class="hw-label">系统</span>
-                      <VaChip size="small" color="secondary">{{ server.系统 }}</VaChip>
+                      <VaChip size="small" color="secondary">{{ server.os }}</VaChip>
                     </div>
                   </div>
                 </VaCardContent>
@@ -355,10 +355,10 @@ const loading = ref(false)
  * 格式化日期 - 从 SnQuery.vue 移植
  */
 const formatDate = (serverData) => {
-  if (!serverData.年份) return '-'
-  const y = serverData.年份
-  const m = String(serverData.月份).padStart(2, '0')
-  const d = String(serverData.日期).padStart(2, '0')
+  if (!serverData.y) return '-'
+  const y = serverData.y
+  const m = String(serverData.m).padStart(2, '0')
+  const d = String(serverData.d).padStart(2, '0')
   return `${y}-${m}-${d}`
 }
 
@@ -387,8 +387,8 @@ const handleSearch = async () => {
 
     if (res) {
       // 更新 URL 参数
-      if (route.params.sn !== res.SN) {
-        router.replace({ name: 'ServerDetail', params: { sn: res.SN } })
+      if (route.params.sn !== res.sn) {
+        router.replace({ name: 'ServerDetail', params: { sn: res.sn } })
       }
 
       notify({
