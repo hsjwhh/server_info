@@ -85,6 +85,16 @@ export function getCompatibleMotherboards(cpuId) {
 }
 
 /**
+ * 通过 CPU SOCKET 获取主板列表
+ * 
+ * @param {string} socket - CPU SOCKET 类型
+ * @returns {Promise<Array>} 兼容主板列表
+ */
+export function getMbBySocket(socket) {
+  return request.get(`/hw/mb/${socket}`)
+}
+
+/**
  * 通过 CPU 型号获取主板列表
  *  
  * @param {string} cpu - CPU 型号

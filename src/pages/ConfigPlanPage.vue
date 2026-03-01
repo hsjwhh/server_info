@@ -63,7 +63,7 @@
                   </div>
                   <div class="detail-row">
                     <span class="label">封装接口:</span>
-                    <span>{{ selectedCpu.socket }}</span>
+                    <span>{{ formattedSocket }}</span>
                   </div>
                 </div>
 
@@ -103,7 +103,7 @@
               <div v-else>
                 <!-- 主板搜索/选择 -->
                 <VaSelect v-model="selectedMotherboard" label="选择主板" placeholder="选择兼容的主板..."
-                  :options="compatibleMotherboards" text-by="mb" value-by="mb" searchable clearable>
+                  :options="compatibleMotherboards" text-by="model" value-by="model" searchable clearable>
                   <template #prepend>
                     <VaIcon name="mdi-expansion-card" size="small" />
                   </template>
@@ -463,7 +463,7 @@ import {
   VaProgressBar,
   useToast
 } from 'vuestic-ui'
-import { searchCpu, getCpuDetail, getMbByCpu, getCompatibleMotherboards } from '../api/configPlan'
+import { searchCpu, getCpuDetail, getMbBySocket, getMbByCpu, getCompatibleMotherboards } from '../api/configPlan'
 
 const { init: notify } = useToast()
 
@@ -673,12 +673,21 @@ const validateCpuCount = () => {
 const selectedMotherboard = ref<string | null>(null)
 const compatibleMotherboards = ref<any[]>([])
 
+// CPU SOCKET 格式化，FCLGA1700 → LGA-1700，方便后续匹配主板
+const formattedSocket = computed(() => {
+  const s = selectedCpu.value.socket
+  if (s?.startsWith('FCLGA')) {
+    return s.replace(/^FCLGA(\d+)$/, 'LGA-$1')
+  }
+  return s
+})
+
 const loadCompatibleMotherboards = async () => {
   if (!selectedCpu.value) return
 
   try {
     // 👈 使用 CPU ID 而不是 cpu_short_name
-    const boards = await getMbByCpu(selectedCpu.value.cpu_short_name)
+    const boards = await getMbBySocket(formattedSocket.value)
     compatibleMotherboards.value = boards
   } catch (err) {
     console.error('加载兼容主板失败:', err)
