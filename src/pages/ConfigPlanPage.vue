@@ -55,7 +55,7 @@
                   </div>
                   <div class="detail-row">
                     <span class="label">TDP:</span>
-                    <span class="highlight">{{ selectedCpu.tdp }}W</span>
+                     <VaChip color="primary">{{ selectedCpu.tdp }} W</VaChip>
                   </div>
                   <div class="detail-row">
                     <span class="label">支持内存:</span>
@@ -111,26 +111,60 @@
 
                 <!-- 已选主板详情 -->
                 <div v-if="selectedMotherboardDetail" class="selected-item mt-3">
-                  <div class="selected-header">
+                  <!-- <div class="selected-header">
                     <span class="selected-name">{{ selectedMotherboardDetail.model }}</span>
+                  </div> -->
+                  <div class="selected-header">
+                    <a v-if="selectedMotherboardDetail.url" :href="selectedMotherboardDetail.url" target="_blank"
+                      rel="noopener noreferrer" class="selected-name selected-link">
+                      {{ selectedMotherboardDetail.model }}
+                      <VaIcon name="mdi-open-in-new" size="small" class="ml-1" />
+                    </a>
+                    <span v-else class="selected-name">
+                      {{ selectedMotherboardDetail.model }}
+                    </span>
                   </div>
                   <div class="selected-details">
                     <div class="detail-row">
-                      <span class="label">芯片组:</span>
-                      <span>{{ selectedMotherboardDetail.chipset }}</span>
+                      <span class="label">支持 CPU 系列及数量:</span>
+                      <span>{{ selectedMotherboardDetail.cpu_number }} * {{ selectedMotherboardDetail.product_collection
+                      }}</span>
                     </div>
                     <div class="detail-row">
-                      <span class="label">内存插槽:</span>
-                      <span>{{ selectedMotherboardDetail.memory_slots }} × {{ selectedMotherboardDetail.memory_type
-                        }}</span>
+                      <span class="label">CPU Max TDP:</span>
+                      <VaChip color="primary">{{ selectedMotherboardDetail.max_tdp }}</VaChip>
+                    </div>
+                    <div class="detail-row">
+                      <span class="label">内存数量:</span>
+                      <VaChip color="primary">{{ selectedMotherboardDetail.dimm_number }}</VaChip>
+                    </div>
+                    <div class="detail-row">
+                      <span class="label">内存类型:</span>
+                      <span><template v-for="(item, index) in splitItems('memory_type')" :key="index">
+                          <div>{{ item }}</div>
+                        </template>
+                      </span>
                     </div>
                     <div class="detail-row">
                       <span class="label">最大内存:</span>
-                      <span>{{ selectedMotherboardDetail.max_memory }}GB</span>
+                      <span>{{ selectedMotherboardDetail.max_memory }}</span>
                     </div>
                     <div class="detail-row">
                       <span class="label">PCIe 插槽:</span>
-                      <span>{{ selectedMotherboardDetail.pcie_slots }}</span>
+                      <span>
+                        <template v-for="(item, index) in splitItems('pcie_list')" :key="index">
+                          <div>{{ item }}</div>
+                        </template>
+                      </span>
+                    </div>
+                    <div class="detail-row">
+                      <span class="label">存储:</span>
+                      <span>
+                        {{ selectedMotherboardDetail.m2 }}<br />
+                        <template v-for="(item, index) in splitItems('input')" :key="index">
+                          <div>{{ item }}</div>
+                        </template>
+                      </span>
                     </div>
                     <div class="detail-row">
                       <span class="label">功耗:</span>
@@ -155,11 +189,12 @@
               </VaAlert>
 
               <div v-else class="form-group">
-                <VaSelect v-model="memoryType" label="内存类型" :options="memoryOptions" :disabled="!!selectedCpu">
+                <!-- <VaSelect v-model="memoryType" label="内存类型" :options="memoryOptions" :disabled="!!selectedCpu">
                   <template #prepend>
                     <VaIcon name="mdi-chip" size="small" />
                   </template>
-                </VaSelect>
+                </VaSelect> -->
+                <VaInput :model-value="memoryType" label="内存类型" readonly disabled />
 
                 <VaSelect v-model="memoryCapacity" label="单条容量" :options="memoryCapacityOptions" class="mt-3">
                   <template #prepend>
@@ -191,7 +226,7 @@
 
               <!-- M.2 SSD -->
               <div class="storage-group">
-                <VaCheckbox v-model="hasM2" label="M.2 NVMe SSD" />
+                <VaCheckbox v-model="hasM2" label="M.2" />
                 <div v-if="hasM2" class="storage-config">
                   <VaSelect v-model="m2Capacity" label="容量" :options="['256GB', '512GB', '1TB', '2TB']" size="small" />
                   <VaCounter v-model="m2Count" :min="1" :max="4" size="small" />
@@ -568,7 +603,7 @@ const handleCpuSearch = debounce(async () => {
   } catch (err) {
     console.error('CPU 搜索失败:', err)
   }
-}, 300)
+}, 1000)
 
 /**
  * 选择 CPU (两阶段加载策略)
@@ -599,7 +634,7 @@ const selectCpu = async (cpuSummary: any) => {
     selectedCpu.value = cpuDetail
 
     // 根据 CPU 详情自动设置内存类型
-    memoryType.value = cpuDetail.memory_type || 'DDR4'
+    memoryType.value = extractMemoryTypes(selectedCpu.value.memory_speed)[0] || 'DDR4'
 
     // 根据 CPU 可扩展性设置默认数量
     cpuCount.value = cpuScalability.value.default
@@ -637,6 +672,7 @@ const clearCpu = () => {
   selectedMotherboard.value = null
   selectedMotherboardDetail.value = null  // ⭐ 关键：清空主板详情
   compatibleMotherboards.value = []
+  memoryType.value = ''
 }
 
 /**
@@ -697,7 +733,7 @@ const loadCompatibleMotherboards = async () => {
 const selectedMotherboardDetail = computed(() => {
   if (!selectedMotherboard.value) return null
   return compatibleMotherboards.value.find(
-    (board) => board.主板 === selectedMotherboard.value
+    (board) => board.model === selectedMotherboard.value
   )
 })
 
@@ -705,8 +741,23 @@ const maxMemorySlots = computed(() => {
   return selectedMotherboardDetail.value?.memory_slots || 8
 })
 
+// 公共工具：将以分号分隔的字符串拆成列表
+function splitSemicolon(str?: string | null): string[] {
+  if (!str) return []
+  return str
+    .split(';')
+    .map(s => s.trim())
+    .filter(Boolean)
+}
+
+// 可在模板中调用，将指定字段拆分
+function splitItems(key: string): string[] {
+  const value = selectedMotherboardDetail.value?.[key]
+  return splitSemicolon(value as string)
+}
+
 // ==================== 内存相关 ====================
-const memoryType = ref('DDR4')
+const memoryType = ref('')
 const memoryCapacity = ref('32GB')
 const memoryCount = ref(2)
 

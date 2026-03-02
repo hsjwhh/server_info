@@ -254,8 +254,8 @@
                       </div>
                     </div>
                     <div v-if="server.os" class="hardware-item">
-                      <span class="hw-label">系统</span>
-                      <VaChip size="small" color="secondary">{{ server.os }}</VaChip>
+                      <span class="hw-label">OS</span>
+                      <VaChip color="secondary">{{ server.os }}</VaChip>
                     </div>
                   </div>
                 </VaCardContent>

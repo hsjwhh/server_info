@@ -42,21 +42,6 @@ const routes = [
         },
       },
       {
-        path: 'sn',
-        name: 'SnQuery',
-        component: () => import('../pages/SnQuery.vue'),
-        meta: { 
-          title: '序列号查询',
-          icon: 'mdi-file-search-outline',
-          showInMenu: false,  // 👈 显示在菜单中
-          breadcrumbs: [
-            { label: '首页', to: '/' },
-            { label: '序列号查询', to: '/sn' }
-          ],
-          requiresAuth: true // 需要登录
-        }
-      },
-      {
         path: 'servers',
         name: 'ServerList',
         component: () => import('../pages/server/ServerListPage.vue'),
