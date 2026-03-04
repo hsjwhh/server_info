@@ -6,7 +6,7 @@
       <!-- <VaBreadcrumbs color="secondary">
         <VaBreadcrumbsItem label="首页" to="/" />
         <VaBreadcrumbsItem label="服务器列表" to="/servers1" />
-        <VaBreadcrumbsItem :label="server?.SN || 'SN 查询'" active />
+        <VaBreadcrumbsItem :label="server?.sn || 'SN 查询'" active />
       </VaBreadcrumbs> -->
 
       <!-- <VaButton

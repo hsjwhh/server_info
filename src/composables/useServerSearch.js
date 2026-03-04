@@ -1,7 +1,7 @@
 import { useServerListStore } from '../store/useServerListStore'
 import { searchSn } from '../api/sn'
 import { useToast } from 'vuestic-ui'
-import { ref } from 'vue'
+import { getCurrentInstance } from 'vue'
 
 /**
  * 封装与服务器列表搜索相关的 API 逻辑
@@ -9,8 +9,14 @@ import { ref } from 'vue'
  */
 export function useServerSearch() {
     const store = useServerListStore()
-    // 注意：在组合式函数内调用 useToast，必须在 setup() 顶层同步调用
-    const { init: notify } = useToast()
+
+    // 安全地获取 useToast：只有在 setup() 同步上下文中才能调用 useToast()。
+    // 通过 getCurrentInstance() 检测当前是否存在 Vue 实例，
+    // 若不存在（如异步回调、非组件上下文）则降级为 console.warn，避免运行时报错。
+    const instance = getCurrentInstance()
+    const notify = instance
+        ? useToast().init
+        : (opts) => console.warn('[useServerSearch] 通知（无组件实例）:', opts?.message)
 
     // 这两个放在外层组件更好，但如果只是用在 composable 里作为简单缓存也可以
     const CACHE_KEY = 'serverListPageState'

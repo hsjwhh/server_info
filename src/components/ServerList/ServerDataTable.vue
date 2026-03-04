@@ -44,7 +44,7 @@
               preset="plain"
               icon="mdi-eye"
               size="small"
-              @click.stop="viewDetail(rowData.SN)"
+              @click.stop="viewDetail(rowData.sn)"
             />
             <VaButton
               preset="plain"
@@ -186,7 +186,7 @@ const viewDetail = (sn) => {
  * 行点击事件
  */
 const handleRowClick = (event) => {
-  viewDetail(event.item.SN)
+  viewDetail(event.item.sn)
 }
 
 /**
@@ -194,7 +194,7 @@ const handleRowClick = (event) => {
  */
 const handleEdit = (server) => {
   notify({
-    message: `编辑服务器: ${server.SN}`,
+    message: `编辑服务器: ${server.sn}`,
     color: 'info'
   })
 }

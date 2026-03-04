@@ -149,7 +149,7 @@ const selectSuggestion = async (suggestion) => {
   searchQuery.value = suggestion
   const detail = await getSnDetail(suggestion)
   servers.value.unshift(detail)  // 添加到列表
-  viewDetail(detail.SN)          // 跳转详情页
+  viewDetail(detail.sn)          // 跳转详情页
 }
 
 // ServerDetailPage 接收参数
