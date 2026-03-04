@@ -1172,6 +1172,10 @@ const exportConfig = () => {
   text-align: right;
 }
 
+.config-plan-page :deep(.page-title) {
+  margin-bottom: 2rem !important;
+}
+
 /* Power Analysis */
 .power-analysis {
   display: flex;
