@@ -13,28 +13,42 @@ import 'vuestic-ui/dist/vuestic-ui.css'
 // 可选：全局图标字体（企业后台常用）
 import '@mdi/font/css/materialdesignicons.min.css'
 
-createApp(App)                              // 创建一个 Vue 应用实例，根组件是 App.vue
-    .use(router)                            // 在应用中注册 Vue Router 插件，这样整个应用就具备路由能力
+// ...前面的 import 保持不变
+
+createApp(App)
+    .use(router)
     .use(createVuestic({
         config: {
             icons: createIconsConfig({
-                aliases: VuesticIconAliases,
+                aliases: [
+                    // ⚠️ 注意：自定义覆盖必须放在最前面！拦截默认解析
+                    { name: 'va-clear', to: 'mdi-close-circle' },       // 解决 Input clearable 隐身问题
+                    { name: 'va-close', to: 'mdi-close' },              // 弹窗关闭按钮
+                    { name: 'va-arrow-down', to: 'mdi-chevron-down' },  // Select 下拉箭头
+                    { name: 'va-arrow-up', to: 'mdi-chevron-up' },
+                    { name: 'va-arrow-right', to: 'mdi-chevron-right' },
+                    { name: 'va-arrow-left', to: 'mdi-chevron-left' },
+                    { name: 'va-calendar', to: 'mdi-calendar' },        // 日期选择器
+                    { name: 'va-warning', to: 'mdi-alert-circle' },     // 警告
+                    { name: 'va-error', to: 'mdi-alert' },              // 错误
+                    
+                    // ⬇️ 默认别名垫底，作为其他未覆盖图标的回退
+                    ...VuesticIconAliases, 
+                ],
                 fonts: [
                     // 支持 @mdi/font（class 名称例如 `mdi mdi-home`）
                     {
                         name: 'mdi-{icon}',
                         resolve: ({ icon }) => ({ class: `mdi mdi-${icon}` }),
                     },
-                    // 直接使用图标名作为回退，例如 `home` -> `mdi mdi-home`
+                    // 直接使用图标名作为回退
                     {
                         name: '{icon}',
                         resolve: ({ icon }) => ({ class: `mdi mdi-${icon}` }),
                     },
-                    // 保留 Vuestic 默认的 material-icons 映射作为回退
                     ...VuesticIconFonts,
                 ],
             }),
         },
     }))
-    // .use(ElementPlus)                      // 在应用中注册 Element Plus 组件库
-    .mount('#app')                          // 将应用挂载到 index.html 里的 <div id="app"></div> 节点上，页面正式开始渲染
+    .mount('#app')                        // 将应用挂载到 index.html 里的 <div id="app"></div> 节点上，页面正式开始渲染

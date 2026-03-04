@@ -214,7 +214,9 @@ const handleLogin = async () => {
   background: var(--color-bg-page);
   border-radius: var(--radius-xl);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
+  /* overflow: hidden 会裁掉 VaInput 的 clear 按钮，改用 clip-path 保留圆角 */
+  overflow: visible;
+  clip-path: inset(0 round var(--radius-xl));
   margin: var(--space-8);
 }
 
@@ -347,6 +349,15 @@ const handleLogin = async () => {
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
+}
+
+/*
+ * 修复：Vuestic 用背景色做对比度计算来决定 clear icon 颜色。
+ * 右侧表单区背景是 --color-bg-page (#f5f6fa)，显式告知 Vuestic
+ * 避免在半透明或渐变背景下计算出错导致 icon 不可见。
+ */
+.auth-form :deep(.va-input-wrapper) {
+  --va-background-element: #f5f6fa;
 }
 
 .form-options {
