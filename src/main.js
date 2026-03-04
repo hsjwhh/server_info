@@ -1,7 +1,9 @@
 import { createApp } from 'vue'             // 引入 Vue 核心 API：createApp，用于创建应用实例
+import { createPinia } from 'pinia'         // 引入 Pinia
 import App from './App.vue'                 // 引入根组件 App.vue，整个应用的最外层组件
 import router from './router'           // 引入我们自己定义的路由实例（在 router/index.js 里创建并导出）
 
+const pinia = createPinia()
 // import ElementPlus from 'element-plus'      // 引入 Element Plus 组件库本体（JS 部分）
 // import 'element-plus/dist/index.css'        // 引入 Element Plus 的全局样式（CSS 部分）
 import './style.css'
@@ -16,6 +18,7 @@ import '@mdi/font/css/materialdesignicons.min.css'
 // ...前面的 import 保持不变
 
 createApp(App)
+    .use(pinia)                           // 注册 Pinia
     .use(router)
     .use(createVuestic({
         config: {
@@ -31,9 +34,9 @@ createApp(App)
                     { name: 'va-calendar', to: 'mdi-calendar' },        // 日期选择器
                     { name: 'va-warning', to: 'mdi-alert-circle' },     // 警告
                     { name: 'va-error', to: 'mdi-alert' },              // 错误
-                    
+
                     // ⬇️ 默认别名垫底，作为其他未覆盖图标的回退
-                    ...VuesticIconAliases, 
+                    ...VuesticIconAliases,
                 ],
                 fonts: [
                     // 支持 @mdi/font（class 名称例如 `mdi mdi-home`）
