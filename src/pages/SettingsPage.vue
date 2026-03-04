@@ -130,12 +130,8 @@ const resetSettings = () => {
   flex-direction: column;
 }
 
-.page-title {
-  margin-bottom: 1.5rem;
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 2.25rem;
-  color: #111827;
+.settings-page :deep(.page-title) {
+  margin-bottom: var(--space-6) !important;
 }
 
 .settings-section {
@@ -158,13 +154,20 @@ const resetSettings = () => {
 }
 
 .setting-label {
-  font-weight: 600;
-  color: #111827;
+  display: block;
+  font-weight: 700;
+  margin-bottom: var(--space-2);
+  color: var(--color-text-primary);
 }
 
 .setting-description {
-  font-size: 14px;
-  color: #6b7280;
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.setting-card {
+  height: 100%;
 }
 
 .about-section {
@@ -175,17 +178,18 @@ const resetSettings = () => {
 
 .about-item {
   display: flex;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .about-label {
-  font-weight: 600;
-  color: #6b7280;
-  min-width: 100px;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
 }
 
 .about-value {
-  color: #111827;
+  font-weight: 600;
+  color: var(--color-text-primary);
 }
 
 .action-buttons {

@@ -971,51 +971,38 @@ const exportConfig = () => {
 .hardware-form {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 8px;
+  gap: var(--space-4);
 }
 
 .form-row {
   display: flex;
-  gap: 12px;
+  gap: var(--space-4);
   align-items: flex-end;
 }
 
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-/* CPU 搜索建议 */
+/* Suggestion List */
 .suggestions-list {
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  margin-top: calc(-1 * var(--space-4));
+  z-index: 10;
+  box-shadow: var(--shadow-md);
   max-height: 300px;
   overflow-y: auto;
-  background: #ffffff;
 }
 
 .suggestion-item {
-  padding: 12px;
+  padding: var(--space-3) var(--space-4);
   cursor: pointer;
-  border-bottom: 1px solid #f3f4f6;
-  transition: background 0.15s;
+  border-bottom: 1px solid var(--color-border-subtle);
+  transition: background 0.2s;
 }
 
 .suggestion-item:last-child {
@@ -1023,94 +1010,110 @@ const exportConfig = () => {
 }
 
 .suggestion-item:hover {
-  background: #f9fafb;
+  background: var(--color-bg-hover);
 }
 
 .suggestion-main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 4px;
+  margin-bottom: var(--space-1);
 }
 
 .suggestion-sub {
-  font-size: 13px;
-  color: #6b7280;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
 }
 
-/* 已选择项 */
+/* Selected Items */
 .selected-item {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
-  margin-top: 12px;
+  padding: var(--space-4);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
 }
 
 .selected-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .selected-name {
-  font-weight: 600;
-  color: #111827;
-  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  font-size: var(--text-lg);
+}
+
+.selected-link {
+  color: var(--va-primary);
+  text-decoration: none;
+}
+
+.selected-link:hover {
+  text-decoration: underline;
 }
 
 .selected-details {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-4);
 }
 
 .detail-row {
   display: flex;
-  justify-content: space-between;
-  font-size: 14px;
+  flex-direction: column;
+  gap: var(--space-1);
 }
 
 .detail-row .label {
-  color: #6b7280;
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
-.detail-row .highlight {
-  color: #2563eb;
+.detail-row span:not(.label) {
   font-weight: 600;
+  color: var(--color-text-primary);
 }
 
-/* 存储配置 */
+.detail-row .highlight {
+  color: var(--va-primary);
+  font-size: var(--text-lg);
+}
+
+/* Storage & Networking Groups */
 .storage-group {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 12px;
-  background: #f9fafb;
-  border-radius: 6px;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--color-bg-page);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-subtle);
 }
 
 .storage-config {
   display: flex;
-  gap: 12px;
-  align-items: flex-end;
-  margin-left: 28px;
+  gap: var(--space-4);
+  align-items: center;
+  padding-left: var(--space-2);
 }
 
 .memory-summary,
 .storage-summary {
   display: flex;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
-/* 右侧总览面板 */
+/* Right Summary Panel */
 .summary-panel {
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
+  position: sticky;
+  top: var(--space-4);
 }
 
 .card-title-with-action {
@@ -1129,138 +1132,125 @@ const exportConfig = () => {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 48px 20px;
-  color: #9ca3af;
+  padding: var(--space-12) var(--space-5);
+  color: var(--color-text-secondary);
+  text-align: center;
 }
 
 .empty-state p {
-  margin-top: 12px;
-  font-size: 14px;
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
 }
 
 .summary-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .summary-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  background: #f9fafb;
-  border-radius: 6px;
+  padding: var(--space-3);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
 }
 
 .summary-label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  color: #6b7280;
-  font-size: 14px;
+  gap: var(--space-2);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
 }
 
 .summary-value {
-  font-weight: 500;
-  color: #111827;
-  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
+  text-align: right;
 }
 
-/* 功耗分析 */
+/* Power Analysis */
 .power-analysis {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .power-breakdown {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .power-item {
   display: flex;
   justify-content: space-between;
-  padding: 8px 12px;
-  background: #f9fafb;
-  border-radius: 6px;
-  font-size: 14px;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
 }
 
 .power-label {
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .power-value {
   font-weight: 600;
-  color: #111827;
+  color: var(--color-text-primary);
 }
 
 .power-total {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .total-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 12px;
-  background: #f0f9ff;
-  border-radius: 8px;
+  padding: var(--space-3);
+  background: #f0f9ff; /* Specific light blue for power highlights */
+  border-radius: var(--radius-md);
 }
 
 .total-label {
-  font-size: 15px;
+  font-size: var(--text-base);
   font-weight: 600;
   color: #1e40af;
 }
 
 .total-value {
-  font-size: 18px;
+  font-size: var(--text-xl);
   font-weight: 700;
   color: #1e40af;
 }
 
 .total-value.recommended {
-  color: #059669;
+  color: #059669; /* Green for recommendation */
 }
 
-/* 响应式 */
-@media (max-width: 1280px) {
-  .config-container {
-    grid-template-columns: 1fr;
-  }
-
-  .summary-panel {
-    max-height: none;
-  }
-}
-
-/* CPU 数量控件 */
+/* CPU Control */
 .cpu-count-control {
-  margin-top: 12px;
+  margin-top: var(--space-3);
 }
 
 .cpu-count-control .va-input-label {
   display: block;
-  margin-bottom: 8px;
-  font-size: 14px;
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
   font-weight: 500;
-  color: #374151;
+  color: var(--color-text-primary);
 }
 
 .count-input-group {
   display: flex;
   align-items: center;
-  gap: 8px;
-}
-
-.count-input-group .va-input {
-  flex-shrink: 0;
+  gap: var(--space-2);
 }
 
 .count-input-group .va-input input {
@@ -1268,7 +1258,6 @@ const exportConfig = () => {
   font-weight: 600;
 }
 
-/* 隐藏数字输入框的浏览器默认上下箭头 */
 .count-input-group .va-input input::-webkit-outer-spin-button,
 .count-input-group .va-input input::-webkit-inner-spin-button {
   -webkit-appearance: none;
@@ -1278,4 +1267,28 @@ const exportConfig = () => {
 .count-input-group .va-input input[type=number] {
   -moz-appearance: textfield;
 }
+
+/* Responsive */
+@media (max-width: 1280px) {
+  .config-container {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 640px) {
+  .form-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .storage-config {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
 </style>
+```

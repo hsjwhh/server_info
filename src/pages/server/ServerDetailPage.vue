@@ -433,49 +433,16 @@ watch(() => route.params.sn, (newSn) => {
 .server-detail-page {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
 
 .page-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  margin-bottom: var(--space-2);
 }
 
-.page-title {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #111827;
-}
-
-.search-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.search-card :deep(.va-card__content) {
-  padding: 2rem;
-}
-
-.search-bar {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-}
-
-.search-input {
-  flex: 1;
-  max-width: 600px;
-}
-
-.loading-wrapper {
-  min-height: 400px;
-}
-
-/* 概览卡片 */
+/* Overview Card Styling */
 .overview-card {
-  border-radius: 1rem;
+  border-radius: var(--radius-xl);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
@@ -483,53 +450,48 @@ watch(() => route.params.sn, (newSn) => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .title-content {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .card-main-title {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: var(--text-2xl);
   font-weight: 700;
-  color: #111827;
-}
-
-.card-subtitle {
-  margin: 0.25rem 0 0 0;
-  font-size: 0.875rem;
-  color: #6b7280;
+  color: var(--color-text-primary);
 }
 
 .title-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
+/* Info Cards */
 .info-grid-3 {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  padding: 0.5rem 0;
+  gap: var(--space-6);
+  padding: var(--space-2) 0;
 }
 
 .info-card {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  padding: 1.25rem;
-  background: #f9fafb;
-  border-radius: 0.75rem;
+  gap: var(--space-4);
+  padding: var(--space-5);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-lg);
   transition: all 0.3s ease;
 }
 
 .info-card:hover {
-  background: #f3f4f6;
+  background: var(--color-bg-hover);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
@@ -537,87 +499,56 @@ watch(() => route.params.sn, (newSn) => {
 .info-icon-wrapper {
   width: 48px;
   height: 48px;
-  border-radius: 0.75rem;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
 }
 
-.info-icon-wrapper.primary {
-  background: rgba(var(--va-primary-rgb), 0.1);
-  color: var(--va-primary);
-}
-
-.info-icon-wrapper.success {
-  background: rgba(var(--va-success-rgb), 0.1);
-  color: var(--va-success);
-}
-
-.info-icon-wrapper.warning {
-  background: rgba(var(--va-warning-rgb), 0.1);
-  color: var(--va-warning);
-}
-
-.info-icon-wrapper.danger {
-  background: rgba(var(--va-danger-rgb), 0.1);
-  color: var(--va-danger);
-}
-
-.info-icon-wrapper.info {
-  background: rgba(var(--va-info-rgb), 0.1);
-  color: var(--va-info);
-}
-
-.info-icon-wrapper.secondary {
-  background: rgba(0, 0, 0, 0.05);
-  color: #6b7280;
-}
+/* Colors for icon wrappers remain using rgba/vars from vuestic for now as they are dynamic */
+.info-icon-wrapper.primary { background: rgba(var(--va-primary-rgb), 0.1); color: var(--va-primary); }
+.info-icon-wrapper.success { background: rgba(var(--va-success-rgb), 0.1); color: var(--va-success); }
+.info-icon-wrapper.warning { background: rgba(var(--va-warning-rgb), 0.1); color: var(--va-warning); }
+.info-icon-wrapper.danger { background: rgba(var(--va-danger-rgb), 0.1); color: var(--va-danger); }
+.info-icon-wrapper.info { background: rgba(var(--va-info-rgb), 0.1); color: var(--va-info); }
+.info-icon-wrapper.secondary { background: rgba(0, 0, 0, 0.05); color: var(--color-text-secondary); }
 
 .info-content {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--space-1);
   min-width: 0;
 }
 
 .info-label {
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
   font-weight: 500;
 }
 
 .info-value {
-  font-size: 1rem;
-  color: #111827;
+  font-size: var(--text-base);
+  color: var(--color-text-primary);
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* 硬件配置 */
+/* Hardware Section */
 .hardware-section {
-  margin-top: 1rem;
-}
-
-.section-title {
-  display: flex;
-  align-items: center;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #111827;
-  margin-bottom: 1rem;
+  margin-top: var(--space-4);
 }
 
 .hardware-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
 
 .hardware-card {
-  border-radius: 0.75rem;
+  border-radius: var(--radius-lg);
   transition: all 0.3s ease;
 }
 
@@ -629,116 +560,54 @@ watch(() => route.params.sn, (newSn) => {
 .hardware-items {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .hardware-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem;
-  background: #f9fafb;
-  border-radius: 0.5rem;
+  padding: var(--space-3);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
 }
 
 .hw-label {
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: #374151;
+  color: #374151; /* Keep exact grey for label */
 }
 
-.hw-value-group {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-/* 操作按钮 */
-.actions-card {
-  margin-top: 1rem;
-  border-radius: 0.75rem;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
-/* 空状态 */
+/* Empty States */
 .empty-card {
-  border-radius: 1rem;
-  margin-top: 2rem;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 2rem;
-  text-align: center;
-}
-
-.empty-title {
-  margin-top: 1.5rem;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #111827;
-}
-
-.empty-text {
-  margin-top: 0.75rem;
-  font-size: 1rem;
-  color: #6b7280;
-  max-width: 500px;
+  border-radius: var(--radius-xl);
+  margin-top: var(--space-8);
 }
 
 .empty-actions {
-  margin-top: 2rem;
+  margin-top: var(--space-8);
   display: flex;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
-/* 响应式 */
+/* Responsive */
 @media (max-width: 768px) {
   .page-header {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
-  }
-
-  .search-bar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .search-input {
-    max-width: 100%;
+    gap: var(--space-4);
   }
 
   .card-title-custom {
     flex-direction: column;
     align-items: flex-start;
-    gap: 1rem;
+    gap: var(--space-4);
   }
 
-  .info-grid-3 {
+  .info-grid-3, .hardware-grid, .action-buttons {
     grid-template-columns: 1fr;
-  }
-
-  .hardware-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .action-buttons {
     flex-direction: column;
     align-items: stretch;
-  }
-
-  .action-buttons .va-spacer {
-    display: none;
   }
 }
 </style>

@@ -576,12 +576,7 @@ onDeactivated(() => {
   margin-bottom: 0.5rem;
 }
 
-.page-title {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #111827;
-}
+/* .page-title handled by global utility */
 
 .toolbar {
   display: flex;
@@ -608,11 +603,11 @@ onDeactivated(() => {
 .filter-panel {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
+  gap: var(--space-4);
   align-items: flex-end;
-  padding: 1rem;
-  background: #f9fafb;
-  border-radius: 0.5rem;
+  padding: var(--space-4);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
 }
 
 .filter-input {
@@ -642,8 +637,8 @@ onDeactivated(() => {
 }
 
 .date-text {
-  color: #6b7280;
-  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
 }
 
 .hardware-summary {
@@ -654,21 +649,25 @@ onDeactivated(() => {
 
 .action-buttons {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.25rem !important; /* Match baseline gap */
 }
 
 .pagination-container {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 1.5rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border);
 }
 
 .pagination-info {
-  font-size: 0.875rem;
-  color: #6b7280;
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+.status-tag {
+  font-weight: 600;
 }
 
 .empty-state {
@@ -681,16 +680,16 @@ onDeactivated(() => {
 }
 
 .empty-title {
-  margin-top: 1rem;
-  font-size: 1.25rem;
+  margin-top: var(--space-4);
+  font-size: var(--text-xl);
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text-primary);
 }
 
 .empty-text {
-  margin-top: 0.5rem;
-  font-size: 1rem;
-  color: #6b7280;
+  margin-top: var(--space-2);
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
   max-width: 500px;
 }
 
@@ -702,9 +701,9 @@ onDeactivated(() => {
 }
 
 .loading-text {
-  margin-top: 1rem;
-  color: #6b7280;
-  font-size: 1rem;
+  margin-top: var(--space-4);
+  color: var(--color-text-secondary);
+  font-size: var(--text-base);
 }
 
 @media (max-width: 768px) {

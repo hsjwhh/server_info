@@ -211,18 +211,18 @@ const handleLogin = async () => {
   width: 100%;
   max-width: 1200px;
   min-height: 600px;
-  background: #ffffff;
-  border-radius: 1rem;
+  background: var(--color-bg-page);
+  border-radius: var(--radius-xl);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   overflow: hidden;
-  margin: 2rem;
+  margin: var(--space-8);
 }
 
-/* 左侧装饰区 */
+/* Decoration Section */
 .auth-decoration {
   flex: 1;
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  padding: 3rem;
+  padding: var(--space-12);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -237,30 +237,30 @@ const handleLogin = async () => {
 
 .brand-section {
   text-align: center;
-  margin-bottom: 3rem;
+  margin-bottom: var(--space-12);
 }
 
 .brand-logo {
   width: 80px;
   height: 80px;
   background: rgba(255, 255, 255, 0.2);
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto var(--space-6);
   backdrop-filter: blur(10px);
 }
 
 .brand-title {
-  font-size: 2rem;
+  font-size: var(--text-3xl);
   font-weight: 700;
   color: #ffffff;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 var(--space-2) 0;
 }
 
 .brand-subtitle {
-  font-size: 1.125rem;
+  font-size: var(--text-lg);
   color: rgba(255, 255, 255, 0.9);
   margin: 0;
 }
@@ -268,22 +268,22 @@ const handleLogin = async () => {
 .features {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
 
 .feature-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
   color: #ffffff;
-  font-size: 1rem;
-  padding: 1rem;
+  font-size: var(--text-base);
+  padding: var(--space-4);
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 0.5rem;
+  border-radius: var(--radius-md);
   backdrop-filter: blur(10px);
 }
 
-/* 装饰图案 */
+/* Pattern */
 .decoration-pattern {
   position: absolute;
   top: 0;
@@ -300,51 +300,24 @@ const handleLogin = async () => {
   background: rgba(255, 255, 255, 0.3);
 }
 
-.pattern-1 {
-  width: 300px;
-  height: 300px;
-  top: -100px;
-  right: -100px;
-  animation: float 20s infinite ease-in-out;
-}
-
-.pattern-2 {
-  width: 200px;
-  height: 200px;
-  bottom: -50px;
-  left: -50px;
-  animation: float 15s infinite ease-in-out reverse;
-}
-
-.pattern-3 {
-  width: 150px;
-  height: 150px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: float 18s infinite ease-in-out;
-}
+.pattern-1 { width: 300px; height: 300px; top: -100px; right: -100px; animation: float 20s infinite ease-in-out; }
+.pattern-2 { width: 200px; height: 200px; bottom: -50px; left: -50px; animation: float 15s infinite ease-in-out reverse; }
+.pattern-3 { width: 150px; height: 150px; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: float 18s infinite ease-in-out; }
 
 @keyframes float {
-  0%, 100% {
-    transform: translate(0, 0) scale(1);
-  }
-  33% {
-    transform: translate(30px, -30px) scale(1.1);
-  }
-  66% {
-    transform: translate(-20px, 20px) scale(0.9);
-  }
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.9); }
 }
 
-/* 右侧表单区 */
+/* Form Section */
 .auth-form-wrapper {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 3rem 2rem;
-  background: #ffffff;
+  padding: var(--space-12) var(--space-8);
+  background: var(--color-bg-page);
 }
 
 .auth-form-container {
@@ -353,105 +326,85 @@ const handleLogin = async () => {
 }
 
 .form-header {
-  margin-bottom: 2rem;
+  margin-bottom: var(--space-8);
   text-align: center;
 }
 
 .form-title {
-  font-size: 2rem;
+  font-size: var(--text-3xl);
   font-weight: 700;
-  color: #111827;
-  margin: 0 0 0.5rem 0;
+  color: var(--color-text-primary);
+  margin: 0 0 var(--space-2) 0;
 }
 
 .form-subtitle {
-  font-size: 1rem;
-  color: #6b7280;
+  font-size: var(--text-base);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .auth-form {
   display: flex;
   flex-direction: column;
-  gap: 1.25rem;
+  gap: var(--space-5);
 }
 
 .form-options {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: -0.5rem;
+  margin-top: calc(-1 * var(--space-2));
 }
 
 .forgot-password {
   color: var(--va-primary);
-  font-size: 0.875rem;
+  font-size: var(--text-sm);
 }
 
 .login-button {
-  margin-top: 0.5rem;
+  margin-top: var(--space-2);
   height: 48px;
-  font-size: 1rem;
+  font-size: var(--text-base);
   font-weight: 600;
 }
 
 .divider-text {
-  padding: 0 1rem;
-  color: #9ca3af;
-  font-size: 0.875rem;
+  padding: 0 var(--space-4);
+  color: var(--color-text-subtle);
+  font-size: var(--text-sm);
 }
 
 .social-login {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
-.social-button {
-  height: 44px;
-}
+.social-button { height: 44px; }
 
 .form-footer {
-  margin-top: 2rem;
+  margin-top: var(--space-8);
   text-align: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--space-2);
 }
 
 .footer-text {
-  color: #6b7280;
-  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
 }
 
-/* 响应式设计 */
+/* Responsive */
 @media (max-width: 968px) {
-  .auth-decoration {
-    display: none;
-  }
-
-  .auth-wrapper {
-    max-width: 500px;
-  }
+  .auth-decoration { display: none; }
+  .auth-wrapper { max-width: 500px; }
 }
 
 @media (max-width: 640px) {
-  .auth-wrapper {
-    margin: 1rem;
-    min-height: auto;
-  }
-
-  .auth-form-wrapper {
-    padding: 2rem 1.5rem;
-  }
-
-  .form-title {
-    font-size: 1.5rem;
-  }
-
-  .brand-title {
-    font-size: 1.5rem;
-  }
+  .auth-wrapper { margin: var(--space-4); min-height: auto; }
+  .auth-form-wrapper { padding: var(--space-8) var(--space-6); }
+  .form-title, .brand-title { font-size: var(--text-2xl); }
 }
 </style>

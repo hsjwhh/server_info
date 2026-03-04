@@ -1,0 +1,56 @@
+/**
+ * Global Utility Classes
+ * src/styles/utilities.css
+ */
+
+/* Page Header & Title (Match exact existing styles) */
+.page-header {
+    display: flex !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    /* Margin intentionally omitted, kept in page styles to prevent shifts */
+}
+
+.page-title {
+    font-size: 2rem !important;
+    font-weight: 700 !important;
+    color: var(--color-text-primary) !important;
+    margin: 0 !important;
+}
+
+/* Empty State */
+.empty-state {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+}
+
+.empty-title {
+    font-size: 1.25rem !important;
+    font-weight: 700 !important;
+    color: var(--color-text-primary) !important;
+}
+
+.empty-text {
+    font-size: 1rem !important;
+    color: var(--color-text-secondary) !important;
+    max-width: 500px !important;
+}
+
+/* Section Title */
+.section-title {
+    display: flex !important;
+    align-items: center !important;
+    font-weight: 700 !important;
+    color: var(--color-text-primary) !important;
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex !important;
+    gap: 0.75rem !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+}

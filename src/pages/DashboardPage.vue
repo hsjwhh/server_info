@@ -87,12 +87,9 @@ const stats = ref({
   flex-direction: column;
 }
 
-.page-title {
-  margin-bottom: 1.5rem;
-  font-size: 32px;
-  font-weight: 700;
-  line-height: 2.25rem;
-  color: #111827;
+/* Override utility margin to match baseline */
+.dashboard-page :deep(.page-title) {
+  margin-bottom: 1.5rem !important;
 }
 
 .stats-grid {
@@ -115,12 +112,12 @@ const stats = ref({
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #111827;
+  color: var(--color-text-primary);
 }
 
 .stat-label {
   font-size: 14px;
-  color: #6b7280;
+  color: var(--color-text-secondary);
 }
 
 .quick-actions {
