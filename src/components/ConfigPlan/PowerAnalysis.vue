@@ -56,12 +56,14 @@
 
 <script setup>
 import { VaCard, VaCardTitle, VaCardContent, VaDivider, VaProgressBar, VaAlert } from 'vuestic-ui'
-import { useConfigPlan } from '../../composables/useConfigPlan'
+import { storeToRefs } from 'pinia'
+import { useConfigPlanStore } from '../../stores/configPlan'
 
+const store = useConfigPlanStore()
 const {
   cpuPower, motherboardPower, memoryPower, storagePower, expansionPower,
   totalPower, recommendedPSU, powerColor,
-} = useConfigPlan()
+} = storeToRefs(store)
 </script>
 
 <style scoped>

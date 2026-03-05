@@ -116,14 +116,18 @@
 
 <script setup>
 import { VaIcon, VaButton, VaSelect, VaCounter, VaChip } from 'vuestic-ui'
-import { useConfigPlan } from '../../composables/useConfigPlan'
+import { storeToRefs } from 'pinia'
+import { useConfigPlanStore } from '../../stores/configPlan'
 
+const store = useConfigPlanStore()
 const {
   nicItems, nicOptions,
   gpuItems, gpuOptions,
   raidItems,
-  expansionPower, addItem, removeItem
-} = useConfigPlan()
+  expansionPower
+} = storeToRefs(store)
+
+const { addItem, removeItem } = store
 </script>
 
 <style scoped>

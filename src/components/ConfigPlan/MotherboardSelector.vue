@@ -6,11 +6,12 @@
       主板
     </h3>
 
-    <VaAlert v-if="!selectedCpu" color="info" border="top">
-      请先选择 CPU 型号
-    </VaAlert>
+    <div v-if="!selectedCpu" class="empty-placeholder">
+      <VaIcon name="mdi-cpu-64-bit" size="large" color="secondary" />
+      <p>请先在上方选择 CPU 以匹配兼容主板</p>
+    </div>
 
-    <div v-else>
+    <div v-else class="selector-content">
       <VaSelect
         v-model="selectedMotherboard"
         label="选择主板"
@@ -21,81 +22,88 @@
         searchable
         clearable
       >
-        <template #prepend>
+        <template #prependInner>
           <VaIcon name="mdi-expansion-card" size="small" />
         </template>
       </VaSelect>
 
-      <div v-if="selectedMotherboardDetail" class="selected-item mt-3">
-        <div class="selected-header">
+      <div v-if="selectedMotherboardDetail" class="selected-item-card mt-3">
+        <div class="card-header">
           <a
             v-if="selectedMotherboardDetail.url"
             :href="selectedMotherboardDetail.url"
             target="_blank"
             rel="noopener noreferrer"
-            class="selected-name selected-link"
+            class="item-name item-link"
           >
             {{ selectedMotherboardDetail.model }}
-            <VaIcon name="mdi-open-in-new" size="small" class="ml-1" />
+            <VaIcon name="mdi-open-in-new" size="small" />
           </a>
-          <span v-else class="selected-name">{{ selectedMotherboardDetail.model }}</span>
+          <span v-else class="item-name">{{ selectedMotherboardDetail.model }}</span>
         </div>
 
-        <div class="selected-details">
-          <div class="detail-row">
-            <span class="label">支持 CPU 系列及数量:</span>
-            <span>{{ selectedMotherboardDetail.cpu_number }} * {{ selectedMotherboardDetail.product_collection }}</span>
+        <div class="item-details-grid">
+          <div class="detail-tile">
+            <span class="tile-label">CPU 支持</span>
+            <span class="tile-value">{{ selectedMotherboardDetail.cpu_number }} × {{ selectedMotherboardDetail.product_collection }}</span>
           </div>
-          <div class="detail-row">
-            <span class="label">CPU Max TDP:</span>
-            <VaChip color="primary">{{ selectedMotherboardDetail.max_tdp }}</VaChip>
+          <div class="detail-tile">
+            <span class="tile-label">Max TDP</span>
+            <VaChip size="small" color="primary">{{ selectedMotherboardDetail.max_tdp }}</VaChip>
           </div>
-          <div class="detail-row">
-            <span class="label">内存数量:</span>
-            <VaChip color="primary">{{ selectedMotherboardDetail.dimm_number }}</VaChip>
+          <div class="detail-tile">
+            <span class="tile-label">内存插槽</span>
+            <span class="tile-value">{{ selectedMotherboardDetail.dimm_number }} Slots</span>
           </div>
-          <div class="detail-row">
-            <span class="label">内存类型:</span>
-            <span>
-              <div v-for="(item, index) in splitItems('memory_type')" :key="index">{{ item }}</div>
-            </span>
+          <div class="detail-tile">
+            <span class="tile-label">最大内存</span>
+            <span class="tile-value">{{ selectedMotherboardDetail.max_memory }}</span>
           </div>
-          <div class="detail-row">
-            <span class="label">最大内存:</span>
-            <span>{{ selectedMotherboardDetail.max_memory }}</span>
+          <div class="detail-tile full-width">
+            <span class="tile-label">内存类型</span>
+            <div class="tile-tags">
+              <VaChip v-for="(item, index) in splitItems('memory_type')" :key="index" size="small" preset="outline">{{ item }}</VaChip>
+            </div>
           </div>
-          <div class="detail-row">
-            <span class="label">PCIe 插槽:</span>
-            <span>
-              <div v-for="(item, index) in splitItems('pcie_list')" :key="index">{{ item }}</div>
-            </span>
+          <div class="detail-tile full-width">
+            <span class="tile-label">PCIe 配置</span>
+            <div class="tile-list">
+              <div v-for="(item, index) in splitItems('pcie_list')" :key="index" class="list-item">{{ item }}</div>
+            </div>
           </div>
-          <div class="detail-row">
-            <span class="label">存储:</span>
-            <span>
-              {{ selectedMotherboardDetail.m2 }}<br />
-              <div v-for="(item, index) in splitItems('input')" :key="index">{{ item }}</div>
-            </span>
+          <div class="detail-tile full-width">
+            <span class="tile-label">存储接口</span>
+            <div class="tile-list">
+              <div class="list-item">{{ selectedMotherboardDetail.m2 }}</div>
+              <div v-for="(item, index) in splitItems('input')" :key="index" class="list-item">{{ item }}</div>
+            </div>
           </div>
-          <div class="detail-row">
-            <span class="label">功耗:</span>
-            <span class="highlight">{{ selectedMotherboardDetail.power || 50 }}W</span>
+          <div class="detail-tile highlight-tile">
+            <span class="tile-label">预估板载功耗</span>
+            <span class="tile-value-large">{{ selectedMotherboardDetail.power || 50 }}W</span>
           </div>
         </div>
+      </div>
+      <div v-else-if="compatibleMotherboards.length > 0" class="empty-placeholder-mini mt-3">
+        <VaIcon name="mdi-selection-ellipse-arrow-inside" color="secondary" />
+        <p>请从下拉菜单中选择一个主板型号</p>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { VaIcon, VaAlert, VaSelect, VaChip } from 'vuestic-ui'
-import { useConfigPlan } from '../../composables/useConfigPlan'
+import { VaIcon, VaSelect, VaChip } from 'vuestic-ui'
+import { storeToRefs } from 'pinia'
+import { useConfigPlanStore } from '../../stores/configPlan'
 
+const store = useConfigPlanStore()
 const {
   selectedCpu,
-  selectedMotherboard, compatibleMotherboards, selectedMotherboardDetail,
-  splitItems,
-} = useConfigPlan()
+  selectedMotherboard, compatibleMotherboards, selectedMotherboardDetail
+} = storeToRefs(store)
+
+const { splitItems } = store
 </script>
 
 <style scoped>
@@ -105,50 +113,123 @@ const {
   gap: var(--space-4);
 }
 
-.selected-item {
+.empty-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-4);
+  background: var(--color-bg-page);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-text-secondary);
+  text-align: center;
+}
+
+.empty-placeholder p {
+  margin-top: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.empty-placeholder-mini {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
   padding: var(--space-4);
-  background: var(--color-bg-subtle);
+  background: rgba(0,0,0,0.02);
+  border-radius: var(--radius-md);
+  color: var(--color-text-secondary);
+  font-size: var(--text-sm);
+}
+
+.selected-item-card {
+  padding: var(--space-4);
+  background: white;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-subtle);
 }
-.selected-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-3);
+
+.card-header {
+  margin-bottom: var(--space-4);
 }
-.selected-name {
+
+.item-name {
   font-weight: 700;
   color: var(--color-text-primary);
   font-size: var(--text-lg);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
-.selected-link {
+
+.item-link {
   color: var(--va-primary);
   text-decoration: none;
 }
-.selected-link:hover { text-decoration: underline; }
+.item-link:hover { text-decoration: underline; }
 
-.selected-details {
+.item-details-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
 }
-.detail-row {
+
+.detail-tile {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
 }
-.detail-row .label {
+
+.detail-tile.full-width {
+  grid-column: span 2;
+}
+
+.tile-label {
   font-size: var(--text-xs);
   color: var(--color-text-secondary);
-  font-weight: 500;
-}
-.detail-row span:not(.label) {
   font-weight: 600;
+}
+
+.tile-value {
+  font-weight: 600;
+  font-size: var(--text-sm);
   color: var(--color-text-primary);
 }
-.detail-row .highlight {
+
+.tile-value-large {
+  font-weight: 800;
+  font-size: var(--text-xl);
   color: var(--va-primary);
-  font-size: var(--text-lg);
+}
+
+.tile-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  margin-top: var(--space-1);
+}
+
+.tile-list {
+  font-size: var(--text-xs);
+  line-height: 1.4;
+  color: var(--color-text-primary);
+  font-weight: 500;
+}
+
+.highlight-tile {
+  background: var(--va-primary-light);
+  border: 1px solid var(--va-primary);
+}
+
+@media (max-width: 640px) {
+  .item-details-grid {
+    grid-template-columns: 1fr;
+  }
+  .detail-tile.full-width {
+    grid-column: span 1;
+  }
 }
 </style>

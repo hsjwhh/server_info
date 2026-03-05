@@ -21,7 +21,9 @@
 
 <script setup>
 import { VaCard, VaCardTitle, VaCardContent, VaIcon, VaAlert } from 'vuestic-ui'
-import { useConfigPlan } from '../../composables/useConfigPlan'
+import { storeToRefs } from 'pinia'
+import { useConfigPlanStore } from '../../stores/configPlan'
 
-const { compatibilityWarnings } = useConfigPlan()
+const store = useConfigPlanStore()
+const { compatibilityWarnings } = storeToRefs(store)
 </script>

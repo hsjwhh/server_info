@@ -41,42 +41,48 @@
     </div>
 
     <!-- 已选 CPU 详情 -->
-    <div v-if="selectedCpu" class="selected-item">
-      <div class="selected-header">
-        <span class="selected-name">{{ selectedCpu.cpu_short_name }}</span>
-        <VaButton preset="plain" icon="mdi-close" size="small" @click="clearCpu" />
+    <div v-if="selectedCpu" class="selected-item-card mt-3">
+      <div class="card-header">
+        <span class="item-name">{{ selectedCpu.cpu_short_name }}</span>
+        <VaButton preset="plain" icon="mdi-close" size="small" color="danger" @click="clearCpu" />
       </div>
 
-      <div class="selected-details">
-        <div class="detail-row">
-          <span class="label">核心/线程:</span>
-          <span>{{ selectedCpu.cores }}C / {{ selectedCpu.threads }}T</span>
+      <div class="item-details-grid">
+        <div class="detail-tile">
+          <span class="tile-label">核心 / 线程</span>
+          <span class="tile-value">{{ selectedCpu.cores }}C / {{ selectedCpu.threads }}T</span>
         </div>
-        <div class="detail-row">
-          <span class="label">基频/睿频:</span>
-          <span>{{ selectedCpu.base_freq }} / {{ selectedCpu.turbo_freq }}</span>
+        <div class="detail-tile">
+          <span class="tile-label">主频 (Base/Turbo)</span>
+          <span class="tile-value">{{ selectedCpu.base_freq }} / {{ selectedCpu.turbo_freq }}</span>
         </div>
-        <div class="detail-row">
-          <span class="label">TDP:</span>
-          <VaChip color="primary">{{ selectedCpu.tdp }} W</VaChip>
+        <div class="detail-tile">
+          <span class="tile-label">封装接口 (Socket)</span>
+          <span class="tile-value">{{ formattedSocket }}</span>
         </div>
-        <div class="detail-row">
-          <span class="label">支持内存:</span>
-          <span>{{ selectedCpu.memory_speed }} {{ selectedCpu.max_memory_speed }}</span>
+        <div class="detail-tile highlight-tile">
+          <span class="tile-label">TDP 功耗</span>
+          <span class="tile-value-large">{{ selectedCpu.tdp }}W</span>
         </div>
-        <div class="detail-row">
-          <span class="label">封装接口:</span>
-          <span>{{ formattedSocket }}</span>
+        <div class="detail-tile full-width">
+          <span class="tile-label">内存支持</span>
+          <span class="tile-value">{{ selectedCpu.memory_speed }} {{ selectedCpu.max_memory_speed }}</span>
         </div>
       </div>
 
       <!-- CPU 数量控制 -->
-      <div class="cpu-count-control">
-        <label class="va-input-label">{{ cpuCountLabel }}</label>
-        <div class="count-input-group">
+      <div class="cpu-count-section mt-4">
+        <div class="count-header">
+          <span class="count-label">{{ cpuCountLabel }}</span>
+          <VaChip size="small" preset="outline" color="secondary">
+            {{ cpuScalability.max > 1 ? `支持双路/多路` : '仅支持单路' }}
+          </VaChip>
+        </div>
+        <div class="count-stepper">
           <VaButton
             :disabled="cpuScalability.disabled || cpuCount <= cpuScalability.min"
             icon="mdi-minus"
+            preset="secondary"
             size="small"
             @click="cpuCount--"
           />
@@ -84,21 +90,21 @@
             v-model.number="cpuCount"
             :disabled="cpuScalability.disabled"
             inputmode="numeric"
-            style="width: 80px; text-align: center;"
-            class="mx-2"
+            class="count-input"
             @blur="validateCpuCount"
           />
           <VaButton
             :disabled="cpuScalability.disabled || cpuCount >= cpuScalability.max"
             icon="mdi-plus"
+            preset="secondary"
             size="small"
             @click="cpuCount++"
           />
         </div>
       </div>
 
-      <VaAlert v-if="cpuScalability.max > 1" color="info" border="left" class="mt-2" dense>
-        此 CPU 支持最多 {{ cpuScalability.max }} 路配置
+      <VaAlert v-if="cpuScalability.max > 1" color="primary" border="left" class="mt-3" dense>
+        当前 CPU 已开启多路并行计算支持
       </VaAlert>
     </div>
   </div>
@@ -106,13 +112,18 @@
 
 <script setup>
 import { VaInput, VaIcon, VaButton, VaChip, VaAlert } from 'vuestic-ui'
-import { useConfigPlan } from '../../composables/useConfigPlan'
+import { storeToRefs } from 'pinia'
+import { useConfigPlanStore } from '../../stores/configPlan'
 
+const store = useConfigPlanStore()
 const {
   cpuKeyword, cpuSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
-  cpuScalability, cpuCountLabel, formattedSocket,
-  handleCpuSearch, selectCpu, clearCpu, validateCpuCount,
-} = useConfigPlan()
+  cpuScalability, cpuCountLabel, formattedSocket
+} = storeToRefs(store)
+
+const {
+  handleCpuSearch, selectCpu, clearCpu, validateCpuCount
+} = store
 </script>
 
 <style scoped>
@@ -124,18 +135,19 @@ const {
 
 .input-wrapper {
   width: 100%;
-  overflow: hidden;
 }
 
 .suggestions-list {
   background: white;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  margin-top: calc(-1 * var(--space-4));
-  z-index: 10;
-  box-shadow: var(--shadow-md);
-  max-height: 300px;
+  margin-top: calc(-1 * var(--space-2));
+  z-index: 100;
+  box-shadow: var(--shadow-lg);
+  max-height: 320px;
   overflow-y: auto;
+  position: absolute;
+  width: calc(100% - 2 * var(--space-4));
 }
 
 .suggestion-item {
@@ -158,59 +170,114 @@ const {
   color: var(--color-text-secondary);
 }
 
-.selected-item {
+/* 统一卡片样式 */
+.selected-item-card {
   padding: var(--space-4);
-  background: var(--color-bg-subtle);
+  background: white;
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-sm);
 }
-.selected-header {
+
+.card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: var(--space-3);
+  margin-bottom: var(--space-4);
 }
-.selected-name {
+
+.item-name {
   font-weight: 700;
   color: var(--color-text-primary);
   font-size: var(--text-lg);
 }
 
-.selected-details {
+.item-details-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: var(--space-4);
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
 }
-.detail-row {
+
+.detail-tile {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
 }
-.detail-row .label {
+
+.detail-tile.full-width {
+  grid-column: span 2;
+}
+
+.tile-label {
   font-size: var(--text-xs);
   color: var(--color-text-secondary);
-  font-weight: 500;
+  font-weight: 600;
 }
-.detail-row span:not(.label) {
+
+.tile-value {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.tile-value-large {
+  font-weight: 800;
+  font-size: var(--text-xl);
+  color: var(--va-primary);
+}
+
+.highlight-tile {
+  background: var(--va-primary-light);
+  border: 1px solid var(--va-primary);
+}
+
+/* 数量控制 */
+.cpu-count-section {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-border-subtle);
+}
+
+.count-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-2);
+}
+
+.count-label {
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text-primary);
 }
 
-.cpu-count-control { margin-top: var(--space-3); }
-.cpu-count-control .va-input-label {
-  display: block;
-  margin-bottom: var(--space-2);
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--color-text-primary);
-}
-.count-input-group {
+.count-stepper {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: var(--space-3);
+  background: var(--color-bg-page);
+  padding: var(--space-2);
+  border-radius: var(--radius-md);
+  width: fit-content;
 }
-.count-input-group .va-input input { text-align: center; font-weight: 600; }
-.count-input-group .va-input input::-webkit-outer-spin-button,
-.count-input-group .va-input input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-.count-input-group .va-input input[type=number] { -moz-appearance: textfield; }
+
+.count-input {
+  width: 60px;
+}
+.count-input :deep(input) {
+  text-align: center;
+  font-weight: 700;
+  font-size: var(--text-md);
+}
+
+@media (max-width: 640px) {
+  .item-details-grid {
+    grid-template-columns: 1fr;
+  }
+  .detail-tile.full-width {
+    grid-column: span 1;
+  }
+}
 </style>

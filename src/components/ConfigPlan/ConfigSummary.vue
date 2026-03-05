@@ -71,16 +71,25 @@
 
 <script setup>
 import { VaCard, VaCardTitle, VaCardContent, VaIcon, VaButton } from 'vuestic-ui'
-import { useConfigPlan } from '../../composables/useConfigPlan'
+import { storeToRefs } from 'pinia'
+import { useConfigPlanStore } from '../../stores/configPlan'
 
+const store = useConfigPlanStore()
 const {
   selectedCpu, cpuCount,
   selectedMotherboard,
   memoryType, memoryCapacity, memoryCount, totalMemory,
   m2Items, ssdItems, hddItems,
-  nicItems, gpuItems, raidItems,
-  exportConfig,
-} = useConfigPlan()
+  nicItems, gpuItems, raidItems
+} = storeToRefs(store)
+
+const { exportConfigData } = store
+
+const exportConfig = () => {
+  const config = exportConfigData()
+  navigator.clipboard.writeText(JSON.stringify(config, null, 2))
+  window.alert('配置已复制到剪贴板！')
+}
 </script>
 
 <style scoped>
