@@ -186,6 +186,8 @@ const viewDetail = (sn) => {
  * 行点击事件
  */
 const handleRowClick = (event) => {
+  // VaDataTable 的 row:click 回调数据项在 event.item 中。
+  // 单元格内按钮已使用 @click.stop，避免触发行跳转。
   viewDetail(event.item.sn)
 }
 

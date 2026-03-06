@@ -84,6 +84,10 @@ service.interceptors.response.use(
     // ============================
     // 2. 其它接口的 401 → 刷新 token
     // ============================
+    // 并发说明：
+    // 当前实现按“单请求重试”设计，只通过 originalRequest._retry 防止同一个请求死循环。
+    // 如果多个请求同时返回 401，可能触发多个 refresh 请求并发执行（无全局锁/队列）。
+    // 如需严格串行刷新，可后续引入 refreshPromise 队列化策略统一复用刷新结果。
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 

@@ -166,7 +166,8 @@ const handleSearch = async () => {
   }
 }
 
-// 如果路由参数包含 SN,自动查询
+// 如果路由参数包含 SN，自动查询。
+// 约定：'search' 是“仅打开查询页、不触发详情请求”的哨兵值。
 onMounted(() => {
   const sn = route.params.sn
   if (sn && sn !== 'search') {
@@ -175,7 +176,9 @@ onMounted(() => {
   }
 })
 
-// 监听路由变化
+// 监听路由变化并增量触发查询。
+// 这里额外比较 newSn !== snInput.value 用于避免 handleSearch 内部 router.replace
+// 造成的重复请求。
 watch(() => route.params.sn, (newSn) => {
   if (newSn && newSn !== 'search' && newSn !== snInput.value) {
     snInput.value = newSn

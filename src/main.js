@@ -24,7 +24,8 @@ createApp(App)
         config: {
             icons: createIconsConfig({
                 aliases: [
-                    // ⚠️ 注意：自定义覆盖必须放在最前面！拦截默认解析
+                    // 必须放在最前面：优先命中自定义映射，避免被默认别名吞掉，
+                    // 否则 clear/close/arrow 等基础图标会出现不显示或映射错误。
                     { name: 'va-clear', to: 'mdi-close-circle' },       // 解决 Input clearable 隐身问题
                     { name: 'va-close', to: 'mdi-close' },              // 弹窗关闭按钮
                     { name: 'va-arrow-down', to: 'mdi-chevron-down' },  // Select 下拉箭头

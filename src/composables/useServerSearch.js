@@ -18,8 +18,8 @@ export function useServerSearch() {
         ? useToast().init
         : (opts) => console.warn('[useServerSearch] 通知（无组件实例）:', opts?.message)
 
-    // 这两个放在外层组件更好，但如果只是用在 composable 里作为简单缓存也可以
     const CACHE_KEY = 'serverListPageState'
+    const CACHE_TTL_MS = 30 * 60 * 1000
 
     /**
      * 执行搜索
@@ -72,6 +72,15 @@ export function useServerSearch() {
     }
 
     // === Session Storage Cache 逻辑 ===
+    // 缓存结构（schema）：
+    // {
+    //   searchQuery: string,
+    //   hasSearched: boolean,
+    //   servers: Array,
+    //   totalRecords: number,
+    //   currentPage: number,
+    //   timestamp: number // Date.now() 毫秒时间戳
+    // }
     const saveStateToSession = () => {
         const state = {
             searchQuery: store.searchQuery,
@@ -95,9 +104,9 @@ export function useServerSearch() {
 
             const state = JSON.parse(savedState)
 
-            // 检查状态是否过期（30分钟 = 1800000ms）
+            // 检查状态是否过期（30 分钟）
             const age = Date.now() - state.timestamp
-            if (age > 30 * 60 * 1000) {
+            if (age > CACHE_TTL_MS) {
                 sessionStorage.removeItem(CACHE_KEY)
                 return false
             }

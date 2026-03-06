@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated root `README.md` with better navigation to documentation.
 - Updated `.gitignore` to exclude local `SESSION_NOTES.md` session notes file.
+- Improved inline code comments across key scripts (`request`, route-driven detail loading, session cache, table interaction) and standardized API module JSDoc in `src/api/sn.js` and `src/api/filters.js`.
 
 ### Removed
 - Cleaned up legacy documentation in `doc/` directory (removed 11 outdated migration and design docs).

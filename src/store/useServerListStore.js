@@ -28,6 +28,8 @@ export const useServerListStore = defineStore('serverList', () => {
     })
 
     const paginatedServers = computed(() => {
+        // 前置约定：servers 已经是“最终展示顺序”。
+        // 当前排序由 VaDataTable 的交互与上游数据流协同完成，这里仅负责按页切片。
         const start = (currentPage.value - 1) * pageSize.value
         const end = start + pageSize.value
         return servers.value.slice(start, end)
