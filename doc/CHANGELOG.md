@@ -1,0 +1,32 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+### Added
+- Created this standardized `CHANGELOG.md` to track project evolution.
+
+### Changed
+- Updated root `README.md` with better navigation to documentation.
+
+### Removed
+- Cleaned up legacy documentation in `doc/` directory (removed 11 outdated migration and design docs).
+
+---
+
+## [2.0.0] - 2026-02-01
+
+### Changed
+- Major refactor: Migrated from Element Plus to Vuestic UI.
+- Converted codebase from TypeScript to JavaScript for simplified maintenance.
+- Implemented state persistence for server list.
+- Optimized large data handling in `ServerListPage` (V3 update).
+
+## [1.0.0] - 2026-01-01
+
+### Added
+- Initial release of the Server Info hardware management system.
