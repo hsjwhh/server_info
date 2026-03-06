@@ -155,8 +155,9 @@ const { addItem, removeItem } = store
 }
 
 .config-table-header {
-  display: flex;
-  gap: var(--space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 140px 32px;
+  column-gap: var(--space-4);
   padding: var(--space-2) var(--space-3);
   background: var(--color-bg-subtle);
   border-bottom: 1px solid var(--color-border-subtle);
@@ -171,13 +172,27 @@ const { addItem, removeItem } = store
   padding-left: 2px;
 }
 
+.config-table-header .col-capacity {
+  min-width: 0;
+}
+
+.config-table-header .col-count {
+  text-align: center;
+  padding-left: 0;
+}
+
+.config-table-header .col-action {
+  text-align: center;
+}
+
 .config-table-body {
   padding: var(--space-1) 0;
 }
 
 .storage-config-row {
-  display: flex;
-  gap: var(--space-4);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 140px 32px;
+  column-gap: var(--space-4);
   align-items: center;
   padding: var(--space-1) var(--space-3);
   transition: background 0.2s ease;
@@ -192,19 +207,16 @@ const { addItem, removeItem } = store
 }
 
 .col-capacity {
-  flex: 1;
+  min-width: 0;
 }
 
 .col-count {
-  width: 140px;
-  flex-shrink: 0;
+  min-width: 0;
 }
 
 .col-action {
-  width: 32px;
   display: flex;
   justify-content: center;
-  flex-shrink: 0;
 }
 
 .empty-text {
@@ -231,6 +243,7 @@ const { addItem, removeItem } = store
     padding: var(--space-2);
   }
   .storage-config-row {
+    display: flex;
     flex-direction: column;
     align-items: stretch;
     padding: var(--space-3) 0;

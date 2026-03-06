@@ -40,6 +40,11 @@ const CONFIG = {
     GPU_OPTIONS: ['GTX 1650', 'RTX 3060', 'RTX 4090', 'A100', 'H100']
 }
 
+const parsePositiveInt = (value) => {
+    const num = typeof value === 'number' ? value : parseInt(String(value), 10)
+    return Number.isFinite(num) && num > 0 ? num : null
+}
+
 /**
  * useConfigPlanStore 
  * 
@@ -282,8 +287,11 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
         return compatibleMotherboards.value.find(b => b.model === selectedMotherboard.value) || null
     })
 
-    // 动态判定这块板子有几条内存槽，用来限制前端 counter 最大值
-    const maxMemorySlots = computed(() => selectedMotherboardDetail.value?.memory_slots || CONFIG.DEFAULT_MAX_MEMORY_SLOTS)
+    // 动态判定这块板子有几条内存槽（数据库字段: dimm_number）
+    const maxMemorySlots = computed(() => {
+        const slots = parsePositiveInt(selectedMotherboardDetail.value?.dimm_number)
+        return slots || CONFIG.DEFAULT_MAX_MEMORY_SLOTS
+    })
 
     // ── 内存 衍生 ──
     const memoryOptions = computed(() => {

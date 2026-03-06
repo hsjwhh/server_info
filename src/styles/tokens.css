@@ -6,20 +6,24 @@
     /* Colors */
     --color-text-primary: #111827;
     --color-text-secondary: #6b7280;
+    --color-text-subtle: #94a3b8;
     --color-text-muted: #9ca3af;
     --color-text-link: #2563eb;
 
+    --color-bg-card: #ffffff;
     --color-bg-page: #f5f6fa;
     --color-bg-subtle: #f9fafb;
     --color-bg-hover: #f3f4f6;
     --color-bg-white: #ffffff;
 
     --color-border: #e5e7eb;
+    --color-border-subtle: #e5e7eb;
     --color-border-light: #f3f4f6;
 
     /* Typography */
     --text-xs: 0.75rem;
     --text-sm: 0.875rem;
+    --text-md: 0.9375rem;
     --text-base: 1rem;
     --text-lg: 1.125rem;
     --text-xl: 1.25rem;
@@ -41,6 +45,10 @@
     --radius-md: 0.5rem;
     --radius-lg: 0.75rem;
     --radius-xl: 1rem;
+
+    /* Shadow */
+    --shadow-sm: 0 1px 2px rgba(17, 24, 39, 0.08);
+    --shadow-lg: 0 10px 24px rgba(17, 24, 39, 0.12);
 
     /* Header */
     --header-height: 56px;
