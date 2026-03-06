@@ -86,6 +86,21 @@ const routes = [
           requiresAuth: true // 需要登录
         }
       },
+      {
+        path: 'settings',
+        name: 'Settings',
+        component: () => import('../pages/SettingsPage.vue'),
+        meta: {
+          title: '个人设置',
+          icon: 'mdi-account-cog',
+          showInMenu: false, // 仅通过 Header 入口访问
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '个人设置', to: '/settings' }
+          ],
+          requiresAuth: true // 需要登录
+        }
+      },
     ]
   }
 ]

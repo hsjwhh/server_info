@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated root `README.md` with better navigation to documentation.
 - Updated `.gitignore` to exclude local `SESSION_NOTES.md` session notes file.
 - Improved inline code comments across key scripts (`request`, route-driven detail loading, session cache, table interaction) and standardized API module JSDoc in `src/api/sn.js` and `src/api/filters.js`.
+- Unified `src/pages/SettingsPage.vue` to project JavaScript style, added localStorage persistence (`appSettings`), refresh-interval normalization (5-3600), and responsive layout optimization.
+- Added authenticated `/settings` route in `src/router/index.js` so header "个人设置" navigation resolves correctly.
 
 ### Removed
 - Cleaned up legacy documentation in `doc/` directory (removed 11 outdated migration and design docs).

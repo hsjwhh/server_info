@@ -1,7 +1,6 @@
-<!-- src/pages/SettingsPage.vue -->
 <template>
   <div class="settings-page">
-    <h1 class="page-title">设置</h1>
+    <h1 class="page-title">个人设置</h1>
 
     <VaCard>
       <VaCardTitle>系统设置</VaCardTitle>
@@ -22,11 +21,13 @@
               <div class="setting-label">刷新间隔</div>
               <div class="setting-description">设置自动刷新的时间间隔（秒）</div>
             </div>
-            <VaInput 
-              v-model.number="settings.refreshInterval" 
+            <VaInput
+              v-model.number="settings.refreshInterval"
               type="number"
+              min="5"
+              max="3600"
               :disabled="!settings.autoRefresh"
-              style="width: 100px;"
+              class="interval-input"
             />
           </div>
 
@@ -35,7 +36,7 @@
           <div class="setting-item">
             <div class="setting-info">
               <div class="setting-label">暗色模式</div>
-              <div class="setting-description">启用暗色主题</div>
+              <div class="setting-description">启用暗色主题（预留）</div>
             </div>
             <VaSwitch v-model="settings.darkMode" />
           </div>
@@ -58,16 +59,12 @@
       <VaCardContent>
         <div class="about-section">
           <div class="about-item">
-            <span class="about-label">系统版本：</span>
+            <span class="about-label">系统版本</span>
             <span class="about-value">v1.0.0</span>
           </div>
           <div class="about-item">
-            <span class="about-label">构建日期：</span>
-            <span class="about-value">2025-01-29</span>
-          </div>
-          <div class="about-item">
-            <span class="about-label">技术栈：</span>
-            <span class="about-value">Vue 3 + TypeScript + Vuestic UI</span>
+            <span class="about-label">技术栈</span>
+            <span class="about-value">Vue 3 + Vuestic UI</span>
           </div>
         </div>
       </VaCardContent>
@@ -80,43 +77,91 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue'
-import { 
-  VaCard, 
-  VaCardTitle, 
-  VaCardContent, 
-  VaSwitch, 
+<script setup>
+import { ref, watch } from 'vue'
+import {
+  VaCard,
+  VaCardTitle,
+  VaCardContent,
+  VaSwitch,
   VaInput,
   VaDivider,
   VaButton,
   useToast
 } from 'vuestic-ui'
 
-const { init: notify } = useToast()
+const SETTINGS_STORAGE_KEY = 'appSettings'
 
-const settings = ref({
+const defaultSettings = {
   autoRefresh: true,
   refreshInterval: 30,
   darkMode: false,
   notifications: true
-})
+}
+
+const { init: notify } = useToast()
+
+const readSettings = () => {
+  try {
+    const raw = localStorage.getItem(SETTINGS_STORAGE_KEY)
+    if (!raw) {
+      return { ...defaultSettings }
+    }
+
+    const parsed = JSON.parse(raw)
+    return {
+      ...defaultSettings,
+      ...parsed,
+    }
+  } catch (error) {
+    console.error('读取设置失败:', error)
+    return { ...defaultSettings }
+  }
+}
+
+const settings = ref(readSettings())
+
+watch(
+  () => settings.value.autoRefresh,
+  (enabled) => {
+    if (enabled && settings.value.refreshInterval < 5) {
+      settings.value.refreshInterval = 5
+    }
+  }
+)
+
+const normalizeRefreshInterval = () => {
+  const current = Number(settings.value.refreshInterval)
+  if (!Number.isFinite(current)) {
+    settings.value.refreshInterval = defaultSettings.refreshInterval
+    return
+  }
+
+  settings.value.refreshInterval = Math.min(3600, Math.max(5, Math.round(current)))
+}
 
 const saveSettings = () => {
-  // TODO: 保存到本地存储或后端
-  notify({
-    message: '设置已保存',
-    color: 'success'
-  })
+  normalizeRefreshInterval()
+
+  try {
+    localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings.value))
+    notify({
+      message: '设置已保存',
+      color: 'success'
+    })
+  } catch (error) {
+    console.error('保存设置失败:', error)
+    notify({
+      message: '保存失败，请稍后重试',
+      color: 'danger'
+    })
+  }
 }
 
 const resetSettings = () => {
-  settings.value = {
-    autoRefresh: true,
-    refreshInterval: 30,
-    darkMode: false,
-    notifications: true
-  }
+  settings.value = { ...defaultSettings }
+  localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(settings.value))
+
   notify({
     message: '设置已重置为默认值',
     color: 'info'
@@ -137,43 +182,42 @@ const resetSettings = () => {
 .settings-section {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .setting-item {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem 0;
+  gap: var(--space-4);
+  padding: var(--space-2) 0;
 }
 
 .setting-info {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--space-1);
 }
 
 .setting-label {
   display: block;
   font-weight: 700;
-  margin-bottom: var(--space-2);
   color: var(--color-text-primary);
 }
 
 .setting-description {
-  margin-top: var(--space-1);
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
 }
 
-.setting-card {
-  height: 100%;
+.interval-input {
+  width: 120px;
 }
 
 .about-section {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .about-item {
@@ -194,6 +238,18 @@ const resetSettings = () => {
 
 .action-buttons {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-3);
+}
+
+@media (max-width: 768px) {
+  .setting-item {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .interval-input {
+    width: 100%;
+    max-width: 240px;
+  }
 }
 </style>
