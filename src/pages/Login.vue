@@ -134,9 +134,11 @@ import {
   useToast
 } from 'vuestic-ui'
 import request from '../utils/request'
+import { useAuthStore } from '../stores/auth'
 
 const router = useRouter()
 const { init: notify } = useToast()
+const authStore = useAuthStore()
 
 const form = reactive({
   username: '',
@@ -172,13 +174,9 @@ const handleLogin = async () => {
       password: form.password
     })
 
-    localStorage.setItem('accessToken', res.accessToken)
-    localStorage.setItem('refreshToken', res.refreshToken)
-
-    if (rememberMe.value) {
-      localStorage.setItem('rememberMe', 'true')
-      localStorage.setItem('savedUsername', form.username)
-    }
+    // accessToken 存入内存（Pinia store），不写 localStorage
+    // refreshToken 由后端以 HttpOnly Cookie 下发，前端不可见
+    authStore.setToken(res.accessToken, res.user)
 
     notify({
       message: '登录成功,欢迎回来!',

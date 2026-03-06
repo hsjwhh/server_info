@@ -6,12 +6,14 @@
  *   - 全局路由守卫（未登录自动跳转登录页）
  *   - 登录后访问 /login 自动跳转首页
  *
- * 说明：
- *   - accessToken 存在 localStorage 中
- *   - 后端所有受保护接口都需要 token
+ * 安全说明：
+ *   - accessToken 存于 authStore 内存（不读 localStorage）
+ *   - 页面刷新时 authStore 为空 → 自动调用 silentRefresh() 换取新 token
+ *   - silentRefresh() 通过 HttpOnly Cookie 中的 refreshToken 完成，对用户透明
  */
 
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 
 // 定义路由表
 const routes = [
@@ -33,11 +35,11 @@ const routes = [
         meta: {
           title: 'Dashboard',
           icon: 'mdi-view-dashboard',
-          showInMenu: true,  // 👈 显示在菜单中
+          showInMenu: true,
           breadcrumbs: [
             { label: '首页', to: '/' }
           ],
-          requiresAuth: true // 需要登录
+          requiresAuth: true
         },
       },
       {
@@ -47,12 +49,12 @@ const routes = [
         meta: {
           title: '服务器列表',
           icon: 'mdi-server-network',
-          showInMenu: true,  // 👈 显示在菜单中
+          showInMenu: true,
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '服务器列表', to: '/servers' }
           ],
-          requiresAuth: true // 需要登录
+          requiresAuth: true
         }
       },
       {
@@ -62,13 +64,13 @@ const routes = [
         meta: {
           title: '服务器详情',
           icon: 'mdi-server',
-          showInMenu: false,  // 👈 不显示在菜单中
+          showInMenu: false,
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '服务器列表', to: '/servers' },
             { label: '服务器详情' }
           ],
-          requiresAuth: true // 需要登录
+          requiresAuth: true
         }
       },
       {
@@ -78,12 +80,12 @@ const routes = [
         meta: {
           title: '配置方案',
           icon: 'mdi-clipboard-text-outline',
-          showInMenu: true,  // 👈 显示在菜单中
+          showInMenu: true,
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '配置方案', to: '/config-plan' }
           ],
-          requiresAuth: true // 需要登录
+          requiresAuth: true
         }
       },
       {
@@ -93,12 +95,12 @@ const routes = [
         meta: {
           title: '个人设置',
           icon: 'mdi-account-cog',
-          showInMenu: false, // 仅通过 Header 入口访问
+          showInMenu: false,
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '个人设置', to: '/settings' }
           ],
-          requiresAuth: true // 需要登录
+          requiresAuth: true
         }
       },
     ]
@@ -117,23 +119,41 @@ const router = createRouter({
  * ============================================================
  *
  * 逻辑：
- *   1. 如果访问需要登录的页面，但没有 token → 跳转登录页
- *   2. 如果已登录却访问 /login → 自动跳转首页
+ *   1. accessToken 存在 → 正常放行
+ *   2. accessToken 不存在 → 尝试 silentRefresh()（利用 HttpOnly Cookie）
+ *   3. silentRefresh 成功 → 放行
+ *   4. silentRefresh 失败 → 跳转登录页
+ *   5. 已登录却访问 /login → 自动跳首页
  */
-router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('accessToken')
+router.beforeEach(async (to, from, next) => {
+  const authStore = useAuthStore()
 
-  // 访问登录页，但已经登录 → 自动跳首页
-  if (to.path === '/login' && token) {
-    return next('/')
+  // 访问公开页面直接放行
+  if (to.meta.public) {
+    // 但如果已登录访问 /login，跳回首页
+    if (authStore.isLoggedIn) {
+      return next('/')
+    }
+    return next()
   }
 
-  // 访问需要登录的页面，但没有 token → 跳转登录页
-  if (to.meta.requiresAuth && !token) {
+  // 需要登录的页面
+  if (to.meta.requiresAuth) {
+    // 内存中有 token，直接放行
+    if (authStore.isLoggedIn) {
+      return next()
+    }
+
+    // 内存中无 token（页面刷新导致）→ 尝试静默刷新
+    const refreshed = await authStore.silentRefresh()
+    if (refreshed) {
+      return next()
+    }
+
+    // 刷新也失败 → 跳转登录页
     return next('/login')
   }
 
-  // 其它情况正常放行
   next()
 })
 

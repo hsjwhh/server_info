@@ -41,13 +41,14 @@ import {
   VaMenuList,
   VaDivider
 } from 'vuestic-ui'
+import { useAuthStore } from '../stores/auth'
+import request from '../utils/request'
 
 const router = useRouter()
+const authStore = useAuthStore()
 
-// 从 localStorage 读取用户名（login 时已存）
-const username = computed(() => {
-  return localStorage.getItem('savedUsername') || 'Admin'
-})
+// 用户名从 store 中读取，未登录时显示默认头像
+const username = computed(() => authStore.user?.username || 'Admin')
 
 const userInitial = computed(() => {
   return username.value.charAt(0).toUpperCase()
@@ -58,15 +59,19 @@ const menuOptions = [
   { label: '退出登录',  icon: 'mdi-logout',       value: 'logout'  },
 ]
 
-const handleMenuSelect = (option) => {
+const handleMenuSelect = async (option) => {
   if (option.value === 'settings') {
     router.push('/settings')
   } else if (option.value === 'logout') {
-    localStorage.removeItem('accessToken')
-    localStorage.removeItem('refreshToken')
-    localStorage.removeItem('savedUsername')
-    localStorage.removeItem('rememberMe')
-    router.push('/login')
+    try {
+      // 调用后端登出接口，并清除服务器端 HttpOnly Cookie
+      await request.post('/auth/logout')
+    } catch {
+      // 即使请求失败也强制登出
+    } finally {
+      authStore.clearToken()    // 清除内存中的 accessToken
+      router.push('/login')
+    }
   }
 }
 </script>

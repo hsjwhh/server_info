@@ -1,11 +1,11 @@
 // src/utils/request.js
 /**
- * axios 二次封装（最终整合版）
+ * axios 二次封装（安全版）
  *
  * 功能：
  * 1. 统一 baseURL
- * 2. 自动附带 accessToken
- * 3. 自动刷新 token（401 时）
+ * 2. 自动附带 accessToken（从 authStore 内存读取，不读 localStorage）
+ * 3. 自动刷新 token（401 时利用 HttpOnly Cookie 中的 refreshToken）
  * 4. 刷新成功后自动重试原请求
  * 5. 刷新失败自动跳转登录页
  * 6. 统一错误提示（Vuestic UI Toast）
@@ -14,6 +14,7 @@
 
 import axios from 'axios'
 import { useToast } from 'vuestic-ui'
+import { useAuthStore } from '../stores/auth'
 
 // 创建 toast 实例
 let toastInstance = null
@@ -27,21 +28,22 @@ const getToast = () => {
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: 'http://localhost:3000/api', // 后端 API 根路径
-  timeout: 5000, // 超时时间
+  baseURL: 'http://localhost:3000/api',
+  timeout: 5000,
+  withCredentials: true    // 允许携带 Cookie（refreshToken 由后端通过 HttpOnly Cookie 管理）
 })
 
 /**
  * ============================================================
- * 1. 请求拦截器：自动附带 accessToken
+ * 1. 请求拦截器：从内存（authStore）读取 accessToken
  * ============================================================
  */
 service.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken')
+    const authStore = useAuthStore()
+    const token = authStore.accessToken
 
     if (token) {
-      // 在请求头中加入 Authorization: Bearer xxx
       config.headers.Authorization = `Bearer ${token}`
     }
 
@@ -57,7 +59,6 @@ service.interceptors.request.use(
  */
 service.interceptors.response.use(
   (response) => {
-    // 直接返回 response.data
     return response.data
   },
 
@@ -69,74 +70,37 @@ service.interceptors.response.use(
     const isLoginAPI = url.includes('/auth/login')
 
     // ============================
-    // 1. 登录接口的 401（用户名不存在 / 密码错误）
+    // 1. 登录接口的 401（用户名/密码错误）
     // ============================
     if (isLoginAPI && status === 401) {
       const msg = error.response?.data?.message || '登录失败'
       const notify = getToast()
-      notify({
-        message: msg,
-        color: 'danger'
-      })
+      notify({ message: msg, color: 'danger' })
       return Promise.reject(error)
-    }    
+    }
 
     // ============================
-    // 2. 其它接口的 401 → 刷新 token
+    // 2. 其它接口的 401 → 静默刷新 token
+    // 浏览器会自动携带 HttpOnly Cookie 中的 refreshToken，无需手动读取
     // ============================
-    // 并发说明：
-    // 当前实现按“单请求重试”设计，只通过 originalRequest._retry 防止同一个请求死循环。
-    // 如果多个请求同时返回 401，可能触发多个 refresh 请求并发执行（无全局锁/队列）。
-    // 如需严格串行刷新，可后续引入 refreshPromise 队列化策略统一复用刷新结果。
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    if (status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 
-      const refreshToken = localStorage.getItem('refreshToken')
+      const authStore = useAuthStore()
 
-      if (!refreshToken) {
+      // 调用 authStore 的静默刷新（内部用 withCredentials 携带 Cookie）
+      const refreshed = await authStore.silentRefresh()
+
+      if (refreshed) {
+        // 刷新成功 → 用新 token 重试原请求
+        originalRequest.headers.Authorization = `Bearer ${authStore.accessToken}`
+        return service(originalRequest)
+      } else {
+        // 刷新失败 → 跳转登录页
         const notify = getToast()
-        notify({
-          message: '登录已过期，请重新登录',
-          color: 'danger'
-        })
+        notify({ message: '登录已过期，请重新登录', color: 'danger' })
         window.location.href = '/login'
         return Promise.reject(error)
-      }
-
-      try {
-        /**
-         * 调用刷新 token API
-         * 注意：这里不能用 service（否则会再次进入拦截器）
-         * 必须用 axios 原生实例
-         */
-        const res = await axios.post('http://localhost:3000/api/auth/refresh', {
-          refreshToken
-        })
-
-        const newAccessToken = res.data.accessToken
-
-        // 保存新的 accessToken
-        localStorage.setItem('accessToken', newAccessToken)
-
-        // 更新原请求的 Authorization
-        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
-
-        // 使用新的 token 重试原请求
-        return service(originalRequest)
-
-      } catch (refreshError) {
-        // 刷新失败 → 清除 token → 跳转登录页
-        localStorage.removeItem('accessToken')
-        localStorage.removeItem('refreshToken')
-
-        const notify = getToast()
-        notify({
-          message: '登录已过期，请重新登录',
-          color: 'danger'
-        })
-        window.location.href = '/login'
-
-        return Promise.reject(refreshError)
       }
     }
 
@@ -145,10 +109,7 @@ service.interceptors.response.use(
     // ============================
     const msg = error.response?.data?.message || error.message || '请求失败'
     const notify = getToast()
-    notify({
-      message: msg,
-      color: 'danger'
-    })
+    notify({ message: msg, color: 'danger' })
     return Promise.reject(error)
   }
 )
