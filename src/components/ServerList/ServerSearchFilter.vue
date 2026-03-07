@@ -39,7 +39,7 @@ import {
   VaButton,
   VaIcon
 } from 'vuestic-ui'
-import { useServerListStore } from '../../store/useServerListStore'
+import { useServerListStore } from '../../stores/useServerListStore'
 import { useServerSearch } from '../../composables/useServerSearch'
 
 // 初始化 Store 和 Composables

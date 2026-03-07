@@ -120,7 +120,7 @@ import {
   VaInnerLoading,
   useToast
 } from 'vuestic-ui'
-import { useServerListStore } from '../../store/useServerListStore'
+import { useServerListStore } from '../../stores/useServerListStore'
 import { useServerSearch } from '../../composables/useServerSearch'
 
 const router = useRouter()

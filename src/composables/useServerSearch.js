@@ -1,4 +1,4 @@
-import { useServerListStore } from '../store/useServerListStore'
+import { useServerListStore } from '../stores/useServerListStore'
 import { searchSn } from '../api/sn'
 import { useToast } from 'vuestic-ui'
 import { getCurrentInstance } from 'vue'
