@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed, unref } from 'vue'
 import debounce from 'lodash.debounce'
 import { searchCpu, getCpuDetail, getMbBySocket } from '../api/configPlan'
+import { validateConfig } from './configPlanValidation'
 
 /**
  * --- Constants & "Magic Numbers" Extraction ---
@@ -353,27 +354,24 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
     })
 
     // ── 安全与兼容性审计 (核心价值) ──
-    // 在任何配置变更时，计算一系列合法性检查以生成 UI Alert 通知
-    const compatibilityWarnings = computed(() => {
-        const warnings = []
+    // 统一调用独立校验模块，返回分级结果：blockers / warnings / infos。
+    const validationResult = computed(() => validateConfig({
+        selectedCpu: selectedCpu.value,
+        selectedMotherboard: selectedMotherboard.value,
+        selectedMotherboardDetail: selectedMotherboardDetail.value,
+        formattedSocket: formattedSocket.value,
+        totalMemory: totalMemory.value,
+        memoryCount: memoryCount.value,
+        maxMemorySlots: maxMemorySlots.value,
+        totalPower: totalPower.value,
+        recommendedPSU: recommendedPSU.value
+    }))
 
-        // 内存溢出校验
-        if (selectedMotherboardDetail.value) {
-            const maxMem = selectedMotherboardDetail.value.max_memory
-            if (totalMemory.value > maxMem)
-                warnings.push(`内存总容量 ${totalMemory.value}GB 超过主板最大支持 ${maxMem}GB`)
-        }
-
-        // 插槽校验
-        if (memoryCount.value > maxMemorySlots.value)
-            warnings.push(`内存条数量 ${memoryCount.value} 超过主板插槽数 ${maxMemorySlots.value}`)
-
-        // 负载极限校验 
-        if (totalPower.value / recommendedPSU.value > 0.9)
-            warnings.push('系统功耗接近电源理论上限，建议添加更多冗余')
-
-        return warnings
-    })
+    // 兼容旧组件字段：保留原 warnings 数组接口（blocker 也会展示出来）
+    const compatibilityWarnings = computed(() => [
+        ...validationResult.value.blockers,
+        ...validationResult.value.warnings
+    ])
 
     return {
         // ==== 导出 State ====
@@ -387,6 +385,7 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
         cpuScalability, cpuCountLabel, formattedSocket, memoryOptions, totalMemory, memoryPower,
         selectedMotherboardDetail, maxMemorySlots, storagePower, expansionPower,
         cpuPower, motherboardPower, totalPower, recommendedPSU, powerColor,
+        validationResult,
         compatibilityWarnings,
 
         // ==== 导出 Actions ====
