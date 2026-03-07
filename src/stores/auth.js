@@ -11,8 +11,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import axios from 'axios'
-
-const API_BASE = 'http://localhost:3000/api'
+import { API_BASE_URL } from '../config/env'
 
 export const useAuthStore = defineStore('auth', () => {
     // ============================================================
@@ -57,7 +56,7 @@ export const useAuthStore = defineStore('auth', () => {
     async function silentRefresh() {
         try {
             const res = await axios.post(
-                `${API_BASE}/auth/refresh`,
+                `${API_BASE_URL}/auth/refresh`,
                 {},                          // body 为空，refreshToken 通过 Cookie 自动携带
                 { withCredentials: true }    // 必须携带 Cookie
             )

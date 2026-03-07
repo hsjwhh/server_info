@@ -15,6 +15,8 @@
 import axios from 'axios'
 import { useToast } from 'vuestic-ui'
 import { useAuthStore } from '../stores/auth'
+import router from '../router'
+import { API_BASE_URL } from '../config/env'
 
 // 创建 toast 实例
 let toastInstance = null
@@ -28,7 +30,7 @@ const getToast = () => {
 
 // 创建 axios 实例
 const service = axios.create({
-  baseURL: 'http://localhost:3000/api',
+  baseURL: API_BASE_URL,
   timeout: 5000,
   withCredentials: true    // 允许携带 Cookie（refreshToken 由后端通过 HttpOnly Cookie 管理）
 })
@@ -99,7 +101,9 @@ service.interceptors.response.use(
         // 刷新失败 → 跳转登录页
         const notify = getToast()
         notify({ message: '登录已过期，请重新登录', color: 'danger' })
-        window.location.href = '/login'
+        if (router.currentRoute.value.path !== '/login') {
+          router.replace('/login')
+        }
         return Promise.reject(error)
       }
     }
