@@ -23,7 +23,13 @@
 
           <VaDivider class="dropdown-divider" />
 
-          <VaMenuList :options="menuOptions" @selected="handleMenuSelect" />
+          <VaMenuList
+            class="user-menu"
+            text-by="label"
+            value-by="value"
+            :options="menuOptions"
+            @selected="handleMenuSelect"
+          />
         </VaDropdownContent>
       </VaDropdown>
     </div>
@@ -38,8 +44,8 @@ import {
   VaAvatar,
   VaDropdown,
   VaDropdownContent,
-  VaMenuList,
-  VaDivider
+  VaDivider,
+  VaMenuList
 } from 'vuestic-ui'
 import { useAuthStore } from '../stores/auth'
 import request from '../utils/request'
@@ -59,10 +65,16 @@ const menuOptions = [
   { label: '退出登录',  icon: 'mdi-logout',       value: 'logout'  },
 ]
 
-const handleMenuSelect = async (option) => {
-  if (option.value === 'settings') {
+const handleMenuSelect = async (value, option) => {
+  const selectedOption = option || menuOptions.find((item) => item.value === value)
+
+  if (!selectedOption) {
+    return
+  }
+
+  if (selectedOption.value === 'settings') {
     router.push('/settings')
-  } else if (option.value === 'logout') {
+  } else if (selectedOption.value === 'logout') {
     try {
       // 调用后端登出接口，并清除服务器端 HttpOnly Cookie
       await request.post('/auth/logout')
@@ -104,35 +116,65 @@ const handleMenuSelect = async (option) => {
 
 /* 下拉面板 */
 .user-dropdown {
-  min-width: 200px;
-  padding: var(--space-2) 0;
+  width: 220px;
+  background: var(--color-bg-white);
+  padding: 8px 0;
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-md);
 }
 
 .user-info {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  padding: var(--space-4) var(--space-4) var(--space-3);
+  padding: var(--space-3) var(--space-4) var(--space-4);
 }
 
 .user-meta {
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 2px;
+  overflow: hidden;
 }
 
 .user-name {
   font-weight: 600;
-  font-size: var(--text-base);
+  font-size: var(--text-md);
   color: var(--color-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-role {
-  font-size: var(--text-sm);
+  font-size: var(--text-xs);
   color: var(--color-text-secondary);
 }
 
 .dropdown-divider {
-  margin: var(--space-1) 0;
+  margin: 4px 0;
+}
+
+.user-menu {
+  width: 100%;
+}
+
+.user-menu :deep(.va-menu-list) {
+  padding: 0 4px;
+}
+
+.user-menu :deep(.va-menu-item__content) {
+  width: 100%;
+  border-radius: var(--radius-sm);
+  transition: background-color 0.2s;
+}
+
+.user-menu :deep(.va-menu-item__content:hover) {
+  background: var(--color-bg-hover);
+}
+
+.user-menu :deep(.va-menu-item__anchor) {
+  color: var(--color-text-primary);
+  font-size: var(--text-sm);
 }
 </style>
