@@ -168,23 +168,32 @@ const handleMenuSelect = async (value, option) => {
 }
 
 .user-menu :deep(.va-menu-item) {
-  --va-menu-item-hover-color: var(--color-bg-hover);
-  --va-menu-item-hover-opacity: 1;
+  --va-menu-item-hover-opacity: 0;
+  border-radius: var(--radius-sm);
+  transition: background 0.15s ease;
+}
+
+.user-menu :deep(.va-menu-item:hover) {
+  background: var(--color-bg-hover);
 }
 
 .user-menu :deep(.va-menu-item::after) {
-  border-radius: var(--radius-sm);
+  display: none;
 }
 
-.user-menu :deep(.va-menu-item__cell--left),
-.user-menu :deep(.va-menu-item__cell--right) {
+.user-menu :deep(.va-menu-item__cell--left) {
   padding-left: 10px;
-  padding-right: 6px;
+  padding-right: 0;
+  width: 32px;
 }
 
 .user-menu :deep(.va-menu-item__cell--center) {
-  padding-left: 10px;
+  padding-left: 6px;
   padding-right: 10px;
+}
+
+.user-menu :deep(.va-menu-item__cell--right) {
+  padding-right: 6px;
 }
 
 .user-menu :deep(.va-menu-item__left-icon) {
