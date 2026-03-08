@@ -161,40 +161,43 @@ const handleMenuSelect = async (value, option) => {
 }
 
 .user-menu :deep(.va-menu-list) {
-  padding: 4px;
-}
-
-.user-menu :deep(.va-menu-item__content) {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  transition: all 0.2s ease;
-  cursor: pointer;
   width: 100%;
+  min-width: 100%;
+  padding: 4px;
+  table-layout: auto;
 }
 
-.user-menu :deep(.va-menu-item__content:hover) {
-  background: var(--color-bg-hover);
+.user-menu :deep(.va-menu-item) {
+  --va-menu-item-hover-color: var(--color-bg-hover);
+  --va-menu-item-hover-opacity: 1;
+}
+
+.user-menu :deep(.va-menu-item::after) {
+  border-radius: var(--radius-sm);
+}
+
+.user-menu :deep(.va-menu-item__cell--left),
+.user-menu :deep(.va-menu-item__cell--right) {
+  padding-left: 10px;
+  padding-right: 6px;
+}
+
+.user-menu :deep(.va-menu-item__cell--center) {
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .user-menu :deep(.va-menu-item__left-icon) {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 18px;
   color: var(--color-text-secondary);
-  flex-shrink: 0;
-  pointer-events: none;
 }
 
-.user-menu :deep(.va-menu-item__anchor) {
-  flex: 1;
+.user-menu :deep(.va-menu-item__content) {
+  display: block;
+  padding: 8px 0;
   color: var(--color-text-primary);
   font-size: var(--text-sm);
   text-decoration: none;
   white-space: nowrap;
-  pointer-events: none;
 }
 </style>
