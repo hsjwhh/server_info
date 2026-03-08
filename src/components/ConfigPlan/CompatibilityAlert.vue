@@ -1,11 +1,12 @@
 <!-- src/components/ConfigPlan/CompatibilityAlert.vue -->
 <template>
-  <VaCard v-if="validationResult.blockers.length > 0 || validationResult.warnings.length > 0">
+  <VaCard v-if="validationResult.blockers.length > 0 || validationResult.warnings.length > 0 || validationResult.infos.length > 0">
     <VaCardTitle>
-      <VaIcon name="mdi-alert" color="warning" class="mr-2" />
-      兼容性提示
+      <VaIcon name="mdi-alert-circle-outline" color="primary" class="mr-2" />
+      兼容性与建议
     </VaCardTitle>
     <VaCardContent>
+      <!-- Blockers (红色) -->
       <VaAlert
         v-for="(item, index) in validationResult.blockers"
         :key="`blocker-${index}`"
@@ -13,8 +14,13 @@
         border="left"
         class="mb-2"
       >
+        <template #icon>
+          <VaIcon name="mdi-close-octagon" />
+        </template>
         {{ item }}
       </VaAlert>
+
+      <!-- Warnings (黄色) -->
       <VaAlert
         v-for="(item, index) in validationResult.warnings"
         :key="`warning-${index}`"
@@ -22,6 +28,23 @@
         border="left"
         class="mb-2"
       >
+        <template #icon>
+          <VaIcon name="mdi-alert" />
+        </template>
+        {{ item }}
+      </VaAlert>
+
+      <!-- Infos (蓝色/Outline) -->
+      <VaAlert
+        v-for="(item, index) in validationResult.infos"
+        :key="`info-${index}`"
+        color="info"
+        outline
+        class="mb-2"
+      >
+        <template #icon>
+          <VaIcon name="mdi-information" />
+        </template>
         {{ item }}
       </VaAlert>
     </VaCardContent>

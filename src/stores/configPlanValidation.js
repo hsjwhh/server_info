@@ -1,14 +1,23 @@
-// src/stores/configPlanValidation.js
-// ConfigPlan 统一校验入口：集中维护所有“可阻断/可提示”的规则。
+import { unref } from 'vue'
 
 const parsePositiveInt = (value) => {
   const num = typeof value === 'number' ? value : parseInt(String(value), 10)
   return Number.isFinite(num) && num > 0 ? num : null
 }
 
-const normalizeSocket = (value) => String(value || '').toUpperCase().replace(/[^A-Z0-9]/g, '')
+/**
+ * 标准化 Socket 名称
+ * 处理 FCLGA4677 -> LGA4677 的情况，确保 CPU 和主板端前缀不一致时也能正确匹配
+ */
+const normalizeSocket = (value) => {
+  return String(value || '')
+    .toUpperCase()
+    .replace(/^FC/, '') // 移除 Intel 常用的 FC 前缀
+    .replace(/[^A-Z0-9]/g, '')
+}
 
-export function validateConfig(input) {
+export function validateConfig(rawInput) {
+  const input = unref(rawInput) // 增加 ref 保护
   const result = {
     blockers: [],
     warnings: [],
@@ -33,7 +42,7 @@ export function validateConfig(input) {
     result.warnings.push('已选择 CPU，但尚未选择主板')
   }
 
-  // CPU / 主板 socket 一致性校验（即使下拉已按 socket 过滤，这里仍做最终兜底）
+  // CPU / 主板 socket 一致性校验
   if (selectedMotherboardDetail && formattedSocket) {
     const mbSocket = selectedMotherboardDetail.sockets || selectedMotherboardDetail.socket
     if (mbSocket && normalizeSocket(mbSocket) !== normalizeSocket(formattedSocket)) {
@@ -54,7 +63,7 @@ export function validateConfig(input) {
     const powerRatio = totalPower / recommendedPSU
     if (powerRatio > 1) {
       result.blockers.push(`系统总功耗 ${totalPower}W 已超过建议电源 ${recommendedPSU}W`)
-    } else if (powerRatio > 0.9) {
+    } else if (powerRatio > 0.85) { // 从 0.9 调整为 0.85，与 store/powerColor 逻辑对齐
       result.warnings.push('系统功耗接近电源理论上限，建议添加更多冗余')
     }
   }

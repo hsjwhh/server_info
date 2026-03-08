@@ -367,12 +367,6 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
         recommendedPSU: recommendedPSU.value
     }))
 
-    // 兼容旧组件字段：保留原 warnings 数组接口（blocker 也会展示出来）
-    const compatibilityWarnings = computed(() => [
-        ...validationResult.value.blockers,
-        ...validationResult.value.warnings
-    ])
-
     return {
         // ==== 导出 State ====
         cpuKeyword, cpuSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
@@ -386,7 +380,6 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
         selectedMotherboardDetail, maxMemorySlots, storagePower, expansionPower,
         cpuPower, motherboardPower, totalPower, recommendedPSU, powerColor,
         validationResult,
-        compatibilityWarnings,
 
         // ==== 导出 Actions ====
         addItem, removeItem, handleCpuSearch, selectCpu, clearCpu, validateCpuCount,
