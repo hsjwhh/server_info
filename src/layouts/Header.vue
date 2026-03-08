@@ -27,6 +27,7 @@
             class="user-menu"
             text-by="label"
             value-by="value"
+            icon-by="icon"
             :options="menuOptions"
             @selected="handleMenuSelect"
           />
@@ -160,21 +161,40 @@ const handleMenuSelect = async (value, option) => {
 }
 
 .user-menu :deep(.va-menu-list) {
-  padding: 0 4px;
+  padding: 4px;
 }
 
 .user-menu :deep(.va-menu-item__content) {
-  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 8px 12px;
   border-radius: var(--radius-sm);
-  transition: background-color 0.2s;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  width: 100%;
 }
 
 .user-menu :deep(.va-menu-item__content:hover) {
   background: var(--color-bg-hover);
 }
 
+.user-menu :deep(.va-menu-item__left-icon) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
 .user-menu :deep(.va-menu-item__anchor) {
+  flex: 1;
   color: var(--color-text-primary);
   font-size: var(--text-sm);
+  text-decoration: none;
+  white-space: nowrap;
+  pointer-events: none;
 }
 </style>
