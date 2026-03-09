@@ -15,7 +15,7 @@
     <VaForm ref="formRef" @submit.prevent="handleSubmit">
       <div class="flex flex-col gap-6">
         
-        <!-- 第一行：标识与核心硬件 (1:1 或 适应度布局) -->
+        <!-- 第一行：标识与核心硬件 -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- 1. 标识与归属 -->
           <VaCard class="shadow-sm">
@@ -27,7 +27,6 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                 <VaDateInput v-model="entryDate" label="入库日期 *" class="w-full" required />
                 <VaInput v-model="form.sn" label="序列号 (SN) *" placeholder="唯一序列号或起始 SN" required />
-                <!-- number 字段作为数量录入 -->
                 <VaCounter v-model="form.number" label="入库数量 (Quantity) *" :min="1" />
                 <VaInput v-model="form.customer" label="客户名称 *" placeholder="最终用户" required />
                 <VaInput v-model="form.owner" label="所属者" />
@@ -42,21 +41,44 @@
               <VaIcon name="mdi-cpu-64-bit" class="mr-2" color="primary" />
               核心硬件配置
             </VaCardTitle>
-            <VaCardContent class="flex flex-col gap-4 mt-2">
+            <VaCardContent class="flex flex-col gap-4 mt-2 relative">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- CPU 搜索：对齐 ConfigPlan 逻辑，支持输入搜索 -->
-                <VaSelect
-                  v-model="selectedCpuObj"
-                  label="CPU 型号 *"
-                  placeholder="输入型号搜索 (如 2680)"
-                  searchable
-                  text-by="cpu_short_name"
-                  track-by="id"
-                  :options="cpuSuggestions"
-                  :loading="searchingCpu"
-                  @update:model-value="onCpuSelect"
-                  @search="handleCpuSearch"
-                />
+                <!-- CPU 搜索：对齐 ConfigPlan 逻辑，文本框 + 自动补全 -->
+                <div class="cpu-search-container">
+                  <VaInput
+                    v-model="cpuKeyword"
+                    label="CPU 型号 *"
+                    placeholder="输入型号搜索 (如 2680)"
+                    required
+                    clearable
+                    :loading="searchingCpu"
+                    @input="handleCpuSearch"
+                    @clear="clearCpu"
+                  >
+                    <template #prependInner>
+                      <VaIcon name="mdi-magnify" size="small" />
+                    </template>
+                  </VaInput>
+                  
+                  <!-- 搜索建议列表 (对齐 CpuSelector.vue 样式) -->
+                  <div v-if="cpuSuggestions.length > 0" class="suggestions-list">
+                    <div
+                      v-for="cpu in cpuSuggestions"
+                      :key="cpu.id"
+                      class="suggestion-item"
+                      @click="onCpuSelect(cpu)"
+                    >
+                      <div class="suggestion-main">
+                        <strong>{{ cpu.cpu_short_name }}</strong>
+                        <VaChip size="small" color="info">{{ cpu.tdp }}W</VaChip>
+                      </div>
+                      <div class="suggestion-sub">
+                        {{ cpu.cores }}C/{{ cpu.threads }}T · {{ cpu.socket }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
                 <VaCounter v-model="form.cpun" label="CPU 数量" :min="1" />
                 
                 <!-- 主板选择 -->
@@ -205,7 +227,7 @@
 import { ref, reactive } from 'vue'
 import debounce from 'lodash.debounce'
 import { 
-  VaCard, VaCardTitle, VaCardContent, VaInput, VaForm, VaButton, VaDivider,
+  VaCard, VaCardTitle, VaCardContent, VaInput, VaForm, VaButton, VaDivider, VaChip,
   VaDateInput, VaCounter, VaIcon, VaTextarea, VaSelect, useToast 
 } from 'vuestic-ui'
 import { createServer } from '../../api/server'
@@ -217,7 +239,7 @@ const loading = ref(false)
 const entryDate = ref(new Date())
 
 // 联动状态
-const selectedCpuObj = ref(null)
+const cpuKeyword = ref('')
 const selectedMbObj = ref(null)
 const cpuSuggestions = ref([])
 const mbOptions = ref([])
@@ -235,7 +257,7 @@ const hwLists = reactive({
   raid: []
 })
 
-// 基础表单：完全对应后端数据库字段 (number, owner, agent, customer, sn 等)
+// 基础表单
 const initialForm = {
   y: null, m: null, d: null,
   owner: '', agent: '', sn: '', customer: '', number: 1,
@@ -255,21 +277,25 @@ const form = reactive({ ...initialForm })
 
 // --- 联动逻辑 ---
 
-const handleCpuSearch = debounce(async (query) => {
-  // 对齐 ConfigPlan 逻辑
-  if (!query || query.length < 2) return
+const handleCpuSearch = debounce(async () => {
+  if (!cpuKeyword.value || cpuKeyword.value.length < 2) {
+    cpuSuggestions.value = []
+    return
+  }
   searchingCpu.value = true
   try {
-    cpuSuggestions.value = await searchCpu(query)
+    cpuSuggestions.value = await searchCpu(cpuKeyword.value)
   } finally {
     searchingCpu.value = false
   }
-}, 500)
+}, 600)
 
 const onCpuSelect = async (cpu) => {
   if (!cpu) return
+  cpuKeyword.value = cpu.cpu_short_name
   form.cpu = cpu.cpu_short_name
   form.cpu_id = cpu.id
+  cpuSuggestions.value = [] // 清空建议列表
   
   // 联动加载主板
   loadingMbs.value = true
@@ -283,6 +309,15 @@ const onCpuSelect = async (cpu) => {
   } finally {
     loadingMbs.value = false
   }
+}
+
+const clearCpu = () => {
+  cpuKeyword.value = ''
+  form.cpu = ''
+  form.cpu_id = null
+  cpuSuggestions.value = []
+  mbOptions.value = []
+  selectedMbObj.value = null
 }
 
 const onMbSelect = (mb) => {
@@ -299,7 +334,8 @@ const removeHw = (key, idx) => hwLists[key].splice(idx, 1)
 const resetForm = () => {
   Object.assign(form, initialForm)
   entryDate.value = new Date()
-  selectedCpuObj.value = null
+  cpuKeyword.value = ''
+  cpuSuggestions.value = []
   selectedMbObj.value = null
   Object.keys(hwLists).forEach(k => { hwLists[k] = [] })
   hwLists.mem = [{ model: '', count: 2 }]
@@ -313,12 +349,10 @@ const handleSubmit = async () => {
 
   loading.value = true
   try {
-    // 1. 日期拆解
     form.y = entryDate.value.getFullYear()
     form.m = entryDate.value.getMonth() + 1
     form.d = entryDate.value.getDate()
 
-    // 2. 硬件清单序列化 (分号分隔)
     Object.keys(hwLists).forEach(key => {
       const validItems = hwLists[key].filter(i => i.model && i.model.trim())
       form[key] = validItems.map(i => i.model.trim()).join(';')
@@ -327,8 +361,6 @@ const handleSubmit = async () => {
 
     await createServer(form)
     notify({ message: '服务器入库成功！', color: 'success' })
-    
-    // 清除 SN，保留配置以便连续录入
     form.sn = ''
   } catch (err) {
     console.error('保存失败:', err)
@@ -357,6 +389,51 @@ const handleSubmit = async () => {
   font-weight: 600;
   border-bottom: 1px solid var(--color-border-light);
   padding: 1rem 1.25rem;
+}
+
+/* CPU 建议列表样式对齐 CpuSelector.vue */
+.cpu-search-container {
+  position: relative;
+  width: 100%;
+}
+
+.suggestions-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  z-index: 1000;
+  box-shadow: var(--shadow-lg);
+  max-height: 280px;
+  overflow-y: auto;
+  margin-top: 2px;
+}
+
+.suggestion-item {
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border-subtle);
+  transition: background 0.2s;
+}
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background: var(--color-bg-hover); }
+
+.suggestion-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2px;
+}
+.suggestion-main strong {
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+.suggestion-sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
 }
 
 /* 局部布局辅助类 */
