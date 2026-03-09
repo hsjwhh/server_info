@@ -26,9 +26,9 @@
             <VaCardContent>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                 <VaDateInput v-model="entryDate" label="入库日期 *" class="w-full" required />
-                <VaInput v-model="form.sn" label="序列号 (SN) *" placeholder="唯一序列号" required />
-                <!-- 严格按照表结构：number 字段保留，owner, agent, customer -->
-                <VaInput v-model="form.number" label="编号 (Number)" placeholder="内部编号" />
+                <VaInput v-model="form.sn" label="序列号 (SN) *" placeholder="唯一序列号或起始 SN" required />
+                <!-- number 字段作为数量录入 -->
+                <VaCounter v-model="form.number" label="入库数量 (Quantity) *" :min="1" />
                 <VaInput v-model="form.customer" label="客户名称 *" placeholder="最终用户" required />
                 <VaInput v-model="form.owner" label="所属者" />
                 <VaInput v-model="form.agent" label="代理商" />
@@ -238,7 +238,7 @@ const hwLists = reactive({
 // 基础表单：完全对应后端数据库字段 (number, owner, agent, customer, sn 等)
 const initialForm = {
   y: null, m: null, d: null,
-  owner: '', agent: '', sn: '', customer: '', number: '',
+  owner: '', agent: '', sn: '', customer: '', number: 1,
   chassis: '', psu: '', mb: '', mb_id: null, bmcpwd: '',
   cpu: '', cpu_id: null, cpun: 1,
   mem: '', memn: '',
