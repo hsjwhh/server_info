@@ -160,11 +160,17 @@ export function deleteConfig(configId) {
 }
 
 /**
- * 计算功耗（可选，如果后端有专门的计算接口）
- * 
- * @param {Object} hw - 硬件配置
- * @returns {Promise<Object>} 功耗计算结果
+ * 新增 CPU 信息
+ * @param {Object} data - CPU 详细数据
+ * @returns {Promise<Object>} 新增后的记录信息
  */
-export function calculatePower(hw) {
-  return request.post('/hw/power-calculation', hw)
+export function addCpu(data) {
+  return request.post('/hw/cpu', data)
+}
+
+/**
+ * 修改 CPU 信息 (可选，留作后续扩展)
+ */
+export function updateCpu(id, data) {
+  return request.put(`/hw/cpu/${id}`, data)
 }

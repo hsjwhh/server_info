@@ -29,21 +29,32 @@
             <VaCardContent class="relative">
               <div class="vertical-form mt-2">
                 <div class="cpu-container mb-3">
-                  <VaInput
-                    v-model="cpuKeyword"
-                    label="CPU 型号 *"
-                    placeholder="输入型号搜索"
-                    required
-                    clearable
-                    :loading="searchingCpu"
-                    class="w-full"
-                    @input="handleCpuSearch"
-                    @clear="clearCpu"
-                  >
-                    <template #prependInner>
-                      <VaIcon name="mdi-magnify" size="small" />
-                    </template>
-                  </VaInput>
+                  <label class="va-input-label cpu-standalone-label">CPU 型号 *</label>
+                  <div class="cpu-input-row">
+                    <VaInput
+                      v-model="cpuKeyword"
+                      placeholder="输入型号搜索..."
+                      required
+                      clearable
+                      :loading="searchingCpu"
+                      class="f-grow"
+                      @input="handleCpuSearch"
+                      @clear="clearCpu"
+                    >
+                      <template #prependInner>
+                        <VaIcon name="mdi-magnify" size="small" />
+                      </template>
+                    </VaInput>
+                    <VaButton
+                      preset="secondary"
+                      icon="mdi-plus"
+                      class="cpu-add-btn"
+                      title="新增 CPU 到数据库"
+                      @click="showCpuAddModal = true"
+                    >
+                      录入新型号
+                    </VaButton>
+                  </div>
                   
                   <div v-if="cpuSuggestions.length > 0" class="suggestions-list">
                     <div
@@ -105,20 +116,23 @@
                 <!-- 硬盘系列：保持动态 -->
                 <div class="hw-group-box mb-4 pt-3 border-t">
                   <label class="group-label">硬盘清单 (支持多型号)</label>
+                  <!-- M.2 -->
                   <div v-for="(item, idx) in hwLists.m2" :key="idx" class="hw-row mb-2">
                     <VaInput v-model="item.model" placeholder="M.2 型号" class="f-grow" />
                     <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('m2', idx)" />
+                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('m2', idx)" />
                   </div>
+                  <!-- SSD -->
                   <div v-for="(item, idx) in hwLists.ssd" :key="idx" class="hw-row mb-2">
                     <VaInput v-model="item.model" placeholder="SSD 型号" class="f-grow" />
                     <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('ssd', idx)" />
+                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('ssd', idx)" />
                   </div>
+                  <!-- HDD -->
                   <div v-for="(item, idx) in hwLists.hdd" :key="idx" class="hw-row mb-2">
                     <VaInput v-model="item.model" placeholder="HDD 型号" class="f-grow" />
                     <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('hdd', idx)" />
+                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('hdd', idx)" />
                   </div>
                   <div class="flex gap-2">
                     <VaButton size="small" preset="secondary" @click="addHw('m2')">+ M.2</VaButton>
@@ -135,22 +149,23 @@
             <VaCardTitle>扩展、显卡与系统</VaCardTitle>
             <VaCardContent>
               <div class="vertical-form mt-2">
+                <!-- 扩展件：保持动态 -->
                 <div class="hw-group-box mb-4">
                   <label class="group-label">扩展设备清单</label>
                   <div v-for="(item, idx) in hwLists.gpu" :key="idx" class="hw-row mb-2">
                     <VaInput v-model="item.model" placeholder="显卡型号" class="f-grow" />
                     <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('gpu', idx)" />
+                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('gpu', idx)" />
                   </div>
                   <div v-for="(item, idx) in hwLists.lan" :key="idx" class="hw-row mb-2">
                     <VaInput v-model="item.model" placeholder="网卡型号" class="f-grow" />
                     <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('lan', idx)" />
+                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('lan', idx)" />
                   </div>
                   <div v-for="(item, idx) in hwLists.raid" :key="idx" class="hw-row mb-2">
                     <VaInput v-model="item.model" placeholder="阵列卡型号" class="f-grow" />
                     <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('raid', idx)" />
+                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('raid', idx)" />
                   </div>
                   <div class="flex gap-2">
                     <VaButton size="small" preset="secondary" @click="addHw('gpu')">+ GPU</VaButton>
@@ -159,6 +174,7 @@
                   </div>
                 </div>
 
+                <!-- 系统与备注 -->
                 <div class="system-box border-t pt-3">
                   <VaInput v-model="form.os" label="操作系统" placeholder="例如: CentOS 7.9" class="w-full mb-3" />
                   <VaTextarea v-model="form.note" label="备注信息" :min-rows="2" class="w-full" />
@@ -171,14 +187,20 @@
       </div>
 
       <div class="flex justify-center gap-4 mt-8 mb-12">
-        <VaButton preset="secondary" color="secondary" size="large" @click="resetForm">
+        <VaButton preset="secondary" @click="resetForm">
           重置表单
         </VaButton>
-        <VaButton type="submit" :loading="loading" size="large" icon="mdi-content-save">
+        <VaButton type="submit" :loading="loading" icon="mdi-content-save">
           保存服务器入库
         </VaButton>
       </div>
     </VaForm>
+
+    <!-- CPU 新增弹窗 -->
+    <CpuAddModal
+      v-model="showCpuAddModal"
+      @saved="onCpuSaved"
+    />
   </div>
 </template>
 
@@ -192,6 +214,7 @@ import {
 import { createServer } from '../../api/server'
 import { searchCpu, getMbBySocket } from '../../api/configPlan'
 import { formatSocket } from '../../utils/hardware'
+import CpuAddModal from '../../components/ConfigPlan/CpuAddModal.vue'
 
 const { init: notify } = useToast()
 const formRef = ref(null)
@@ -204,6 +227,7 @@ const cpuSuggestions = ref([])
 const mbOptions = ref([])
 const searchingCpu = ref(false)
 const loadingMbs = ref(false)
+const showCpuAddModal = ref(false)
 
 const hwLists = reactive({
   m2: [],
@@ -261,6 +285,18 @@ const onCpuSelect = async (cpu) => {
   } finally {
     loadingMbs.value = false
   }
+}
+
+/**
+ * 当成功新增 CPU 后的处理逻辑：自动选中该 CPU
+ */
+const onCpuSaved = (newCpu) => {
+  notify({ message: '新 CPU 已成功录入数据库并自动选中', color: 'success' })
+  // 触发自动选中逻辑
+  if (newCpu) {
+    onCpuSelect(newCpu)
+  }
+  showCpuAddModal.value = false
 }
 
 const clearCpu = () => {
@@ -406,6 +442,27 @@ const handleSubmit = async () => {
 
 .cpu-container {
   position: relative;
+  margin-bottom: 0.75rem;
+}
+
+.cpu-standalone-label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+/* input 与按钮同行，按钮高度跟随 input */
+.cpu-input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: stretch;
+}
+
+.cpu-add-btn {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .suggestions-list {
