@@ -50,7 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-## [2.0.0] - 2026-02-01
+## [0.1.0] - 2026-02-01
 
 ### Changed
 - Major refactor: Migrated from Element Plus to Vuestic UI.
@@ -58,7 +58,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Implemented state persistence for server list.
 - Optimized large data handling in `ServerListPage` (V3 update).
 
-## [1.0.0] - 2026-01-01
+## [0.0.1] - 2026-01-01
 
 ### Added
 - Initial release of the Server Info hardware management system.

@@ -3,6 +3,7 @@ import { ref, computed, unref } from 'vue'
 import debounce from 'lodash.debounce'
 import { searchCpu, getCpuDetail, getMbBySocket } from '../api/configPlan'
 import { validateConfig } from './configPlanValidation'
+import { formatSocket } from '../utils/hardware'
 
 /**
  * --- Constants & "Magic Numbers" Extraction ---
@@ -267,11 +268,7 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
     })
 
     // 接口名称格式化 (把 FCLGAxxxx 美化成 LGA-xxxx，业界更为通用)
-    const formattedSocket = computed(() => {
-        const s = selectedCpu.value?.socket
-        if (s?.startsWith('FCLGA')) return s.replace(/^FCLGA(\d+)$/, 'LGA-$1')
-        return s
-    })
+    const formattedSocket = computed(() => formatSocket(selectedCpu.value?.socket))
 
     // 核心解构器：从 CPU 的 memory_speed 字段中，挖掘支持哪些类型的内存条
     const extractMemoryTypes = (memorySpeed) => {

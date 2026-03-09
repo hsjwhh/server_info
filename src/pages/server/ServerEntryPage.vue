@@ -1,57 +1,42 @@
 <!-- src/pages/server/ServerEntryPage.vue -->
 <template>
   <div class="server-entry-page">
-    <!-- 页面标题区 -->
-    <div class="page-header mb-6">
-      <div class="flex items-center gap-3">
-        <VaIcon name="mdi-database-plus" size="large" color="primary" />
-        <div>
-          <h1 class="va-h3 mb-0">服务器入库录入</h1>
-          <p class="text-secondary va-text-sm">严格对照数据库字段录入，支持硬件联动与多项序列化存储</p>
-        </div>
-      </div>
-    </div>
+    <h1 class="page-title">服务器入库录入</h1>
 
     <VaForm ref="formRef" @submit.prevent="handleSubmit">
-      <div class="flex flex-col gap-6">
+      <div class="layout-container">
         
-        <!-- 第一行：标识与核心硬件 -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- 第一行：标识/归属 与 核心配置 (左右并排) -->
+        <div class="card-row">
           <!-- 1. 标识与归属 -->
-          <VaCard class="shadow-sm">
-            <VaCardTitle>
-              <VaIcon name="mdi-identifier" class="mr-2" color="primary" />
-              标识与归属
-            </VaCardTitle>
+          <VaCard class="flex-1 shadow-sm">
+            <VaCardTitle>标识与归属</VaCardTitle>
             <VaCardContent>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
-                <VaDateInput v-model="entryDate" label="入库日期 *" class="w-full" required />
-                <VaInput v-model="form.sn" label="序列号 (SN) *" placeholder="唯一序列号或起始 SN" required />
-                <VaCounter v-model="form.number" label="入库数量 (Quantity) *" :min="1" />
-                <VaInput v-model="form.customer" label="客户名称 *" placeholder="最终用户" required />
-                <VaInput v-model="form.owner" label="所属者" />
-                <VaInput v-model="form.agent" label="代理商" />
+              <div class="vertical-form mt-2">
+                <VaDateInput v-model="entryDate" label="入库日期 *" required class="w-full mb-3" />
+                <VaInput v-model="form.sn" label="序列号 (SN) *" placeholder="唯一序列号" required class="w-full mb-3" />
+                <VaCounter v-model="form.number" label="入库数量 *" :min="1" class="mb-3" />
+                <VaInput v-model="form.customer" label="客户名称 *" required class="w-full mb-3" />
+                <VaInput v-model="form.owner" label="所属者" class="w-full mb-3" />
+                <VaInput v-model="form.agent" label="代理商" class="w-full" />
               </div>
             </VaCardContent>
           </VaCard>
 
-          <!-- 2. 核心硬件配置 -->
-          <VaCard class="shadow-sm">
-            <VaCardTitle>
-              <VaIcon name="mdi-cpu-64-bit" class="mr-2" color="primary" />
-              核心硬件配置
-            </VaCardTitle>
-            <VaCardContent class="flex flex-col gap-4 mt-2 relative">
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- CPU 搜索：对齐 ConfigPlan 逻辑，文本框 + 自动补全 -->
-                <div class="cpu-search-container">
+          <!-- 2. 核心配置 -->
+          <VaCard class="flex-1 shadow-sm">
+            <VaCardTitle>核心配置</VaCardTitle>
+            <VaCardContent class="relative">
+              <div class="vertical-form mt-2">
+                <div class="cpu-container mb-3">
                   <VaInput
                     v-model="cpuKeyword"
                     label="CPU 型号 *"
-                    placeholder="输入型号搜索 (如 2680)"
+                    placeholder="输入型号搜索"
                     required
                     clearable
                     :loading="searchingCpu"
+                    class="w-full"
                     @input="handleCpuSearch"
                     @clear="clearCpu"
                   >
@@ -60,7 +45,6 @@
                     </template>
                   </VaInput>
                   
-                  <!-- 搜索建议列表 (对齐 CpuSelector.vue 样式) -->
                   <div v-if="cpuSuggestions.length > 0" class="suggestions-list">
                     <div
                       v-for="cpu in cpuSuggestions"
@@ -72,16 +56,13 @@
                         <strong>{{ cpu.cpu_short_name }}</strong>
                         <VaChip size="small" color="info">{{ cpu.tdp }}W</VaChip>
                       </div>
-                      <div class="suggestion-sub">
-                        {{ cpu.cores }}C/{{ cpu.threads }}T · {{ cpu.socket }}
-                      </div>
+                      <div class="suggestion-sub">{{ cpu.cores }}C/{{ cpu.threads }}T · {{ cpu.socket }}</div>
                     </div>
                   </div>
                 </div>
 
-                <VaCounter v-model="form.cpun" label="CPU 数量" :min="1" />
+                <VaCounter v-model="form.cpun" label="CPU 数量" :min="1" class="mb-3" />
                 
-                <!-- 主板选择 -->
                 <VaSelect
                   v-model="selectedMbObj"
                   label="主板型号 *"
@@ -92,125 +73,103 @@
                   :options="mbOptions"
                   :disabled="!form.cpu"
                   :loading="loadingMbs"
+                  class="w-full mb-3"
                   @update:model-value="onMbSelect"
                 />
-                <VaInput v-model="form.bmcpwd" label="BMC 密码" type="password" />
-              </div>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <VaInput v-model="form.chassis" label="机箱型号" />
-                <VaInput v-model="form.psu" label="电源信息" />
+                
+                <VaInput v-model="form.bmcpwd" label="BMC 密码" class="w-full mb-3" />
+                <VaInput v-model="form.chassis" label="机箱型号" class="w-full mb-3" />
+                <VaInput v-model="form.psu" label="电源信息" class="w-full" />
               </div>
             </VaCardContent>
           </VaCard>
         </div>
 
-        <!-- 第二行：内存与存储 (全宽) -->
-        <VaCard class="shadow-sm">
-          <VaCardTitle>
-            <VaIcon name="mdi-database-outline" class="mr-2" color="primary" />
-            内存与存储清单
-          </VaCardTitle>
-          <VaCardContent class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-2">
-            <!-- 内存 -->
-            <div class="hw-group">
-              <label class="va-text-xs font-bold text-secondary uppercase mb-2 block">内存条 (RAM)</label>
-              <div v-for="(item, idx) in hwLists.mem" :key="idx" class="flex gap-2 mb-2">
-                <VaInput v-model="item.model" placeholder="型号" class="flex-grow" />
-                <VaCounter v-model="item.count" :min="1" style="width: 80px" />
-                <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('mem', idx)" />
-              </div>
-              <VaButton size="small" preset="primary" icon="mdi-plus" @click="addHw('mem')">添加项</VaButton>
-            </div>
-
-            <!-- M.2 -->
-            <div class="hw-group">
-              <label class="va-text-xs font-bold text-secondary uppercase mb-2 block">M.2 固态</label>
-              <div v-for="(item, idx) in hwLists.m2" :key="idx" class="flex gap-2 mb-2">
-                <VaInput v-model="item.model" placeholder="型号" class="flex-grow" />
-                <VaCounter v-model="item.count" :min="1" style="width: 80px" />
-                <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('m2', idx)" />
-              </div>
-              <VaButton size="small" preset="primary" icon="mdi-plus" @click="addHw('m2')">添加项</VaButton>
-            </div>
-
-            <!-- SSD -->
-            <div class="hw-group">
-              <label class="va-text-xs font-bold text-secondary uppercase mb-2 block">SATA SSD</label>
-              <div v-for="(item, idx) in hwLists.ssd" :key="idx" class="flex gap-2 mb-2">
-                <VaInput v-model="item.model" placeholder="型号" class="flex-grow" />
-                <VaCounter v-model="item.count" :min="1" style="width: 80px" />
-                <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('ssd', idx)" />
-              </div>
-              <VaButton size="small" preset="primary" icon="mdi-plus" @click="addHw('ssd')">添加项</VaButton>
-            </div>
-
-            <!-- HDD -->
-            <div class="hw-group">
-              <label class="va-text-xs font-bold text-secondary uppercase mb-2 block">机械硬盘 (HDD)</label>
-              <div v-for="(item, idx) in hwLists.hdd" :key="idx" class="flex gap-2 mb-2">
-                <VaInput v-model="item.model" placeholder="型号" class="flex-grow" />
-                <VaCounter v-model="item.count" :min="1" style="width: 80px" />
-                <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('hdd', idx)" />
-              </div>
-              <VaButton size="small" preset="primary" icon="mdi-plus" @click="addHw('hdd')">添加项</VaButton>
-            </div>
-          </VaCardContent>
-        </VaCard>
-
-        <!-- 第三行：扩展与显卡 (全宽) -->
-        <VaCard class="shadow-sm">
-          <VaCardTitle>
-            <VaIcon name="mdi-expansion-card-variant" class="mr-2" color="primary" />
-            扩展、显卡与系统
-          </VaCardTitle>
-          <VaCardContent>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-2 mb-6">
-              <!-- GPU -->
-              <div class="hw-group">
-                <label class="va-text-xs font-bold text-secondary uppercase mb-2 block">显卡 (GPU)</label>
-                <div v-for="(item, idx) in hwLists.gpu" :key="idx" class="flex gap-2 mb-2">
-                  <VaInput v-model="item.model" placeholder="型号" class="flex-grow" />
-                  <VaCounter v-model="item.count" :min="1" style="width: 80px" />
-                  <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('gpu', idx)" />
+        <!-- 第二行：内存存储 与 扩展等 (左右并排) -->
+        <div class="card-row">
+          <!-- 3. 内存与存储 -->
+          <VaCard class="flex-1 shadow-sm">
+            <VaCardTitle>内存与存储清单</VaCardTitle>
+            <VaCardContent>
+              <div class="vertical-form mt-2">
+                <!-- 内存：固定单项 -->
+                <div class="mb-4">
+                  <label class="group-label">内存配置 (固定单种型号)</label>
+                  <div class="hw-row">
+                    <VaInput v-model="form.mem" label="型号" placeholder="DDR4 32GB" class="f-grow" />
+                    <VaCounter v-model="form.memn" label="数量" :min="1" class="hw-counter" />
+                    <div class="btn-placeholder"></div>
+                  </div>
                 </div>
-                <VaButton size="small" preset="primary" icon="mdi-plus" @click="addHw('gpu')">添加项</VaButton>
-              </div>
 
-              <!-- LAN -->
-              <div class="hw-group">
-                <label class="va-text-xs font-bold text-secondary uppercase mb-2 block">独立网卡 (LAN)</label>
-                <div v-for="(item, idx) in hwLists.lan" :key="idx" class="flex gap-2 mb-2">
-                  <VaInput v-model="item.model" placeholder="型号" class="flex-grow" />
-                  <VaCounter v-model="item.count" :min="1" style="width: 80px" />
-                  <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('lan', idx)" />
+                <!-- 硬盘系列：保持动态 -->
+                <div class="hw-group-box mb-4 pt-3 border-t">
+                  <label class="group-label">硬盘清单 (支持多型号)</label>
+                  <div v-for="(item, idx) in hwLists.m2" :key="idx" class="hw-row mb-2">
+                    <VaInput v-model="item.model" placeholder="M.2 型号" class="f-grow" />
+                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('m2', idx)" />
+                  </div>
+                  <div v-for="(item, idx) in hwLists.ssd" :key="idx" class="hw-row mb-2">
+                    <VaInput v-model="item.model" placeholder="SSD 型号" class="f-grow" />
+                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('ssd', idx)" />
+                  </div>
+                  <div v-for="(item, idx) in hwLists.hdd" :key="idx" class="hw-row mb-2">
+                    <VaInput v-model="item.model" placeholder="HDD 型号" class="f-grow" />
+                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('hdd', idx)" />
+                  </div>
+                  <div class="flex gap-2">
+                    <VaButton size="small" preset="secondary" @click="addHw('m2')">+ M.2</VaButton>
+                    <VaButton size="small" preset="secondary" @click="addHw('ssd')">+ SSD</VaButton>
+                    <VaButton size="small" preset="secondary" @click="addHw('hdd')">+ HDD</VaButton>
+                  </div>
                 </div>
-                <VaButton size="small" preset="primary" icon="mdi-plus" @click="addHw('lan')">添加项</VaButton>
               </div>
+            </VaCardContent>
+          </VaCard>
 
-              <!-- RAID -->
-              <div class="hw-group">
-                <label class="va-text-xs font-bold text-secondary uppercase mb-2 block">阵列卡 (RAID)</label>
-                <div v-for="(item, idx) in hwLists.raid" :key="idx" class="flex gap-2 mb-2">
-                  <VaInput v-model="item.model" placeholder="型号" class="flex-grow" />
-                  <VaCounter v-model="item.count" :min="1" style="width: 80px" />
-                  <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('raid', idx)" />
+          <!-- 4. 扩展与系统 -->
+          <VaCard class="flex-1 shadow-sm">
+            <VaCardTitle>扩展、显卡与系统</VaCardTitle>
+            <VaCardContent>
+              <div class="vertical-form mt-2">
+                <div class="hw-group-box mb-4">
+                  <label class="group-label">扩展设备清单</label>
+                  <div v-for="(item, idx) in hwLists.gpu" :key="idx" class="hw-row mb-2">
+                    <VaInput v-model="item.model" placeholder="显卡型号" class="f-grow" />
+                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('gpu', idx)" />
+                  </div>
+                  <div v-for="(item, idx) in hwLists.lan" :key="idx" class="hw-row mb-2">
+                    <VaInput v-model="item.model" placeholder="网卡型号" class="f-grow" />
+                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('lan', idx)" />
+                  </div>
+                  <div v-for="(item, idx) in hwLists.raid" :key="idx" class="hw-row mb-2">
+                    <VaInput v-model="item.model" placeholder="阵列卡型号" class="f-grow" />
+                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                    <VaButton icon="mdi-close" preset="secondary" color="danger" @click="removeHw('raid', idx)" />
+                  </div>
+                  <div class="flex gap-2">
+                    <VaButton size="small" preset="secondary" @click="addHw('gpu')">+ GPU</VaButton>
+                    <VaButton size="small" preset="secondary" @click="addHw('lan')">+ LAN</VaButton>
+                    <VaButton size="small" preset="secondary" @click="addHw('raid')">+ RAID</VaButton>
+                  </div>
                 </div>
-                <VaButton size="small" preset="primary" icon="mdi-plus" @click="addHw('raid')">添加项</VaButton>
+
+                <div class="system-box border-t pt-3">
+                  <VaInput v-model="form.os" label="操作系统" placeholder="例如: CentOS 7.9" class="w-full mb-3" />
+                  <VaTextarea v-model="form.note" label="备注信息" :min-rows="2" class="w-full" />
+                </div>
               </div>
-            </div>
-
-            <VaDivider class="my-4" />
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <VaInput v-model="form.os" label="操作系统" placeholder="例如: CentOS 7.9 / Win Server" />
-              <VaTextarea v-model="form.note" label="备注信息" :min-rows="2" placeholder="额外记录..." />
-            </div>
-          </VaCardContent>
-        </VaCard>
+            </VaCardContent>
+          </VaCard>
+        </div>
 
       </div>
 
-      <!-- 操作区 -->
       <div class="flex justify-center gap-4 mt-8 mb-12">
         <VaButton preset="secondary" color="secondary" size="large" @click="resetForm">
           重置表单
@@ -227,18 +186,18 @@
 import { ref, reactive } from 'vue'
 import debounce from 'lodash.debounce'
 import { 
-  VaCard, VaCardTitle, VaCardContent, VaInput, VaForm, VaButton, VaDivider, VaChip,
+  VaCard, VaCardTitle, VaCardContent, VaInput, VaForm, VaButton, VaChip,
   VaDateInput, VaCounter, VaIcon, VaTextarea, VaSelect, useToast 
 } from 'vuestic-ui'
 import { createServer } from '../../api/server'
 import { searchCpu, getMbBySocket } from '../../api/configPlan'
+import { formatSocket } from '../../utils/hardware'
 
 const { init: notify } = useToast()
 const formRef = ref(null)
 const loading = ref(false)
 const entryDate = ref(new Date())
 
-// 联动状态
 const cpuKeyword = ref('')
 const selectedMbObj = ref(null)
 const cpuSuggestions = ref([])
@@ -246,9 +205,7 @@ const mbOptions = ref([])
 const searchingCpu = ref(false)
 const loadingMbs = ref(false)
 
-// 动态硬件清单列表
 const hwLists = reactive({
-  mem: [{ model: '', count: 2 }],
   m2: [],
   ssd: [],
   hdd: [],
@@ -257,13 +214,12 @@ const hwLists = reactive({
   raid: []
 })
 
-// 基础表单
 const initialForm = {
   y: null, m: null, d: null,
   owner: '', agent: '', sn: '', customer: '', number: 1,
   chassis: '', psu: '', mb: '', mb_id: null, bmcpwd: '',
   cpu: '', cpu_id: null, cpun: 1,
-  mem: '', memn: '',
+  mem: '', memn: 2,
   m2: '', m2n: '',
   ssd: '', ssdn: '',
   hdd: '', hddn: '',
@@ -274,8 +230,6 @@ const initialForm = {
 }
 
 const form = reactive({ ...initialForm })
-
-// --- 联动逻辑 ---
 
 const handleCpuSearch = debounce(async () => {
   if (!cpuKeyword.value || cpuKeyword.value.length < 2) {
@@ -295,17 +249,15 @@ const onCpuSelect = async (cpu) => {
   cpuKeyword.value = cpu.cpu_short_name
   form.cpu = cpu.cpu_short_name
   form.cpu_id = cpu.id
-  cpuSuggestions.value = [] // 清空建议列表
+  cpuSuggestions.value = []
   
-  // 联动加载主板
   loadingMbs.value = true
   mbOptions.value = []
   form.mb = ''
   form.mb_id = null
   selectedMbObj.value = null
   try {
-    const socket = cpu.socket.startsWith('FCLGA') ? cpu.socket.replace('FCLGA', 'LGA-') : cpu.socket
-    mbOptions.value = await getMbBySocket(socket)
+    mbOptions.value = await getMbBySocket(formatSocket(cpu.socket))
   } finally {
     loadingMbs.value = false
   }
@@ -326,8 +278,6 @@ const onMbSelect = (mb) => {
   form.mb_id = mb.id
 }
 
-// --- 动态硬件管理 ---
-
 const addHw = (key) => hwLists[key].push({ model: '', count: 1 })
 const removeHw = (key, idx) => hwLists[key].splice(idx, 1)
 
@@ -338,10 +288,7 @@ const resetForm = () => {
   cpuSuggestions.value = []
   selectedMbObj.value = null
   Object.keys(hwLists).forEach(k => { hwLists[k] = [] })
-  hwLists.mem = [{ model: '', count: 2 }]
 }
-
-// --- 提交处理 ---
 
 const handleSubmit = async () => {
   const isValid = await formRef.value.validate()
@@ -372,12 +319,78 @@ const handleSubmit = async () => {
 
 <style scoped>
 .server-entry-page {
-  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* 与 ConfigPlanPage 对齐的间距 */
 }
 
-.text-secondary {
-  color: var(--color-text-secondary);
+.page-title {
+  font-size: var(--text-3xl);
+  font-weight: 700;
+  color: var(--color-text-primary);
+  flex-shrink: 0;
 }
+
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+}
+
+.flex-1 {
+  flex: 1;
+  min-width: 400px;
+}
+
+.vertical-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.w-full { width: 100%; }
+.mb-3 { margin-bottom: 0.75rem; }
+.mb-4 { margin-bottom: 1rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.pt-3 { padding-top: 0.75rem; }
+.border-t { border-top: 1px solid var(--color-border-light); }
+
+.hw-group-box {
+  display: flex;
+  flex-direction: column;
+}
+
+.group-label {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.hw-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+}
+
+.hw-counter {
+  width: 120px;
+}
+
+.btn-placeholder {
+  width: 36px;
+  flex-shrink: 0;
+}
+
+.f-grow { flex-grow: 1; }
 
 :deep(.va-card) {
   border-radius: var(--radius-md);
@@ -391,10 +404,8 @@ const handleSubmit = async () => {
   padding: 1rem 1.25rem;
 }
 
-/* CPU 建议列表样式对齐 CpuSelector.vue */
-.cpu-search-container {
+.cpu-container {
   position: relative;
-  width: 100%;
 }
 
 .suggestions-list {
@@ -409,46 +420,30 @@ const handleSubmit = async () => {
   box-shadow: var(--shadow-lg);
   max-height: 280px;
   overflow-y: auto;
-  margin-top: 2px;
 }
 
 .suggestion-item {
-  padding: var(--space-2) var(--space-3);
+  padding: 0.5rem 0.75rem;
   cursor: pointer;
   border-bottom: 1px solid var(--color-border-subtle);
-  transition: background 0.2s;
 }
-.suggestion-item:last-child { border-bottom: none; }
 .suggestion-item:hover { background: var(--color-bg-hover); }
 
 .suggestion-main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2px;
 }
-.suggestion-main strong {
-  font-size: var(--text-sm);
-  color: var(--color-text-primary);
-}
+
 .suggestion-sub {
   font-size: var(--text-xs);
   color: var(--color-text-secondary);
 }
 
-/* 局部布局辅助类 */
-.grid { display: grid; }
 .flex { display: flex; }
+.justify-center { justify-content: center; }
 .gap-2 { gap: 0.5rem; }
-.gap-3 { gap: 0.75rem; }
 .gap-4 { gap: 1rem; }
-.gap-6 { gap: 1.5rem; }
-.mb-0 { margin-bottom: 0; }
-.mb-6 { margin-bottom: 1.5rem; }
-.my-4 { margin-top: 1rem; margin-bottom: 1rem; }
-.mt-2 { margin-top: 0.5rem; }
 .mt-8 { margin-top: 2rem; }
 .mb-12 { margin-bottom: 3rem; }
-.w-full { width: 100%; }
-.flex-grow { flex-grow: 1; }
 </style>
