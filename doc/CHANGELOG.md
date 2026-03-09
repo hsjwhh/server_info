@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Created this standardized `CHANGELOG.md` to track project evolution.
 - 新增 `src/stores/auth.js`：Pinia 内存 Token 管理，提供 `silentRefresh()` 页面刷新静默恢复登录态。
-- 新增 `src/pages/server/ServerEntryPage.vue`：支持 30+ 字段的服务器入库录入页面，采用分栏卡片布局与表单校验。
+- 新增 `src/pages/server/ServerEntryPage.vue`：支持 30+ 字段的服务器入库录入页面。
+- 优化 `ServerEntryPage.vue`：引入 CPU 与主板智能联动搜索，支持内存、硬盘及扩展卡的动态增减录入，并实现数据的分号（`;`）序列化存储。
 - 新增 `src/api/server.js`：封装服务器入库与 SN 唯一性检查接口。
 
 ### Changed
