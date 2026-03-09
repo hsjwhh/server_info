@@ -89,6 +89,21 @@ const routes = [
         }
       },
       {
+        path: 'server/entry',
+        name: 'ServerEntry',
+        component: () => import('../pages/server/ServerEntryPage.vue'),
+        meta: { 
+          title: '服务器录入', 
+          icon: 'mdi-database-plus', 
+          showInMenu: true, 
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '服务器录入', to: '/server/entry' }
+          ],
+          requiresAuth: true 
+        }
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('../pages/SettingsPage.vue'),

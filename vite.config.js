@@ -10,4 +10,14 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        // 如果后端接口本身就带有 /api 前缀，则不需要 rewrite
+        // rewrite: (path) => path.replace(/^\/api/, '')
+      }
+    }
+  }
 })
