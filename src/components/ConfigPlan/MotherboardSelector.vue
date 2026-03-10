@@ -142,68 +142,11 @@ const { splitItems } = store
   font-size: var(--text-sm);
 }
 
-.selected-item-card {
-  padding: var(--space-4);
-  background: white;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-subtle);
-}
-
-.card-header {
-  margin-bottom: var(--space-4);
-}
-
-.item-name {
-  font-weight: 700;
-  color: var(--color-text-primary);
-  font-size: var(--text-lg);
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
 .item-link {
   color: var(--va-primary);
   text-decoration: none;
 }
 .item-link:hover { text-decoration: underline; }
-
-.item-details-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3);
-}
-
-.detail-tile {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-bg-subtle);
-  border-radius: var(--radius-md);
-}
-
-.detail-tile.full-width {
-  grid-column: span 2;
-}
-
-.tile-label {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-  font-weight: 600;
-}
-
-.tile-value {
-  font-weight: 600;
-  font-size: var(--text-sm);
-  color: var(--color-text-primary);
-}
-
-.tile-value-large {
-  font-weight: 800;
-  font-size: var(--text-xl);
-  color: var(--va-primary);
-}
 
 .tile-tags {
   display: flex;
@@ -217,19 +160,5 @@ const { splitItems } = store
   line-height: 1.4;
   color: var(--color-text-primary);
   font-weight: 500;
-}
-
-.highlight-tile {
-  background: var(--va-primary-light);
-  border: 1px solid var(--va-primary);
-}
-
-@media (max-width: 640px) {
-  .item-details-grid {
-    grid-template-columns: 1fr;
-  }
-  .detail-tile.full-width {
-    grid-column: span 1;
-  }
 }
 </style>

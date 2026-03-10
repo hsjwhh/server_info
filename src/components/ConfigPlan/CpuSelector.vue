@@ -6,36 +6,36 @@
       处理器 (CPU)
     </h3>
 
-    <div class="input-wrapper">
+    <div class="input-wrapper relative">
       <VaInput
         v-model="cpuKeyword"
         label="CPU 型号"
         placeholder="输入 CPU 关键字搜索..."
         clearable
         :loading="loadingCpuDetail"
-        @input="handleCpuSearch"
+        @update:model-value="handleCpuSearch"
         @clear="clearCpu"
       >
         <template #prependInner>
           <VaIcon name="mdi-magnify" size="small" />
         </template>
       </VaInput>
-    </div>
 
-    <!-- 搜索建议列表 -->
-    <div v-if="cpuSuggestions.length > 0" class="suggestions-list">
-      <div
-        v-for="cpu in cpuSuggestions"
-        :key="cpu.id"
-        class="suggestion-item"
-        @click="selectCpu(cpu)"
-      >
-        <div class="suggestion-main">
-          <strong>{{ cpu.cpu_short_name }}</strong>
-          <VaChip size="small" color="info">{{ cpu.tdp }}W</VaChip>
-        </div>
-        <div class="suggestion-sub">
-          {{ cpu.cores }}C/{{ cpu.threads }}T · {{ cpu.base_freq }}
+      <!-- 搜索建议列表：移入 relative 容器内，防止覆盖输入框 -->
+      <div v-if="cpuSuggestions.length > 0" class="suggestions-list">
+        <div
+          v-for="cpu in cpuSuggestions"
+          :key="cpu.id"
+          class="suggestion-item"
+          @click="selectCpu(cpu)"
+        >
+          <div class="suggestion-main">
+            <strong>{{ cpu.cpu_short_name }}</strong>
+            <VaChip size="small" color="info">{{ cpu.tdp }}W</VaChip>
+          </div>
+          <div class="suggestion-sub">
+            {{ cpu.cores }}C/{{ cpu.threads }}T · {{ cpu.base_freq }}
+          </div>
         </div>
       </div>
     </div>
@@ -127,114 +127,6 @@ const {
 </script>
 
 <style scoped>
-.form-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.input-wrapper {
-  width: 100%;
-}
-
-.suggestions-list {
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  margin-top: calc(-1 * var(--space-2));
-  z-index: 100;
-  box-shadow: var(--shadow-lg);
-  max-height: 320px;
-  overflow-y: auto;
-  position: absolute;
-  width: calc(100% - 2 * var(--space-4));
-}
-
-.suggestion-item {
-  padding: var(--space-3) var(--space-4);
-  cursor: pointer;
-  border-bottom: 1px solid var(--color-border-subtle);
-  transition: background 0.2s;
-}
-.suggestion-item:last-child { border-bottom: none; }
-.suggestion-item:hover { background: var(--color-bg-hover); }
-
-.suggestion-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-1);
-}
-.suggestion-sub {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-}
-
-/* 统一卡片样式 */
-.selected-item-card {
-  padding: var(--space-4);
-  background: white;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-subtle);
-  box-shadow: var(--shadow-sm);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-4);
-}
-
-.item-name {
-  font-weight: 700;
-  color: var(--color-text-primary);
-  font-size: var(--text-lg);
-}
-
-.item-details-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-3);
-}
-
-.detail-tile {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-bg-subtle);
-  border-radius: var(--radius-md);
-}
-
-.detail-tile.full-width {
-  grid-column: span 2;
-}
-
-.tile-label {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-  font-weight: 600;
-}
-
-.tile-value {
-  font-weight: 600;
-  font-size: var(--text-sm);
-  color: var(--color-text-primary);
-}
-
-.tile-value-large {
-  font-weight: 800;
-  font-size: var(--text-xl);
-  color: var(--va-primary);
-}
-
-.highlight-tile {
-  background: var(--va-primary-light);
-  border: 1px solid var(--va-primary);
-}
-
-/* 数量控制 */
 .cpu-count-section {
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-border-subtle);
@@ -270,14 +162,5 @@ const {
   text-align: center;
   font-weight: 700;
   font-size: var(--text-md);
-}
-
-@media (max-width: 640px) {
-  .item-details-grid {
-    grid-template-columns: 1fr;
-  }
-  .detail-tile.full-width {
-    grid-column: span 1;
-  }
 }
 </style>

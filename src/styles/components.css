@@ -1,0 +1,113 @@
+/**
+ * Shared Component Patterns
+ * src/styles/components.css
+ */
+
+/* ① Suggestions List (搜索建议) */
+.suggestions-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  z-index: 1000;
+  box-shadow: var(--shadow-lg);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.suggestion-item {
+  padding: var(--space-3) var(--space-4);
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border-subtle);
+  transition: background 0.2s;
+}
+.suggestion-item:last-child { border-bottom: none; }
+.suggestion-item:hover { background: var(--color-bg-hover); }
+
+.suggestion-main {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-1);
+}
+.suggestion-sub {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+/* ② Selected Item Card (已选展示卡片) */
+.selected-item-card {
+  padding: var(--space-4);
+  background: white;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--space-4);
+}
+
+.item-name {
+  font-weight: 700;
+  color: var(--color-text-primary);
+  font-size: var(--text-lg);
+}
+
+/* ③ Item Details Grid (详情数据网格) */
+.item-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.detail-tile {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-md);
+}
+
+.detail-tile.full-width {
+  grid-column: span 2;
+}
+
+.tile-label {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.tile-value {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--color-text-primary);
+}
+
+.tile-value-large {
+  font-weight: 800;
+  font-size: var(--text-xl);
+  color: var(--va-primary);
+}
+
+.highlight-tile {
+  background: var(--va-primary-light);
+  border: 1px solid var(--va-primary);
+}
+
+@media (max-width: 640px) {
+  .item-details-grid {
+    grid-template-columns: 1fr;
+  }
+  .detail-tile.full-width {
+    grid-column: span 1;
+  }
+}

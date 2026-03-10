@@ -38,7 +38,7 @@
                       clearable
                       :loading="searchingCpu"
                       class="f-grow"
-                      @input="handleCpuSearch"
+                      @update:model-value="handleCpuSearch"
                       @clear="clearCpu"
                     >
                       <template #prependInner>
@@ -442,38 +442,6 @@ const handleSubmit = async () => {
 .cpu-add-btn {
   white-space: nowrap;
   flex-shrink: 0;
-}
-
-.suggestions-list {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: white;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  z-index: 1000;
-  box-shadow: var(--shadow-lg);
-  max-height: 280px;
-  overflow-y: auto;
-}
-
-.suggestion-item {
-  padding: var(--space-2) var(--space-3);
-  cursor: pointer;
-  border-bottom: 1px solid var(--color-border-subtle);
-}
-.suggestion-item:hover { background: var(--color-bg-hover); }
-
-.suggestion-main {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.suggestion-sub {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
 }
 
 .border-t { border-top: 1px solid var(--color-border-light); }
