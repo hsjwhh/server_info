@@ -358,26 +358,19 @@ const handleSubmit = async () => {
   height: 100%;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem; /* 与 ConfigPlanPage 对齐的间距 */
-}
-
-.page-title {
-  font-size: var(--text-3xl);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  flex-shrink: 0;
+  gap: var(--space-6);
 }
 
 .layout-container {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
 
 .card-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
 
 .flex-1 {
@@ -390,13 +383,6 @@ const handleSubmit = async () => {
   flex-direction: column;
 }
 
-.w-full { width: 100%; }
-.mb-3 { margin-bottom: 0.75rem; }
-.mb-4 { margin-bottom: 1rem; }
-.mb-2 { margin-bottom: 0.5rem; }
-.pt-3 { padding-top: 0.75rem; }
-.border-t { border-top: 1px solid var(--color-border-light); }
-
 .hw-group-box {
   display: flex;
   flex-direction: column;
@@ -404,16 +390,16 @@ const handleSubmit = async () => {
 
 .group-label {
   font-size: var(--text-xs);
-  font-weight: 700;
+  font-weight: var(--font-weight-bold);
   color: var(--color-text-secondary);
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-2);
   display: block;
 }
 
 .hw-row {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2);
   align-items: flex-end;
 }
 
@@ -426,37 +412,30 @@ const handleSubmit = async () => {
   flex-shrink: 0;
 }
 
-.f-grow { flex-grow: 1; }
-
-:deep(.va-card) {
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-subtle);
-}
-
 :deep(.va-card__title) {
   font-size: var(--text-base);
-  font-weight: 600;
+  font-weight: var(--font-weight-semibold);
   border-bottom: 1px solid var(--color-border-light);
-  padding: 1rem 1.25rem;
+  padding: var(--space-4) var(--space-5);
 }
 
 .cpu-container {
   position: relative;
-  margin-bottom: 0.75rem;
+  margin-bottom: var(--space-3);
 }
 
 .cpu-standalone-label {
   display: block;
   margin-bottom: 4px;
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-primary);
 }
 
 /* input 与按钮同行，按钮高度跟随 input */
 .cpu-input-row {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2);
   align-items: stretch;
 }
 
@@ -480,7 +459,7 @@ const handleSubmit = async () => {
 }
 
 .suggestion-item {
-  padding: 0.5rem 0.75rem;
+  padding: var(--space-2) var(--space-3);
   cursor: pointer;
   border-bottom: 1px solid var(--color-border-subtle);
 }
@@ -497,10 +476,5 @@ const handleSubmit = async () => {
   color: var(--color-text-secondary);
 }
 
-.flex { display: flex; }
-.justify-center { justify-content: center; }
-.gap-2 { gap: 0.5rem; }
-.gap-4 { gap: 1rem; }
-.mt-8 { margin-top: 2rem; }
-.mb-12 { margin-bottom: 3rem; }
+.border-t { border-top: 1px solid var(--color-border-light); }
 </style>

@@ -18,7 +18,7 @@
     </VaCardTitle>
     <VaCardContent>
       <div class="info-grid-3">
-        <div class="info-card">
+        <div class="info-card hover-lift">
           <div class="info-icon-wrapper success">
             <VaIcon name="mdi-calendar" size="large" />
           </div>
@@ -28,7 +28,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="info-card hover-lift">
           <div class="info-icon-wrapper primary">
             <VaIcon name="mdi-account-tie" size="large" />
           </div>
@@ -38,7 +38,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="info-card hover-lift">
           <div class="info-icon-wrapper warning">
             <VaIcon name="mdi-briefcase" size="large" />
           </div>
@@ -48,7 +48,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="info-card hover-lift">
           <div class="info-icon-wrapper info">
             <VaIcon name="mdi-barcode" size="large" />
           </div>
@@ -58,7 +58,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="info-card hover-lift">
           <div class="info-icon-wrapper danger">
             <VaIcon name="mdi-counter" size="large" />
           </div>
@@ -68,7 +68,7 @@
           </div>
         </div>
 
-        <div class="info-card">
+        <div class="info-card hover-lift">
           <div class="info-icon-wrapper secondary">
             <VaIcon name="mdi-note-text" size="large" />
           </div>
@@ -156,13 +156,6 @@ const formatDate = (serverData) => {
   padding: var(--space-5);
   background: var(--color-bg-subtle);
   border-radius: var(--radius-lg);
-  transition: all 0.3s ease;
-}
-
-.info-card:hover {
-  background: var(--color-bg-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 .info-icon-wrapper {

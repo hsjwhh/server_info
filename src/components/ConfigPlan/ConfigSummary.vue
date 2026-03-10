@@ -13,7 +13,7 @@
       <div class="config-summary">
 
         <div v-if="!selectedCpu" class="empty-state">
-          <VaIcon name="mdi-information-outline" size="large" color="secondary" />
+          <VaIcon name="mdi-information-outline" size="64px" color="secondary" />
           <p>请在左侧选择硬件配置</p>
         </div>
 
@@ -100,17 +100,6 @@ const exportConfig = () => {
   width: 100%;
 }
 .config-summary { min-height: 200px; }
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--space-12) var(--space-5);
-  color: var(--color-text-secondary);
-  text-align: center;
-}
-.empty-state p { margin-top: var(--space-3); font-size: var(--text-sm); }
 
 .summary-list { display: flex; flex-direction: column; gap: var(--space-3); }
 .summary-item {

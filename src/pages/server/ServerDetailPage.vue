@@ -60,7 +60,7 @@
         <VaCard v-else-if="searched" class="empty-card">
           <VaCardContent>
             <div class="empty-state">
-              <VaIcon name="mdi-cloud-question" size="96px" color="secondary" />
+              <VaIcon name="mdi-cloud-question" size="64px" color="secondary" />
               <h3 class="empty-title">未找到服务器</h3>
               <p class="empty-text">SN 编号「{{ snInput }}」不存在或已被删除</p>
               <div class="empty-actions">
@@ -79,7 +79,7 @@
         <VaCard v-else class="empty-card">
           <VaCardContent>
             <div class="empty-state">
-              <VaIcon name="mdi-magnify" size="96px" color="primary" />
+              <VaIcon name="mdi-magnify" size="64px" color="primary" />
               <h3 class="empty-title">请输入 SN 编号</h3>
               <p class="empty-text">在上方搜索框输入服务器 SN 编号以查看详细信息</p>
             </div>

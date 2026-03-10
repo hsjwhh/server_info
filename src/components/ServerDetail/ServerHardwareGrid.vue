@@ -7,7 +7,7 @@
 
     <div class="hardware-grid">
       <!-- 基础硬件 -->
-      <VaCard class="hardware-card">
+      <VaCard class="hardware-card hover-lift">
         <VaCardTitle>
           <VaIcon name="mdi-inbox" class="mr-2" />
           基础配置
@@ -35,7 +35,7 @@
       </VaCard>
 
       <!-- 计算资源 -->
-      <VaCard class="hardware-card">
+      <VaCard class="hardware-card hover-lift">
         <VaCardTitle>
           <VaIcon name="mdi-cpu-64-bit" class="mr-2" />
           计算资源
@@ -61,7 +61,7 @@
       </VaCard>
 
       <!-- 存储设备 -->
-      <VaCard class="hardware-card">
+      <VaCard class="hardware-card hover-lift">
         <VaCardTitle>
           <VaIcon name="mdi-harddisk" class="mr-2" />
           存储设备
@@ -101,7 +101,7 @@
       </VaCard>
 
       <!-- 扩展设备 -->
-      <VaCard class="hardware-card">
+      <VaCard class="hardware-card hover-lift">
         <VaCardTitle>
           <VaIcon name="mdi-expansion-card" class="mr-2" />
           扩展设备
@@ -176,12 +176,6 @@ const props = defineProps({
 
 .hardware-card {
   border-radius: var(--radius-lg);
-  transition: all 0.3s ease;
-}
-
-.hardware-card:hover {
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transform: translateY(-2px);
 }
 
 .hardware-items {

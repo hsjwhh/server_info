@@ -212,10 +212,15 @@ const handleLogin = async () => {
   background: var(--color-bg-page);
   border-radius: var(--radius-xl);
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  /* overflow: hidden 会裁掉 VaInput 的 clear 按钮，改用 clip-path 保留圆角 */
-  overflow: visible;
-  clip-path: inset(0 round var(--radius-xl));
+  overflow: hidden;
   margin: var(--space-8);
+  position: relative;
+}
+
+/* 让 VaInput 的浮层（clear 按钮等）突破 overflow */
+.auth-form :deep(.va-input-wrapper__field) {
+  position: relative;
+  z-index: 1;
 }
 
 /* Decoration Section */

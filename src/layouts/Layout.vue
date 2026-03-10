@@ -49,15 +49,15 @@ const toggleSidebar = () => {
 
 /* Sidebar 占固定宽度（可折叠） */
 .sidebar {
-  width: 240px;
-  background: #ffffff;
+  width: var(--sidebar-width);
+  background: var(--color-bg-white);
   display: flex;
   flex-direction: column;
-  transition: width 0.3s ease;
+  transition: width var(--transition-slow);
 }
 
 .sidebar.collapsed {
-  width: 64px;
+  width: var(--sidebar-collapsed-width);
 }
 
 /* 主区域：Header + 内容 */

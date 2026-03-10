@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.1.0] - 2026-03-10
+
+### 🚀 优化与重构
+- **样式体系重构**：建立了完整的 Design Token 体系 (`tokens.css`)，消灭硬编码，统一了颜色、间距、圆角与阴影阶梯。
+- **视觉体验升级**：优化了 Sidebar 品牌感、Dashboard 统计卡片层级，并为全局卡片注入了统一的阴影与 Hover 动效。
+- **架构治理**：重构了 `utilities.css` 并移除了 `!important` 滥用，大幅精简了组件内部的冗余样式。
+- **排版节奏调整**：统一了全局字体平滑、行高以及标题排版规范，提升了信息密度高的表单页面的易读性。
+
+### 🐛 修复
+- **Login**：修复了登录页卡片圆角裁剪的潜在渲染风险，移除了 `clip-path` hack，改用正常的容器裁剪机制。
+- **空状态**：优化并统一了全站空状态图标尺寸（96px -> 64px），增强了视觉引导性。
+
+---
+
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 

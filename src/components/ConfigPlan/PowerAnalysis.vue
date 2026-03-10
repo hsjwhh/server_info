@@ -87,10 +87,10 @@ const {
   justify-content: space-between;
   align-items: center;
   padding: var(--space-3);
-  background: #f0f9ff;
+  background: var(--color-stat-bg);
   border-radius: var(--radius-md);
 }
-.total-label { font-size: var(--text-base); font-weight: 600; color: #1e40af; }
-.total-value { font-size: var(--text-xl); font-weight: 700; color: #1e40af; }
-.total-value.recommended { color: #059669; }
+.total-label { font-size: var(--text-base); font-weight: var(--font-weight-semibold); color: var(--color-stat-primary); }
+.total-value { font-size: var(--text-xl); font-weight: var(--font-weight-bold); color: var(--color-stat-primary); }
+.total-value.recommended { color: var(--color-stat-success); }
 </style>

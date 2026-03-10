@@ -79,14 +79,14 @@
 
       <!-- 初始状态 - 未搜索 -->
       <div v-if="!hasSearched && servers.length === 0 && !loading" class="empty-state">
-        <VaIcon name="mdi-magnify" size="96px" color="primary" />
+        <VaIcon name="mdi-magnify" size="64px" color="primary" />
         <p class="empty-title">请输入搜索条件</p>
         <p class="empty-text">在上方搜索框输入 SN、主机名或 IP，点击搜索按钮查询服务器</p>
       </div>
 
       <!-- 空状态 - 搜索无结果 -->
       <div v-if="hasSearched && servers.length === 0 && !loading" class="empty-state">
-        <VaIcon name="mdi-server-off" size="96px" color="secondary" />
+        <VaIcon name="mdi-server-off" size="64px" color="secondary" />
         <p class="empty-title">未找到匹配的服务器</p>
         <p class="empty-text">请尝试使用其他关键词或调整筛选条件</p>
         <VaButton
@@ -261,29 +261,6 @@ const handleDelete = (server) => {
 
 .status-tag {
   font-weight: 600;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 4rem 1rem;
-  text-align: center;
-}
-
-.empty-title {
-  margin-top: var(--space-4);
-  font-size: var(--text-xl);
-  font-weight: 700;
-  color: var(--color-text-primary);
-}
-
-.empty-text {
-  margin-top: var(--space-2);
-  font-size: var(--text-base);
-  color: var(--color-text-secondary);
-  max-width: 500px;
 }
 
 .loading-container {

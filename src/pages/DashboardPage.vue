@@ -4,7 +4,7 @@
     <h1 class="page-title">Dashboard</h1>
     
     <div class="stats-grid">
-      <VaCard>
+      <VaCard class="hover-lift stat-card-primary">
         <VaCardContent>
           <div class="stat-item">
             <VaIcon name="mdi-server" size="large" color="primary" />
@@ -16,7 +16,7 @@
         </VaCardContent>
       </VaCard>
 
-      <VaCard>
+      <VaCard class="hover-lift stat-card-success">
         <VaCardContent>
           <div class="stat-item">
             <VaIcon name="mdi-check-circle" size="large" color="success" />
@@ -28,7 +28,7 @@
         </VaCardContent>
       </VaCard>
 
-      <VaCard>
+      <VaCard class="hover-lift stat-card-warning">
         <VaCardContent>
           <div class="stat-item">
             <VaIcon name="mdi-alert-circle" size="large" color="warning" />
@@ -40,7 +40,7 @@
         </VaCardContent>
       </VaCard>
 
-      <VaCard>
+      <VaCard class="hover-lift stat-card-danger">
         <VaCardContent>
           <div class="stat-item">
             <VaIcon name="mdi-close-circle" size="large" color="danger" />
@@ -89,14 +89,19 @@ const stats = ref({
 
 /* Override utility margin to match baseline */
 .dashboard-page :deep(.page-title) {
-  margin-bottom: 1.5rem !important;
+  margin-bottom: var(--space-6) !important;
 }
 
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  gap: var(--space-6);
 }
+
+.stat-card-primary  { border-left: 4px solid var(--va-primary) !important; }
+.stat-card-success  { border-left: 4px solid var(--va-success) !important; }
+.stat-card-warning  { border-left: 4px solid var(--va-warning) !important; }
+.stat-card-danger   { border-left: 4px solid var(--va-danger) !important; }
 
 .stat-item {
   display: flex;

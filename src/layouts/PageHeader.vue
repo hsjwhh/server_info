@@ -40,16 +40,16 @@ const breadcrumbs = computed(() => {
 
 <style scoped>
 .page-header {
-  /* background: #ffffff; */
-  /* border-bottom: 1px solid #e5e7eb; */
-  padding: 0 20px;
-  min-height: 48px;
+  background: var(--color-bg-white);
+  border-bottom: 1px solid var(--color-border-light);
+  padding: 0 var(--space-6);
+  min-height: 44px;
   display: flex;
   align-items: center;
 }
 
 .page-header-content {
-  padding: 0 24px;
+  padding: 0 var(--space-6);
   width: 100%;
 }
 </style>
