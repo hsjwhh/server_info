@@ -4,7 +4,7 @@
     <VaCardContent>
       <!-- 数据表格 -->
       <VaDataTable
-        v-if="servers.length > 0"
+        v-if="filteredServers.length > 0"
         v-model:sort-by="sortBy"
         v-model:sorting-order="sortingOrder"
         :items="paginatedServers"
@@ -65,7 +65,7 @@
       </VaDataTable>
 
       <!-- 分页 -->
-      <div v-if="servers.length > 0" class="pagination-container">
+      <div v-if="filteredServers.length > 0" class="pagination-container">
         <VaPagination
           v-model="currentPage"
           :pages="totalPages"
@@ -96,6 +96,13 @@
         >
           重置搜索
         </VaButton>
+      </div>
+
+      <!-- 新增：筛选无结果 (搜索有数据但过滤后为空) -->
+      <div v-if="hasSearched && servers.length > 0 && filteredServers.length === 0 && !loading" class="empty-state">
+        <VaIcon name="mdi-filter-off" size="64px" color="secondary" />
+        <p class="empty-title">当前业务下暂无数据</p>
+        <p class="empty-text">请切换业务筛选条件，或查看全部结果</p>
       </div>
 
       <!-- 加载状态 -->
@@ -130,6 +137,7 @@ const { init: notify } = useToast()
 const store = useServerListStore()
 const {
   servers,
+  filteredServers,
   totalRecords,
   loading,
   hasSearched,

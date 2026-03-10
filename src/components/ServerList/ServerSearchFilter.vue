@@ -23,6 +23,15 @@
           >
             搜索
           </VaButton>
+
+          <!-- 业务筛选下拉框 -->
+          <VaSelect
+            v-model="selectedBusiness"
+            :options="businessOptions"
+            placeholder="业务筛选"
+            :disabled="!hasSearched || !servers.length"
+            class="business-select"
+          />
         </div>
       </div>
 
@@ -37,14 +46,15 @@ import {
   VaCardContent,
   VaInput,
   VaButton,
-  VaIcon
+  VaIcon,
+  VaSelect
 } from 'vuestic-ui'
 import { useServerListStore } from '../../stores/useServerListStore'
 import { useServerSearch } from '../../composables/useServerSearch'
 
 // 初始化 Store 和 Composables
 const store = useServerListStore()
-const { searchQuery, searching, loading } = storeToRefs(store)
+const { searchQuery, searching, loading, selectedBusiness, businessOptions, hasSearched, servers } = storeToRefs(store)
 
 const {
   executeSearch
@@ -75,6 +85,11 @@ const handleSearch = () => {
   flex: 1;
 }
 
+.business-select {
+  width: 180px;
+  flex-shrink: 0;
+}
+
 
 @media (max-width: 768px) {
   .toolbar {
@@ -85,6 +100,10 @@ const handleSearch = () => {
   .search-container {
     max-width: 100%;
     flex-direction: column;
+  }
+
+  .business-select {
+    width: 100%;
   }
 }
 </style>

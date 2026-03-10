@@ -37,6 +37,7 @@ export function useServerSearch() {
         store.loading = true
         store.hasSearched = true
         store.currentPage = 1 // 搜索后重置页码
+        store.selectedBusiness = '--- ALL ---' // 搜索后重置业务筛选
 
         try {
             const results = await searchSn(store.searchQuery.trim(), {})
@@ -88,6 +89,7 @@ export function useServerSearch() {
             servers: store.servers,
             totalRecords: store.totalRecords,
             currentPage: store.currentPage,
+            selectedBusiness: store.selectedBusiness,
             timestamp: store.lastUpdateTimestamp
         }
         try {
@@ -116,6 +118,7 @@ export function useServerSearch() {
             store.servers = state.servers || []
             store.totalRecords = state.totalRecords || 0
             store.currentPage = state.currentPage || 1
+            store.selectedBusiness = state.selectedBusiness || '--- ALL ---'
             store.lastUpdateTimestamp = state.timestamp
 
             return true
