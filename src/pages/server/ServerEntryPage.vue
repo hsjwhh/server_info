@@ -355,7 +355,7 @@ const handleSubmit = async () => {
 
 <style scoped>
 .server-entry-page {
-  height: 100%;
+  /* height: 100% - Removed to avoid vertical centering issues */
   display: flex;
   flex-direction: column;
   gap: var(--space-6);

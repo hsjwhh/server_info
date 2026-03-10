@@ -1,7 +1,7 @@
 <!-- src/pages/ConfigPlanPage.vue -->
 <template>
   <div class="config-plan-page">
-    <h1 class="page-title">服务器配置方案</h1>
+    <h1 class="page-title mb-6">服务器配置方案</h1>
 
     <div class="config-container">
       <!-- 左侧：硬件选择区 -->
@@ -45,30 +45,14 @@ import CompatibilityAlert from '../components/ConfigPlan/CompatibilityAlert.vue'
 </script>
 
 <style scoped>
-.config-plan-page {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 1.5rem;
-}
-
-.page-title {
-  font-size: var(--text-3xl);
-  font-weight: 700;
-  color: var(--color-text-primary);
-  flex-shrink: 0;
-}
-
 .config-container {
   display: grid;
   grid-template-columns: 1fr 400px;
   gap: var(--space-6);
-  flex: 1;
-  min-height: 0;
+  align-items: start;
 }
 
 .selection-panel {
-  min-height: 0;
   display: flex;
   flex-direction: column;
 }
@@ -76,7 +60,6 @@ import CompatibilityAlert from '../components/ConfigPlan/CompatibilityAlert.vue'
 /* 让 VaCard 内部的 VaCardContent 承担滚动 */
 .selection-panel :deep(.va-card__content) {
   flex: 1;
-  overflow-y: auto;
   min-height: 0;
 }
 

@@ -1,51 +1,15 @@
-<!-- src/pages/ServerDetailPage.vue -->
+<!-- src/pages/server/ServerDetailPage.vue -->
 <template>
   <div class="server-detail-page">
-    <!-- 页面头部 -->
-    <div class="page-header">
-      <!-- <VaBreadcrumbs color="secondary">
-        <VaBreadcrumbsItem label="首页" to="/" />
-        <VaBreadcrumbsItem label="服务器列表" to="/servers1" />
-        <VaBreadcrumbsItem :label="server?.sn || 'SN 查询'" active />
-      </VaBreadcrumbs> -->
-
-      <!-- <VaButton
-        preset="secondary"
-        icon="mdi-arrow-left"
-        @click="$router.push('/servers')"
-      >
-        返回列表
-      </VaButton> -->
+    <div class="page-header mb-6">
       <h1 class="page-title">服务器详情</h1>
     </div>
-
-    <!-- 搜索卡片 -->
-    <!-- <VaCard class="search-card">
-      <VaCardContent>
-        <div class="search-bar">
-          <VaInput
-            v-model="snInput"
-            placeholder="输入 SN 编号查询服务器详情..."
-            clearable
-            @keyup.enter="handleSearch"
-            class="search-input"
-          >
-            <template #prepend>
-              <VaIcon name="mdi-magnify" />
-            </template>
-</VaInput>
-<VaButton :disabled="!snInput" @click="handleSearch" :loading="loading" size="large">
-  查询
-</VaButton>
-</div>
-</VaCardContent>
-</VaCard> -->
 
     <!-- 加载状态 -->
     <VaInnerLoading :loading="loading" class="loading-wrapper">
       <template v-if="!loading">
         <!-- 服务器详情 -->
-        <template v-if="server">
+        <div v-if="server" class="flex flex-col gap-6">
           <!-- 概览卡片 -->
           <ServerOverviewCard :server="server" />
 
@@ -54,7 +18,7 @@
 
           <!-- 操作按钮 -->
           <ServerActionsPanel />
-        </template>
+        </div>
 
         <!-- 未找到 -->
         <VaCard v-else-if="searched" class="empty-card">
@@ -63,7 +27,7 @@
               <VaIcon name="mdi-cloud-question" size="64px" color="secondary" />
               <h3 class="empty-title">未找到服务器</h3>
               <p class="empty-text">SN 编号「{{ snInput }}」不存在或已被删除</p>
-              <div class="empty-actions">
+              <div class="empty-actions mt-6">
                 <VaButton preset="secondary" @click="$router.push('/servers')">
                   查看所有服务器
                 </VaButton>
@@ -188,25 +152,7 @@ watch(() => route.params.sn, (newSn) => {
 </script>
 
 <style scoped>
-.server-detail-page {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.page-header {
-  margin-bottom: var(--space-2);
-}
-
-
-/* Empty States */
-.empty-card {
-  border-radius: var(--radius-xl);
-  margin-top: var(--space-8);
-}
-
 .empty-actions {
-  margin-top: var(--space-8);
   display: flex;
   gap: var(--space-4);
 }

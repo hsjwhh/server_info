@@ -1,9 +1,9 @@
 <!-- src/pages/DashboardPage.vue -->
 <template>
   <div class="dashboard-page">
-    <h1 class="page-title">Dashboard</h1>
+    <h1 class="page-title mb-6">仪表盘</h1>
     
-    <div class="stats-grid">
+    <div class="stats-grid mb-6">
       <VaCard class="hover-lift stat-card-primary">
         <VaCardContent>
           <div class="stat-item">
@@ -53,14 +53,14 @@
       </VaCard>
     </div>
 
-    <VaCard class="mt-4">
+    <VaCard>
       <VaCardTitle>快速操作</VaCardTitle>
       <VaCardContent>
         <div class="quick-actions">
-          <VaButton @click="$router.push('/machines')">
+          <VaButton @click="$router.push('/servers')">
             查看所有服务器
           </VaButton>
-          <VaButton @click="$router.push({ name: 'MachineDetail', params: { sn: 'search' } })">
+          <VaButton @click="$router.push({ name: 'ServerDetail', params: { sn: 'search' } })">
             SN 查询
           </VaButton>
         </div>
@@ -82,16 +82,6 @@ const stats = ref({
 </script>
 
 <style scoped>
-.dashboard-page {
-  display: flex;
-  flex-direction: column;
-}
-
-/* Override utility margin to match baseline */
-.dashboard-page :deep(.page-title) {
-  margin-bottom: var(--space-6) !important;
-}
-
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -106,7 +96,7 @@ const stats = ref({
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .stat-info {
@@ -127,7 +117,7 @@ const stats = ref({
 
 .quick-actions {
   display: flex;
-  gap: 1rem;
+  gap: var(--space-4);
   flex-wrap: wrap;
 }
 </style>
