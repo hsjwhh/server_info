@@ -2,7 +2,10 @@
 
 All notable changes to this project will be documented in this file.
 
-## [v0.1.0] - 2026-03-10
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
 
 ### 🚀 优化与重构
 - **样式体系重构**：建立了完整的 Design Token 体系 (`tokens.css`)，消灭硬编码，统一了颜色、间距、圆角与阴影阶梯。
@@ -16,14 +19,11 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## [1.0.0] - 2026-03-09
 
 ### Added
 - Created this standardized `CHANGELOG.md` to track project evolution.
-- 新增 `src/stores/auth.js`：Pinia 内存 Token 管理，提供 `silentRefresh()` 页面刷新静默恢复登录态。
+- 新增 `src/stores/auth.js`：Pinia 内存 Token 管理，提供 `silentRefresh()` 页面刷新静默恢复登录态备份。
 - 新增 `src/pages/server/ServerEntryPage.vue`：支持 30+ 字段的服务器入库录入页面。
 - 优化 `ServerEntryPage.vue`：严格对照数据库表结构调整字段，将 `number` 字段明确为入库数量，将 CPU 录入组件升级为带实时建议的文本搜索框（对齐 ConfigPlan 逻辑），并重构页面布局为全宽三行结构，显著提升录入效率。
 - 新增 `src/api/server.js`：封装服务器入库与 SN 唯一性检查接口。
@@ -61,8 +61,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 - Cleaned up legacy documentation in `doc/` directory (removed 11 outdated migration and design docs).
-
----
 
 ## [0.1.0] - 2026-02-01
 
