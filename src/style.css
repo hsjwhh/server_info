@@ -32,11 +32,11 @@ h1, h2, h3, h4, h5, h6 {
 
 /* ── VaCard 全局样式微调 ── */
 .va-card {
-    box-shadow: var(--shadow-card) !important;
-    border: 1px solid var(--color-border-light) !important;
-    transition: box-shadow var(--transition-base) !important;
+    box-shadow: var(--shadow-card);
+    border: 1px solid var(--color-border-light);
+    transition: box-shadow var(--transition-base);
 }
 
 .va-card:hover {
-    box-shadow: var(--shadow-md) !important;
+    box-shadow: var(--shadow-md);
 }

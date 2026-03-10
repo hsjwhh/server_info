@@ -98,10 +98,10 @@ const stats = ref({
   gap: var(--space-6);
 }
 
-.stat-card-primary  { border-left: 4px solid var(--va-primary) !important; }
-.stat-card-success  { border-left: 4px solid var(--va-success) !important; }
-.stat-card-warning  { border-left: 4px solid var(--va-warning) !important; }
-.stat-card-danger   { border-left: 4px solid var(--va-danger) !important; }
+.stat-card-primary  { border-left: 4px solid var(--va-primary); }
+.stat-card-success  { border-left: 4px solid var(--va-success); }
+.stat-card-warning  { border-left: 4px solid var(--va-warning); }
+.stat-card-danger   { border-left: 4px solid var(--va-danger); }
 
 .stat-item {
   display: flex;

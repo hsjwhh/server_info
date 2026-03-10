@@ -87,6 +87,12 @@
     margin-bottom: var(--space-4);
 }
 
+.empty-state p {
+    margin-top: var(--space-3);
+    font-size: var(--text-sm);
+    color: var(--color-text-secondary);
+}
+
 .empty-title {
     font-size: 1.25rem;
     font-weight: var(--font-weight-bold);

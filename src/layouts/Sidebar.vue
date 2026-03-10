@@ -108,21 +108,23 @@ const navigateTo = (path: string) => {
 }
 
 .logo, .logo-mini {
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
+  transition: opacity var(--transition-fast), transform var(--transition-fast), max-width var(--transition-slow);
+  overflow: hidden;
+  white-space: nowrap;
 }
 
 .sidebar.collapsed .logo {
   opacity: 0;
   transform: scale(0.8);
   pointer-events: none;
-  display: none;
+  max-width: 0;
 }
 
 .sidebar:not(.collapsed) .logo-mini {
   opacity: 0;
   transform: scale(0.8);
   pointer-events: none;
-  display: none;
+  max-width: 0;
 }
 
 /* 菜单列表 */
