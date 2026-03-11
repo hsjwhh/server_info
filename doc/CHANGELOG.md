@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **页面闭环**：补全了服务器列表页“添加服务器”按钮的跳转逻辑，现在直接链接至入库录入页。
 
 ### 🚀 优化与重构
+- **构建体积优化**：
+    - 将 `@mdi/font` 迁移至 `index.html` 通过 CDN 引入，显著减少了生产环境包体积。
+    - 在 `vite.config.js` 中实施了细粒度的 `manualChunks` 策略（Vue 生态、Vuestic UI、HTTP 层、业务逻辑层），提升了产物缓存命中率。
+    - 在 `main.js` 中优化了图标别名映射，解决了基础图标显示异常的问题。
 - **冗余样式大扫除**：对 `CpuSelector`, `MotherboardSelector`, `ServerEntryPage` 等核心组件进行了“去重”治理，累计移除 150+ 行 Scoped CSS，确保全站 UI 逻辑高度统一。
 - **全站页面瘦身**：对 `pages/` 目录下所有页面进行了样式治理，全面改用全局 `utilities` 与 `Design Token`。
 - **布局一致性修复**：移除了所有路由页面根部的 Flex 容器，回归块级流式布局，解决了内容不足时页面垂直居中问题。

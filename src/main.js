@@ -1,24 +1,20 @@
-import { createApp } from 'vue'             // 引入 Vue 核心 API：createApp，用于创建应用实例
-import { createPinia } from 'pinia'         // 引入 Pinia
-import App from './App.vue'                 // 引入根组件 App.vue，整个应用的最外层组件
-import router from './router'           // 引入我们自己定义的路由实例（在 router/index.js 里创建并导出）
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import App from './App.vue'
+import router from './router'
 
 const pinia = createPinia()
-// import ElementPlus from 'element-plus'      // 引入 Element Plus 组件库本体（JS 部分）
-// import 'element-plus/dist/index.css'        // 引入 Element Plus 的全局样式（CSS 部分）
-import './style.css'
 
+import './style.css'
 import { createVuestic } from 'vuestic-ui'
 import { createIconsConfig, VuesticIconAliases, VuesticIconFonts } from 'vuestic-ui'
 
 import 'vuestic-ui/dist/vuestic-ui.css'
-// 可选：全局图标字体（企业后台常用）
-import '@mdi/font/css/materialdesignicons.min.css'
-
-// ...前面的 import 保持不变
+// @mdi/font 已迁移至 index.html CDN 引入，此处不再 import
+// import '@mdi/font/css/materialdesignicons.min.css'
 
 createApp(App)
-    .use(pinia)                           // 注册 Pinia
+    .use(pinia)
     .use(router)
     .use(createVuestic({
         config: {
@@ -55,4 +51,4 @@ createApp(App)
             }),
         },
     }))
-    .mount('#app')                        // 将应用挂载到 index.html 里的 <div id="app"></div> 节点上，页面正式开始渲染
+    .mount('#app')
