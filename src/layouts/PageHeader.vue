@@ -43,7 +43,7 @@ const breadcrumbs = computed(() => {
   background: var(--color-bg-white);
   border-bottom: 1px solid var(--color-border-light);
   padding: 0 var(--space-6);
-  min-height: 44px;
+  min-height: 60px;
   display: flex;
   align-items: center;
 }

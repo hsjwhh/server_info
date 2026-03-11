@@ -169,6 +169,11 @@ router.beforeEach(async (to, from, next) => {
     return next('/login')
   }
 
+  // [拦截逻辑]：若路由明确禁止直连访问（allowDirectAccess: false），则重定向至 Dashboard
+  if (to.meta.allowDirectAccess === false) {
+    return next({ name: 'Dashboard' })
+  }
+
   next()
 })
 

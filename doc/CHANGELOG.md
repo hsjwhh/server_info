@@ -8,11 +8,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### ✨ 新特性
-- **UI 模式组件化**：正式建立 `src/styles/components.css`，将建议列表（Suggestions）、已选卡片（Selected Card）及详情网格（Details Grid）提取为可复用的全局 UI 模式，并内置移动端响应式适配。
 - **业务筛选**：在服务器搜索结果页新增“业务筛选”下拉框，支持基于搜索结果的内存过滤、分页联动以及 Session 状态持久化。
+- **路由安全拦截**：在全局路由守卫中新增 `allowDirectAccess` 校验逻辑，支持通过路由元信息显式禁止手动输入 URL 访问特定页面（如配置为 `false` 时自动重定向至 Dashboard）。
 - **页面闭环**：补全了服务器列表页“添加服务器”按钮的跳转逻辑，现在直接链接至入库录入页。
 
 ### 🚀 优化与重构
+- **视觉细节微调**：
+    - 移除了 Sidebar 容器右侧边框，使侧边栏与内容区视觉过渡更自然。
+    - 调整 `PageHeader` 最小高度为 `60px`，优化了面包屑区域的垂直空间感。
+    - 统一全局边框色变量 (`--color-border`, `--color-border-subtle`) 为更浅的 `#f3f4f6`。
 - **构建体积优化**：
     - 将 `@mdi/font` 迁移至 `index.html` 通过 CDN 引入，显著减少了生产环境包体积。
     - 在 `vite.config.js` 中实施了细粒度的 `manualChunks` 策略（Vue 生态、Vuestic UI、HTTP 层、业务逻辑层），提升了产物缓存命中率。
@@ -21,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **全站页面瘦身**：对 `pages/` 目录下所有页面进行了样式治理，全面改用全局 `utilities` 与 `Design Token`。
 - **布局一致性修复**：移除了所有路由页面根部的 Flex 容器，回归块级流式布局，解决了内容不足时页面垂直居中问题。
 - **样式体系重构**：建立了完整的 Design Token 体系 (`tokens.css`)，消灭硬编码颜色。
+- **UI 模式组件化**：正式建立 `src/styles/components.css`，将建议列表（Suggestions）、已选卡片（Selected Card）及详情网格（Details Grid）提取为可复用的全局 UI 模式，并内置移动端响应式适配。
 
 ### 🐛 修复
 - **定位与覆盖**：修复了 CPU 搜索建议列表覆盖输入框的定位缺陷，通过补全 `.relative` 定位类并优化 DOM 嵌套结构，确保列表始终出现在输入框正下方。

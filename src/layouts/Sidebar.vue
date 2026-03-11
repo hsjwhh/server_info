@@ -80,7 +80,6 @@ const navigateTo = (path: string) => {
   flex-direction: column;
   height: 100%;
   transition: width var(--transition-slow);
-  border-right: 1px solid var(--color-border-light);
 }
 
 .sidebar.collapsed {

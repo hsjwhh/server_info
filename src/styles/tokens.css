@@ -16,8 +16,8 @@
     --color-bg-hover: #f3f4f6;
     --color-bg-white: #ffffff;
 
-    --color-border: #e5e7eb;
-    --color-border-subtle: #e5e7eb;
+    --color-border: #f3f4f6;
+    --color-border-subtle: #f3f4f6;
     --color-border-light: #f3f4f6;
 
     /* ── 品牌色镜像（方便在普通 CSS 中引用 Vuestic 主色） ── */
