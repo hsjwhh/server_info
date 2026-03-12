@@ -5,7 +5,7 @@
       <VaIcon name="mdi-chip" size="small" />
       处理器 (CPU)
     </h3>
-    <div class="input-wrapper relative">
+    <div ref="inputWrapperRef" class="input-wrapper relative">
       <!-- 整体容器 -->
       <div class="flex items-center w-full">
         <!-- 左半区 (50%)：包含核心数 + 型号搜索 -->
@@ -18,7 +18,7 @@
             placeholder="核心"
             clearable
             style="width: 120px; min-width: 120px; flex: 0 0 120px;"
-            @update:model-value="handleCpuSearch"
+            @update:model-value="handleCoresChange"
           />
 
           <!-- 型号输入框 (占据左半区所有剩余空间) -->
@@ -44,7 +44,7 @@
   <!-- 搜索建议列表 -->
 
       <!-- 搜索建议列表：移入 relative 容器内，防止覆盖输入框 -->
-      <div v-if="cpuSuggestions.length > 0" class="suggestions-list">
+      <div v-if="showSuggestions && cpuSuggestions.length > 0" class="suggestions-list">
         <div
           v-for="cpu in cpuSuggestions"
           :key="cpu.id"
@@ -133,19 +133,31 @@
 </template>
 
 <script setup>
+import { ref, onMounted, onUnmounted } from 'vue'
 import { VaInput, VaIcon, VaButton, VaChip, VaAlert, VaSelect } from 'vuestic-ui'
 import { storeToRefs } from 'pinia'
 import { useConfigPlanStore } from '../../stores/configPlan'
 
 const store = useConfigPlanStore()
 const {
-  cpuKeyword, cpuCoresFilter, cpuSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
+  cpuKeyword, cpuCoresFilter, cpuSuggestions, showSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
   cpuScalability, cpuCountLabel, formattedSocket
 } = storeToRefs(store)
 
 const {
-  handleCpuSearch, selectCpu, clearCpu, validateCpuCount
+  handleCpuSearch, handleCoresChange, closeSuggestions, selectCpu, clearCpu, validateCpuCount
 } = store
+
+const inputWrapperRef = ref(null)
+
+const handleClickOutside = (e) => {
+  if (inputWrapperRef.value && !inputWrapperRef.value.contains(e.target)) {
+    closeSuggestions()
+  }
+}
+
+onMounted(() => document.addEventListener('click', handleClickOutside))
+onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 </script>
 
 <style scoped>

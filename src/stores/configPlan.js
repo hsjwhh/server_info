@@ -1,3 +1,4 @@
+// src/stores/configPlan.js
 import { defineStore } from 'pinia'
 import { ref, computed, unref } from 'vue'
 import debounce from 'lodash.debounce'
@@ -64,6 +65,7 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
     const cpuKeyword = ref('')            // CPU 搜索关键字
     const cpuCoresFilter = ref(null)      // CPU 核心数筛选
     const cpuSuggestions = ref([])        // CPU 搜索结果建议列表
+    const showSuggestions = ref(false)    // 控制建议列表显隐
     const selectedCpu = ref(null)         // 当前已选的 CPU 详细数据对象
     const cpuCount = ref(1)               // 选定 CPU 的配置路数 (颗数)
     const loadingCpuDetail = ref(false)   // 加载 CPU 详情的 loading 状态
@@ -143,6 +145,7 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
             if (cpuCoresFilter.value) params.cores = cpuCoresFilter.value
 
             cpuSuggestions.value = await searchCpu(params)
+            showSuggestions.value = cpuSuggestions.value.length > 0
         } catch (err) {
             console.error('CPU 组合搜索失败:', err)
             throw err
@@ -167,7 +170,8 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
      */
     const selectCpu = async (cpuSummary) => {
         cpuKeyword.value = cpuSummary.cpu_short_name
-        cpuSuggestions.value = [] // 隐藏下拉建议框
+        cpuSuggestions.value = []
+        showSuggestions.value = false
         loadingCpuDetail.value = true
         try {
             const cpuDetail = await getCpuDetail(cpuSummary.id)
@@ -205,6 +209,21 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
         selectedMotherboard.value = null
         compatibleMotherboards.value = []
         memoryType.value = ''
+        showSuggestions.value = false
+    }
+
+    // 核心数切换：全量重置后恢复新选的核心数，触发新搜索
+    const handleCoresChange = () => {
+        const cores = cpuCoresFilter.value
+        clearCpu()
+        cpuCoresFilter.value = cores
+        if (cores) {
+            handleCpuSearch()
+        }
+    }
+
+    const closeSuggestions = () => {
+        showSuggestions.value = false
     }
 
     /**
@@ -375,7 +394,7 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
 
     return {
         // ==== 导出 State ====
-        cpuKeyword, cpuCoresFilter, cpuSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
+        cpuKeyword, cpuCoresFilter, cpuSuggestions, showSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
         selectedMotherboard, compatibleMotherboards,
         memoryType, memoryCapacity, memoryCount, memoryCapacityOptions,
         m2Items, ssdItems, hddItems,
@@ -388,7 +407,7 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
         validationResult,
 
         // ==== 导出 Actions ====
-        addItem, removeItem, handleCpuSearch, selectCpu, clearCpu, validateCpuCount,
+        addItem, removeItem, handleCpuSearch, handleCoresChange, closeSuggestions, selectCpu, clearCpu, validateCpuCount,
         splitItems, exportConfigData
     }
 })
