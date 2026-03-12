@@ -10,8 +10,7 @@ import { createVuestic } from 'vuestic-ui'
 import { createIconsConfig, VuesticIconAliases, VuesticIconFonts } from 'vuestic-ui'
 
 import 'vuestic-ui/dist/vuestic-ui.css'
-// @mdi/font 已迁移至 index.html CDN 引入，此处不再 import
-// import '@mdi/font/css/materialdesignicons.min.css'
+import '@mdi/font/css/materialdesignicons.min.css'
 
 createApp(App)
     .use(pinia)

@@ -62,6 +62,7 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
 
     // ── CPU 相关 ──
     const cpuKeyword = ref('')            // CPU 搜索关键字
+    const cpuCoresFilter = ref(null)      // CPU 核心数筛选
     const cpuSuggestions = ref([])        // CPU 搜索结果建议列表
     const selectedCpu = ref(null)         // 当前已选的 CPU 详细数据对象
     const cpuCount = ref(1)               // 选定 CPU 的配置路数 (颗数)
@@ -366,7 +367,7 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
 
     return {
         // ==== 导出 State ====
-        cpuKeyword, cpuSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
+        cpuKeyword, cpuCoresFilter, cpuSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
         selectedMotherboard, compatibleMotherboards,
         memoryType, memoryCapacity, memoryCount, memoryCapacityOptions,
         m2Items, ssdItems, hddItems,

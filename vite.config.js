@@ -51,12 +51,17 @@ export default defineConfig({
             return 'vue-vendor'
           }
 
-          // ② Vuestic UI（体积最大，单独隔离；升级时只破坏此 chunk 的缓存）
+          // ② Vuestic UI
           if (id.includes('node_modules/vuestic-ui/')) {
             return 'vuestic-vendor'
           }
 
-          // ③ HTTP 请求层
+          // ③ 图标字体包 (体积较大，单独隔离)
+          if (id.includes('node_modules/@mdi/font/')) {
+            return 'icons-vendor'
+          }
+
+          // ④ HTTP 请求层
           if (id.includes('node_modules/axios/')) {
             return 'http-vendor'
           }

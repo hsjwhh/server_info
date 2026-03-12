@@ -28,7 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **UI 模式组件化**：正式建立 `src/styles/components.css`，将建议列表（Suggestions）、已选卡片（Selected Card）及详情网格（Details Grid）提取为可复用的全局 UI 模式，并内置移动端响应式适配。
 
 ### 🐛 修复
-- **定位与覆盖**：修复了 CPU 搜索建议列表覆盖输入框的定位缺陷，通过补全 `.relative` 定位类并优化 DOM 嵌套结构，确保列表始终出现在输入框正下方。
+- **全量数据排序**：重构了服务器列表的排序逻辑，将排序行为从组件局部移至 Store 层级（`sortedServers`），实现了基于全量搜索结果的跨页排序，并解决了日期（y/m/d 分散字段）排序乱序的问题。
+- **定位与覆盖**：修复了 CPU 搜索建议列表覆盖输入框的定位缺陷。
 - **事件绑定**：将全站 `VaInput` 实时搜索触发事件统一为 `@update:model-value`，解决了部分浏览器下输入响应不灵敏的问题。
 - **状态恢复**：优化了列表页的生命周期钩子，确保在未开启 keep-alive 的环境下依然能正确存取 Session 搜索状态。
 - **Login**：修复了登录页卡片圆角裁剪风险，移除了 `clip-path` hack。

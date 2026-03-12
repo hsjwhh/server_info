@@ -40,29 +40,53 @@ export const useServerListStore = defineStore('serverList', () => {
         return servers.value.filter(s => s.owner === selectedBusiness.value)
     })
 
+    // 基于排序状态对过滤后的结果进行全量排序
+    const sortedServers = computed(() => {
+        const data = [...filteredServers.value]
+        if (!sortBy.value || !sortingOrder.value) return data
+
+        return data.sort((a, b) => {
+            const key = sortBy.value
+            let valA = a[key]
+            let valB = b[key]
+
+            // 特殊处理日期排序：数据中没有 date 字段，需由 y, m, d 拼成数字比较
+            if (key === 'date') {
+                valA = (a.y ?? 0) * 10000 + (a.m ?? 0) * 100 + (a.d ?? 0)
+                valB = (b.y ?? 0) * 10000 + (b.m ?? 0) * 100 + (b.d ?? 0)
+            }
+
+            // 处理 null 或 undefined
+            if (valA == null) return 1
+            if (valB == null) return -1
+
+            const result = valA > valB ? 1 : valA < valB ? -1 : 0
+            return sortingOrder.value === 'asc' ? result : -result
+        })
+    })
+
     // 下拉框变化时自动重置页码
     watch(selectedBusiness, () => {
         currentPage.value = 1
     })
 
     const totalPages = computed(() => {
-        return Math.ceil(filteredServers.value.length / pageSize.value)
+        return Math.ceil(sortedServers.value.length / pageSize.value)
     })
 
     const paginatedServers = computed(() => {
-        // 前置约定：servers 已经是“最终展示顺序”。
-        // 当前排序由 VaDataTable 的交互与上游数据流协同完成，这里仅负责按页切片。
+        // 输入源改为排序后的全量数据
         const start = (currentPage.value - 1) * pageSize.value
         const end = start + pageSize.value
-        return filteredServers.value.slice(start, end)
+        return sortedServers.value.slice(start, end)
     })
 
     const paginationStart = computed(() => {
-        return filteredServers.value.length > 0 ? (currentPage.value - 1) * pageSize.value + 1 : 0
+        return sortedServers.value.length > 0 ? (currentPage.value - 1) * pageSize.value + 1 : 0
     })
 
     const paginationEnd = computed(() => {
-        return Math.min(currentPage.value * pageSize.value, filteredServers.value.length)
+        return Math.min(currentPage.value * pageSize.value, sortedServers.value.length)
     })
 
     // === Actions ===
@@ -95,6 +119,7 @@ export const useServerListStore = defineStore('serverList', () => {
         // getters
         businessOptions,
         filteredServers,
+        sortedServers,
         totalPages,
         paginatedServers,
         paginationStart,

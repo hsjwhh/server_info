@@ -5,21 +5,43 @@
       <VaIcon name="mdi-chip" size="small" />
       处理器 (CPU)
     </h3>
-
     <div class="input-wrapper relative">
-      <VaInput
-        v-model="cpuKeyword"
-        label="CPU 型号"
-        placeholder="输入 CPU 关键字搜索..."
-        clearable
-        :loading="loadingCpuDetail"
-        @update:model-value="handleCpuSearch"
-        @clear="clearCpu"
-      >
-        <template #prependInner>
-          <VaIcon name="mdi-magnify" size="small" />
-        </template>
-      </VaInput>
+      <!-- 整体容器 -->
+      <div class="flex items-center w-full">
+        <!-- 左半区 (50%)：包含核心数 + 型号搜索 -->
+        <div class="flex gap-2 items-end" style="width: 50%;">
+          <!-- 核心数下拉框 (严格锁定 120px) -->
+          <VaSelect
+            v-model="cpuCoresFilter"
+            :options="[8, 16, 24, 32, 48, 64, 96, 128]"
+            label="核心数"
+            placeholder="核心"
+            clearable
+            style="width: 120px; min-width: 120px; flex: 0 0 120px;"
+            @update:model-value="handleCpuSearch"
+          />
+
+          <!-- 型号输入框 (占据左半区所有剩余空间) -->
+          <VaInput
+            v-model="cpuKeyword"
+            label="CPU 型号"
+            placeholder="型号搜索..."
+            clearable
+            :loading="loadingCpuDetail"
+            style="flex-grow: 1 !important;"
+            @update:model-value="handleCpuSearch"
+            @clear="clearCpu"
+          >
+            <template #prependInner>
+              <VaIcon name="mdi-magnify" size="small" />
+            </template>
+          </VaInput>
+        </div>
+
+        <!-- 右半区 (50%)：留白 -->
+        <div style="width: 50%;"></div>
+      </div>
+  <!-- 搜索建议列表 -->
 
       <!-- 搜索建议列表：移入 relative 容器内，防止覆盖输入框 -->
       <div v-if="cpuSuggestions.length > 0" class="suggestions-list">
@@ -111,13 +133,13 @@
 </template>
 
 <script setup>
-import { VaInput, VaIcon, VaButton, VaChip, VaAlert } from 'vuestic-ui'
+import { VaInput, VaIcon, VaButton, VaChip, VaAlert, VaSelect } from 'vuestic-ui'
 import { storeToRefs } from 'pinia'
 import { useConfigPlanStore } from '../../stores/configPlan'
 
 const store = useConfigPlanStore()
 const {
-  cpuKeyword, cpuSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
+  cpuKeyword, cpuCoresFilter, cpuSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
   cpuScalability, cpuCountLabel, formattedSocket
 } = storeToRefs(store)
 
