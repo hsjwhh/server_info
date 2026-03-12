@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### ✨ 新特性
 - **业务筛选**：在服务器搜索结果页新增“业务筛选”下拉框，支持基于搜索结果的内存过滤、分页联动以及 Session 状态持久化。
 - **路由安全拦截**：在全局路由守卫中新增 `allowDirectAccess` 校验逻辑，支持通过路由元信息显式禁止手动输入 URL 访问特定页面（如配置为 `false` 时自动重定向至 Dashboard）。
+- **会话安全清理**：新增全量登出清理机制（`performLogout`），在用户登出或 Token 失效时自动重置所有业务 Store 状态并清除 SessionStorage 缓存，确保跨用户访问时的数据隔离。
 - **页面闭环**：补全了服务器列表页“添加服务器”按钮的跳转逻辑，现在直接链接至入库录入页。
 
 ### 🚀 优化与重构

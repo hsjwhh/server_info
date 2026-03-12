@@ -17,6 +17,7 @@ import { useToast } from 'vuestic-ui'
 import { useAuthStore } from '../stores/auth'
 import router from '../router'
 import { API_BASE_URL } from '../config/env'
+import { performLogout } from './logout'
 
 // 创建 toast 实例
 let toastInstance = null
@@ -98,12 +99,11 @@ service.interceptors.response.use(
         originalRequest.headers.Authorization = `Bearer ${authStore.accessToken}`
         return service(originalRequest)
       } else {
-        // 刷新失败 → 跳转登录页
-        const notify = getToast()
-        notify({ message: '登录已过期，请重新登录', color: 'danger' })
-        if (router.currentRoute.value.path !== '/login') {
-          router.replace('/login')
-        }
+        // 刷新失败 → 执行全量清理与强制登出
+        performLogout({
+          notify: getToast(),
+          message: '登录已过期，请重新登录'
+        })
         return Promise.reject(error)
       }
     }

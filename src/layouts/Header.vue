@@ -50,6 +50,7 @@ import {
 } from 'vuestic-ui'
 import { useAuthStore } from '../stores/auth'
 import request from '../utils/request'
+import { performLogout } from '../utils/logout'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -82,8 +83,8 @@ const handleMenuSelect = async (value, option) => {
     } catch {
       // 即使请求失败也强制登出
     } finally {
-      authStore.clearToken()    // 清除内存中的 accessToken
-      router.push('/login')
+      // 执行全量清理（Store 重置 + 缓存清理 + 跳转）
+      performLogout()
     }
   }
 }

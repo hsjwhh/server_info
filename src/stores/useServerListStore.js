@@ -92,10 +92,15 @@ export const useServerListStore = defineStore('serverList', () => {
     // === Actions ===
     const resetSearchState = () => {
         searchQuery.value = ''
-        servers.value = []
+        searching.value = false
         hasSearched.value = false
-        currentPage.value = 1
+        servers.value = []
+        totalRecords.value = 0
+        loading.value = false
         selectedBusiness.value = '--- ALL ---'
+        currentPage.value = 1
+        sortBy.value = 'sn'
+        sortingOrder.value = 'asc'
     }
 
     const updateTimestamp = () => {
