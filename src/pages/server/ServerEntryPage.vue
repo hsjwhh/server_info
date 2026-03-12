@@ -262,7 +262,7 @@ const handleCpuSearch = debounce(async () => {
   }
   searchingCpu.value = true
   try {
-    cpuSuggestions.value = await searchCpu(cpuKeyword.value)
+    cpuSuggestions.value = await searchCpu({ keyword: cpuKeyword.value })
   } finally {
     searchingCpu.value = false
   }

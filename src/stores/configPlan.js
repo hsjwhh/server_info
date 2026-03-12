@@ -130,14 +130,21 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
      * 共享着唯一的闭包防抖实例，彻底解决了原 Composable 会诱发“多实例竞态搜索”的致命 Bug。
      */
     const handleCpuSearch = debounce(async () => {
-        if (!cpuKeyword.value || cpuKeyword.value.length < 2) {
+        // 只要两个条件都为空，则清空建议并退出
+        if (!cpuKeyword.value && !cpuCoresFilter.value) {
             cpuSuggestions.value = []
             return
         }
+
         try {
-            cpuSuggestions.value = await searchCpu(cpuKeyword.value)
+            // 构造传参
+            const params = {}
+            if (cpuKeyword.value) params.keyword = cpuKeyword.value
+            if (cpuCoresFilter.value) params.cores = cpuCoresFilter.value
+
+            cpuSuggestions.value = await searchCpu(params)
         } catch (err) {
-            console.error('CPU 搜索失败:', err)
+            console.error('CPU 组合搜索失败:', err)
             throw err
         }
     }, 600)
@@ -193,6 +200,7 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
     const clearCpu = () => {
         selectedCpu.value = null
         cpuKeyword.value = ''
+        cpuCoresFilter.value = null
         cpuCount.value = 1
         selectedMotherboard.value = null
         compatibleMotherboards.value = []

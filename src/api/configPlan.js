@@ -11,30 +11,16 @@
 import request from '../utils/request'
 
 /**
- * 搜索 CPU（自动补全）
+ * 搜索 CPU（自动补全，支持多维过滤）
  * 
- * @param {string} keyword - CPU 型号关键字
+ * @param {Object} params - 搜索参数
+ * @param {string} [params.keyword] - 型号关键字
+ * @param {number} [params.cores] - 核心数量
  * @returns {Promise<Array>} CPU 列表
- * 
- * 返回格式示例：
- * [
- *   {
- *     id: 123,  // 👈 数据库自增 ID（主键）
- *     cpu_short_name: "Intel Xeon E5-2680 v4",
- *     cores: 14,
- *     threads: 28,
- *     base_freq: 2.4,
- *     turbo_freq: 3.3,
- *     tdp: 120,
- *     memory_type: "DDR4",
- *     max_memory_speed: 2400,
- *     socket: "LGA2011-3"
- *   }
- * ]
  */
-export function searchCpu(keyword) {
+export function searchCpu(params) {
   return request.get('/hw/cpu', {
-    params: { keyword }
+    params
   })
 }
 
