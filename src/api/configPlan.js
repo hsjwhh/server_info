@@ -101,7 +101,7 @@ export function getMbByCpu(cpu) {
  * @returns {Promise<Array>} 主板列表
  */
 export function searchMotherboard(keyword) {
-  return request.get('/hw/motherboard/search', {
+  return request.get('/hw/mb', {
     params: { keyword }
   })
 }

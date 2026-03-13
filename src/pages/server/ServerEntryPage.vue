@@ -1,7 +1,12 @@
 <!-- src/pages/server/ServerEntryPage.vue -->
 <template>
   <div class="server-entry-page">
-    <h1 class="page-title">服务器入库录入</h1>
+    <h1 class="page-title flex items-center justify-between">
+      <span>服务器入库录入</span>
+      <VaButton preset="secondary" icon="mdi-import" @click="showBatchImport = true">
+        批量粘贴配置
+      </VaButton>
+    </h1>
 
     <VaForm ref="formRef" @submit.prevent="handleSubmit">
       <div class="layout-container">
@@ -74,19 +79,39 @@
 
                 <VaCounter v-model="form.cpun" label="CPU 数量" :min="1" class="mb-3" />
                 
-                <VaSelect
-                  v-model="selectedMbObj"
-                  label="主板型号 *"
-                  placeholder="选择兼容主板"
-                  searchable
-                  text-by="model"
-                  track-by="id"
-                  :options="mbOptions"
-                  :disabled="!form.cpu"
-                  :loading="loadingMbs"
-                  class="w-full mb-3"
-                  @update:model-value="onMbSelect"
-                />
+                <!-- 主板：改为搜索式，解除与 CPU 的联动 -->
+                <div class="cpu-container mb-3">
+                  <label class="va-input-label cpu-standalone-label">主板型号 *</label>
+                  <VaInput
+                    v-model="mbKeyword"
+                    placeholder="输入主板型号搜索..."
+                    required
+                    clearable
+                    :loading="loadingMbs"
+                    class="w-full"
+                    @update:model-value="handleMbSearch"
+                    @clear="clearMb"
+                  >
+                    <template #prependInner>
+                      <VaIcon name="mdi-magnify" size="small" />
+                    </template>
+                  </VaInput>
+                  
+                  <div v-if="mbSuggestions.length > 0" class="suggestions-list">
+                    <div
+                      v-for="mb in mbSuggestions"
+                      :key="mb.id"
+                      class="suggestion-item"
+                      @click="onMbSelect(mb)"
+                    >
+                      <div class="suggestion-main">
+                        <strong>{{ mb.model }}</strong>
+                        <VaChip size="small" color="secondary">{{ mb.manufacturer }}</VaChip>
+                      </div>
+                      <div class="suggestion-sub">{{ mb.chipset }} · {{ mb.socket }}</div>
+                    </div>
+                  </div>
+                </div>
                 
                 <VaInput v-model="form.bmcpwd" label="BMC 密码" class="w-full mb-3" />
                 <VaInput v-model="form.chassis" label="机箱型号" class="w-full mb-3" />
@@ -201,6 +226,12 @@
       v-model="showCpuAddModal"
       @saved="onCpuSaved"
     />
+
+    <!-- 批量导入弹窗 -->
+    <BatchImportModal
+      v-model="showBatchImport"
+      @imported="handleImported"
+    />
   </div>
 </template>
 
@@ -215,6 +246,7 @@ import { createServer } from '../../api/server'
 import { searchCpu, getMbBySocket } from '../../api/configPlan'
 import { formatSocket } from '../../utils/hardware'
 import CpuAddModal from '../../components/ConfigPlan/CpuAddModal.vue'
+import BatchImportModal from '../../components/ConfigPlan/BatchImportModal.vue'
 
 const { init: notify } = useToast()
 const formRef = ref(null)
@@ -222,12 +254,13 @@ const loading = ref(false)
 const entryDate = ref(new Date())
 
 const cpuKeyword = ref('')
-const selectedMbObj = ref(null)
+const mbKeyword = ref('')
 const cpuSuggestions = ref([])
-const mbOptions = ref([])
+const mbSuggestions = ref([])
 const searchingCpu = ref(false)
 const loadingMbs = ref(false)
 const showCpuAddModal = ref(false)
+const showBatchImport = ref(false)
 
 const hwLists = reactive({
   m2: [],
@@ -255,6 +288,76 @@ const initialForm = {
 
 const form = reactive({ ...initialForm })
 
+/**
+ * 处理批量导入的数据
+ */
+const handleImported = (data) => {
+  if (data.cpu) {
+    cpuKeyword.value = data.cpu.model
+    form.cpu = data.cpu.model
+    form.cpu_id = data.cpu.id
+    form.cpun = data.cpu.count
+  }
+
+  if (data.motherboard) {
+    mbKeyword.value = data.motherboard.model
+    form.mb = data.motherboard.model
+    form.mb_id = data.motherboard.id
+  }
+
+  if (data.memory && data.memory.length > 0) {
+    // 内存目前表单只支持单一型号
+    form.mem = data.memory[0].model
+    form.memn = data.memory[0].count
+  }
+
+  // 填充存储
+  data.storage.forEach(s => {
+    const model = s.model.toLowerCase()
+    if (model.includes('m.2') || model.includes('nvme')) {
+      hwLists.m2.push({ model: s.model, count: s.count })
+    } else if (model.includes('ssd')) {
+      hwLists.ssd.push({ model: s.model, count: s.count })
+    } else {
+      hwLists.hdd.push({ model: s.model, count: s.count })
+    }
+  })
+
+  // 填充扩展件
+  data.gpu.forEach(g => hwLists.gpu.push({ model: g.model, count: g.count }))
+  data.raid.forEach(r => hwLists.raid.push({ model: r.model, count: r.count }))
+  data.lan.forEach(l => hwLists.lan.push({ model: l.model, count: l.count }))
+  
+  const unhandledOthers = []
+  data.others.forEach(o => {
+    const model = o.model.toLowerCase()
+    if (model.includes('nic') || model.includes('lan') || model.includes('网卡')) {
+      hwLists.lan.push({ model: o.model, count: o.count })
+    } else if (model.includes('raid') || model.includes('阵列')) {
+      hwLists.raid.push({ model: o.model, count: o.count })
+    } else if (model.includes('rtx') || model.includes('gtx') || model.includes('tesla') || model.includes('a100') || model.includes('h100')) {
+      hwLists.gpu.push({ model: o.model, count: o.count })
+    } else {
+      unhandledOthers.push(`${o.model}${o.count > 1 ? ' x' + o.count : ''}`)
+    }
+  })
+
+  if (unhandledOthers.length > 0) {
+    const othersText = unhandledOthers.join('; ')
+    form.note = form.note ? `${form.note}\n${othersText}` : othersText
+  }
+
+  if (data.psu) {
+    form.psu = data.psu
+  }
+
+  if (data.chassis) {
+    form.chassis = data.chassis
+  }
+
+  notify({ message: '配置已批量填充，请检查并完善其它信息', color: 'info' })
+}
+
 const handleCpuSearch = debounce(async () => {
   if (!cpuKeyword.value || cpuKeyword.value.length < 2) {
     cpuSuggestions.value = []
@@ -268,23 +371,12 @@ const handleCpuSearch = debounce(async () => {
   }
 }, 600)
 
-const onCpuSelect = async (cpu) => {
+const onCpuSelect = (cpu) => {
   if (!cpu) return
   cpuKeyword.value = cpu.cpu_short_name
   form.cpu = cpu.cpu_short_name
   form.cpu_id = cpu.id
   cpuSuggestions.value = []
-  
-  loadingMbs.value = true
-  mbOptions.value = []
-  form.mb = ''
-  form.mb_id = null
-  selectedMbObj.value = null
-  try {
-    mbOptions.value = await getMbBySocket(formatSocket(cpu.socket))
-  } finally {
-    loadingMbs.value = false
-  }
 }
 
 /**
@@ -304,14 +396,38 @@ const clearCpu = () => {
   form.cpu = ''
   form.cpu_id = null
   cpuSuggestions.value = []
-  mbOptions.value = []
-  selectedMbObj.value = null
 }
+
+/**
+ * 主板搜索和选择逻辑 (独立)
+ */
+const handleMbSearch = debounce(async () => {
+  if (!mbKeyword.value || mbKeyword.value.length < 2) {
+    mbSuggestions.value = []
+    return
+  }
+  loadingMbs.value = true
+  try {
+    const { searchMotherboard } = await import('../../api/configPlan')
+    mbSuggestions.value = await searchMotherboard(mbKeyword.value)
+  } finally {
+    loadingMbs.value = false
+  }
+}, 600)
 
 const onMbSelect = (mb) => {
   if (!mb) return
+  mbKeyword.value = mb.model
   form.mb = mb.model
   form.mb_id = mb.id
+  mbSuggestions.value = []
+}
+
+const clearMb = () => {
+  mbKeyword.value = ''
+  form.mb = ''
+  form.mb_id = null
+  mbSuggestions.value = []
 }
 
 const addHw = (key) => hwLists[key].push({ model: '', count: 1 })
@@ -321,8 +437,9 @@ const resetForm = () => {
   Object.assign(form, initialForm)
   entryDate.value = new Date()
   cpuKeyword.value = ''
+  mbKeyword.value = ''
   cpuSuggestions.value = []
-  selectedMbObj.value = null
+  mbSuggestions.value = []
   Object.keys(hwLists).forEach(k => { hwLists[k] = [] })
 }
 
