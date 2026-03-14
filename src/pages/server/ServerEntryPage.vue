@@ -140,25 +140,38 @@
 
                 <!-- 硬盘系列：保持动态 -->
                 <div class="hw-group-box mb-4 pt-3 border-t">
-                  <label class="group-label">硬盘清单 (支持多型号)</label>
+                  <label class="group-label mb-3">硬盘清单 (支持多型号)</label>
+                  
                   <!-- M.2 -->
-                  <div v-for="(item, idx) in hwLists.m2" :key="idx" class="hw-row mb-2">
-                    <VaInput v-model="item.model" placeholder="M.2 型号" class="f-grow" />
-                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('m2', idx)" />
+                  <div v-if="hwLists.m2.length > 0" class="sub-group mb-3">
+                    <label class="sub-label">M.2 SSD (NVMe)</label>
+                    <div v-for="(item, idx) in hwLists.m2" :key="idx" class="hw-row mb-2">
+                      <VaInput v-model="item.model" placeholder="M.2 型号" class="f-grow" />
+                      <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                      <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('m2', idx)" />
+                    </div>
                   </div>
+
                   <!-- SSD -->
-                  <div v-for="(item, idx) in hwLists.ssd" :key="idx" class="hw-row mb-2">
-                    <VaInput v-model="item.model" placeholder="SSD 型号" class="f-grow" />
-                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('ssd', idx)" />
+                  <div v-if="hwLists.ssd.length > 0" class="sub-group mb-3">
+                    <label class="sub-label">SATA/SAS SSD</label>
+                    <div v-for="(item, idx) in hwLists.ssd" :key="idx" class="hw-row mb-2">
+                      <VaInput v-model="item.model" placeholder="SSD 型号" class="f-grow" />
+                      <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                      <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('ssd', idx)" />
+                    </div>
                   </div>
+
                   <!-- HDD -->
-                  <div v-for="(item, idx) in hwLists.hdd" :key="idx" class="hw-row mb-2">
-                    <VaInput v-model="item.model" placeholder="HDD 型号" class="f-grow" />
-                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('hdd', idx)" />
+                  <div v-if="hwLists.hdd.length > 0" class="sub-group mb-3">
+                    <label class="sub-label">HDD 机械硬盘</label>
+                    <div v-for="(item, idx) in hwLists.hdd" :key="idx" class="hw-row mb-2">
+                      <VaInput v-model="item.model" placeholder="HDD 型号" class="f-grow" />
+                      <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                      <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('hdd', idx)" />
+                    </div>
                   </div>
+
                   <div class="flex gap-2">
                     <VaButton size="small" preset="secondary" @click="addHw('m2')">+ M.2</VaButton>
                     <VaButton size="small" preset="secondary" @click="addHw('ssd')">+ SSD</VaButton>
@@ -176,22 +189,38 @@
               <div class="vertical-form mt-2">
                 <!-- 扩展件：保持动态 -->
                 <div class="hw-group-box mb-4">
-                  <label class="group-label">扩展设备清单</label>
-                  <div v-for="(item, idx) in hwLists.gpu" :key="idx" class="hw-row mb-2">
-                    <VaInput v-model="item.model" placeholder="显卡型号" class="f-grow" />
-                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('gpu', idx)" />
+                  <label class="group-label mb-3">扩展设备清单</label>
+
+                  <!-- GPU -->
+                  <div v-if="hwLists.gpu.length > 0" class="sub-group mb-3">
+                    <label class="sub-label">显卡 (GPU / 加速卡)</label>
+                    <div v-for="(item, idx) in hwLists.gpu" :key="idx" class="hw-row mb-2">
+                      <VaInput v-model="item.model" placeholder="显卡型号" class="f-grow" />
+                      <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                      <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('gpu', idx)" />
+                    </div>
                   </div>
-                  <div v-for="(item, idx) in hwLists.lan" :key="idx" class="hw-row mb-2">
-                    <VaInput v-model="item.model" placeholder="网卡型号" class="f-grow" />
-                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('lan', idx)" />
+
+                  <!-- LAN -->
+                  <div v-if="hwLists.lan.length > 0" class="sub-group mb-3">
+                    <label class="sub-label">网络扩展 (NIC / LAN)</label>
+                    <div v-for="(item, idx) in hwLists.lan" :key="idx" class="hw-row mb-2">
+                      <VaInput v-model="item.model" placeholder="网卡型号" class="f-grow" />
+                      <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                      <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('lan', idx)" />
+                    </div>
                   </div>
-                  <div v-for="(item, idx) in hwLists.raid" :key="idx" class="hw-row mb-2">
-                    <VaInput v-model="item.model" placeholder="阵列卡型号" class="f-grow" />
-                    <VaCounter v-model="item.count" :min="1" class="hw-counter" />
-                    <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('raid', idx)" />
+
+                  <!-- RAID -->
+                  <div v-if="hwLists.raid.length > 0" class="sub-group mb-3">
+                    <label class="sub-label">存储控制 (RAID / HBA)</label>
+                    <div v-for="(item, idx) in hwLists.raid" :key="idx" class="hw-row mb-2">
+                      <VaInput v-model="item.model" placeholder="阵列卡型号" class="f-grow" />
+                      <VaCounter v-model="item.count" :min="1" class="hw-counter" />
+                      <VaButton icon="mdi-close" preset="plain" color="danger" @click="removeHw('raid', idx)" />
+                    </div>
                   </div>
+
                   <div class="flex gap-2">
                     <VaButton size="small" preset="secondary" @click="addHw('gpu')">+ GPU</VaButton>
                     <VaButton size="small" preset="secondary" @click="addHw('lan')">+ LAN</VaButton>
@@ -455,8 +484,21 @@ const handleSubmit = async () => {
 
     Object.keys(hwLists).forEach(key => {
       const validItems = hwLists[key].filter(i => i.model && i.model.trim())
-      form[key] = validItems.map(i => i.model.trim()).join(';')
-      form[key + 'n'] = validItems.map(i => i.count).join(';')
+      
+      if (validItems.length === 0) {
+        form[key] = ''
+        form[key + 'n'] = ''
+      } else if (validItems.length === 1) {
+        // 规则：只有一个型号时，保持原样存储
+        form[key] = validItems[0].model.trim()
+        form[key + 'n'] = validItems[0].count
+      } else {
+        // 规则：多个型号时，合并为 "型号1 * 数量1;型号2 * 数量2"，数量字段存 0
+        form[key] = validItems
+          .map(i => `${i.model.trim()} * ${i.count}`)
+          .join(';')
+        form[key + 'n'] = 0
+      }
     })
 
     await createServer(form)
@@ -512,6 +554,16 @@ const handleSubmit = async () => {
   text-transform: uppercase;
   margin-bottom: var(--space-2);
   display: block;
+}
+
+.sub-label {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--va-secondary);
+  text-transform: uppercase;
+  margin-bottom: 4px;
+  letter-spacing: 0.05em;
 }
 
 .hw-row {

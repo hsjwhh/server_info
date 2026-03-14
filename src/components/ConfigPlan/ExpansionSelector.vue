@@ -1,115 +1,59 @@
 <!-- src/components/ConfigPlan/ExpansionSelector.vue -->
 <template>
   <div class="form-section">
-    <h3 class="section-title">
-      <VaIcon name="mdi-expansion-card-variant" size="small" />
-      扩展硬件
-    </h3>
-
-    <!-- 独立网卡 -->
-    <div class="expansion-group">
-      <div class="group-header">
-        <span class="label">独立网卡</span>
-        <VaButton preset="secondary" size="small" icon="mdi-plus" @click="addItem(nicItems, { model: 'Intel X550-T2', count: 1 })">
-          添加
-        </VaButton>
-      </div>
-
-      <div v-if="nicItems.length === 0" class="empty-text">未添加网卡</div>
-
-      <div v-else class="config-table">
-        <div class="config-table-header">
-          <span class="col-model">型号</span>
-          <span class="col-count">数量</span>
-          <span class="col-action"></span>
-        </div>
-        <div class="config-table-body">
-          <div v-for="item in nicItems" :key="item.id" class="expansion-config-row">
-            <VaSelect
-              v-model="item.model"
-              :options="nicOptions"
-              size="small"
-              class="col-model"
-            />
-            <VaCounter v-model="item.count" :min="1" :max="4" size="small" class="col-count" />
-            <div class="col-action">
-              <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(nicItems, item.id)" />
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="section-header">
+      <h3 class="section-title">
+        <VaIcon name="mdi-expansion-card-variant" size="small" />
+        扩展硬件
+      </h3>
     </div>
 
-    <!-- 显卡 -->
-    <div class="expansion-group">
-      <div class="group-header">
-        <span class="label">显卡 (GPU)</span>
-        <VaButton preset="secondary" size="small" icon="mdi-plus" @click="addItem(gpuItems, { model: 'RTX 3060', count: 1 })">
-          添加
-        </VaButton>
-      </div>
-
-      <div v-if="gpuItems.length === 0" class="empty-text">未添加显卡</div>
-
-      <div v-else class="config-table">
-        <div class="config-table-header">
-          <span class="col-model">型号</span>
-          <span class="col-count">数量</span>
-          <span class="col-action"></span>
-        </div>
-        <div class="config-table-body">
-          <div v-for="item in gpuItems" :key="item.id" class="expansion-config-row">
-            <VaSelect
-              v-model="item.model"
-              :options="gpuOptions"
-              size="small"
-              class="col-model"
-            />
-            <VaCounter v-model="item.count" :min="1" :max="4" size="small" class="col-count" />
-            <div class="col-action">
-              <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(gpuItems, item.id)" />
-            </div>
-          </div>
+    <div class="hw-group-box">
+      <!-- 显卡 (GPU) -->
+      <div v-if="gpuItems.length > 0" class="sub-group">
+        <label class="group-label">显卡 (GPU / 加速卡)</label>
+        <div v-for="item in gpuItems" :key="item.id" class="hw-row mb-2">
+          <VaSelect v-model="item.model" :options="gpuOptions" size="small" class="f-grow" />
+          <VaCounter v-model="item.count" :min="1" :max="4" size="small" class="hw-counter" />
+          <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(gpuItems, item.id)" />
         </div>
       </div>
-    </div>
 
-    <!-- RAID 卡 -->
-    <div class="expansion-group">
-      <div class="group-header">
-        <span class="label">RAID 卡</span>
-        <VaButton preset="secondary" size="small" icon="mdi-plus" @click="addItem(raidItems, { model: '基础 RAID', count: 1 })">
-          添加
-        </VaButton>
+      <!-- 网卡 (LAN) -->
+      <div v-if="nicItems.length > 0" class="sub-group mt-3">
+        <label class="group-label">网络扩展 (NIC / LAN)</label>
+        <div v-for="item in nicItems" :key="item.id" class="hw-row mb-2">
+          <VaSelect v-model="item.model" :options="nicOptions" size="small" class="f-grow" />
+          <VaCounter v-model="item.count" :min="1" :max="4" size="small" class="hw-counter" />
+          <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(nicItems, item.id)" />
+        </div>
       </div>
 
-      <div v-if="raidItems.length === 0" class="empty-text">未添加 RAID 卡</div>
+      <!-- RAID 卡 -->
+      <div v-if="raidItems.length > 0" class="sub-group mt-3">
+        <label class="group-label">存储控制 (RAID / HBA)</label>
+        <div v-for="item in raidItems" :key="item.id" class="hw-row mb-2">
+          <VaSelect v-model="item.model" :options="['基础 RAID', 'HBA', '高级 RAID']" size="small" class="f-grow" />
+          <VaCounter v-model="item.count" :min="1" :max="4" size="small" class="hw-counter" />
+          <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(raidItems, item.id)" />
+        </div>
+      </div>
 
-      <div v-else class="config-table">
-        <div class="config-table-header">
-          <span class="col-model">型号</span>
-          <span class="col-count">数量</span>
-          <span class="col-action"></span>
-        </div>
-        <div class="config-table-body">
-          <div v-for="item in raidItems" :key="item.id" class="expansion-config-row">
-            <VaSelect
-              v-model="item.model"
-              :options="['基础 RAID', 'HBA', '高级 RAID']"
-              size="small"
-              class="col-model"
-            />
-            <VaCounter v-model="item.count" :min="1" :max="4" size="small" class="col-count" />
-            <div class="col-action">
-              <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(raidItems, item.id)" />
-            </div>
-          </div>
-        </div>
+      <!-- 空状态 -->
+      <div v-if="gpuItems.length === 0 && nicItems.length === 0 && raidItems.length === 0" class="empty-placeholder">
+        未添加扩展硬件
+      </div>
+
+      <!-- 统一底部操作栏 -->
+      <div class="flex gap-2 mt-4 pt-3 border-t">
+        <VaButton size="small" preset="secondary" @click="addItem(gpuItems, { model: 'RTX 3060', count: 1 })">+ GPU</VaButton>
+        <VaButton size="small" preset="secondary" @click="addItem(nicItems, { model: 'Intel X550-T2', count: 1 })">+ LAN</VaButton>
+        <VaButton size="small" preset="secondary" @click="addItem(raidItems, { model: '基础 RAID', count: 1 })">+ RAID</VaButton>
       </div>
     </div>
 
     <div class="expansion-summary">
-      <VaChip color="info">总预估扩展功耗: {{ expansionPower }}W</VaChip>
+      <VaChip color="info" outline size="small">总预估功耗: {{ expansionPower }}W</VaChip>
     </div>
   </div>
 </template>
@@ -134,114 +78,48 @@ const { addItem, removeItem } = store
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
 }
 
-.expansion-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  background: var(--color-bg-page);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-subtle);
+.hw-group-box {
+  padding: var(--space-2) 0;
 }
 
-.group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-2);
-}
-
-.group-header .label {
+.group-label {
+  font-size: 0.7rem;
   font-weight: 700;
-  font-size: var(--text-sm);
-  color: var(--va-primary);
+  color: var(--va-secondary);
   text-transform: uppercase;
+  margin-bottom: var(--space-1);
+  display: block;
   letter-spacing: 0.05em;
 }
 
-.config-table {
-  background: white;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-.config-table-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 140px 32px;
-  column-gap: var(--space-4);
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-bg-subtle);
-  border-bottom: 1px solid var(--color-border-subtle);
-  align-items: center;
-}
-
-.config-table-header span {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-  font-weight: 600;
-  /* 对齐修正 */
-  padding-left: 2px;
-}
-
-.config-table-header .col-model {
-  min-width: 0;
-}
-
-.config-table-header .col-count {
-  text-align: center;
-  padding-left: 0;
-}
-
-.config-table-header .col-action {
-  text-align: center;
-}
-
-.config-table-body {
-  padding: var(--space-1) 0;
-}
-
-.expansion-config-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 140px 32px;
-  column-gap: var(--space-4);
-  align-items: center;
-  padding: var(--space-1) var(--space-3);
-  transition: background 0.2s ease;
-}
-
-.expansion-config-row:not(:last-child) {
-  border-bottom: 1px dashed var(--color-border-subtle);
-}
-
-.expansion-config-row:hover {
-  background: var(--color-bg-hover);
-}
-
-.col-model {
-  min-width: 0;
-}
-
-.col-count {
-  min-width: 0;
-}
-
-.col-action {
+.hw-row {
   display: flex;
-  justify-content: center;
+  gap: var(--space-2);
+  align-items: center;
 }
 
-.empty-text {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-  text-align: center;
+.f-grow {
+  flex-grow: 1;
+}
+
+.hw-counter {
+  width: 110px;
+}
+
+.empty-placeholder {
   padding: var(--space-6);
-  background: rgba(0,0,0,0.01);
-  border-radius: var(--radius-sm);
-  border: 1px dashed var(--color-border);
+  text-align: center;
+  color: var(--va-secondary);
+  font-size: var(--text-sm);
+  background: var(--va-background-element);
+  border-radius: var(--va-card-border-radius);
+  border: 1px dashed var(--va-background-border);
+}
+
+.border-t {
+  border-top: 1px solid var(--va-background-border);
 }
 
 .expansion-summary {
@@ -250,22 +128,8 @@ const { addItem, removeItem } = store
   margin-top: var(--space-2);
 }
 
-@media (max-width: 640px) {
-  .config-table-header {
-    display: none;
-  }
-  .config-table-body {
-    padding: var(--space-2);
-  }
-  .expansion-config-row {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    padding: var(--space-3) 0;
-    gap: var(--space-2);
-  }
-  .col-count {
-    width: 100%;
-  }
-}
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mb-2 { margin-bottom: var(--space-2); }
+.pt-3 { padding-top: var(--space-3); }
 </style>

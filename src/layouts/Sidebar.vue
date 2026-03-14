@@ -2,8 +2,8 @@
 <template>
   <nav class="sidebar" :class="{ collapsed }">
     <div class="sidebar-header">
-      <span v-if="!collapsed" class="logo">SERVER_INFO</span>
-      <span v-else class="logo-mini">SI</span>
+      <img src="/logo.svg" alt="Logo" class="sidebar-logo" />
+      <span v-if="!collapsed" class="logo">ServerInfo</span>
     </div>
 
     <ul class="menu">
@@ -104,6 +104,13 @@ const navigateTo = (path: string) => {
 .sidebar:not(.collapsed) .sidebar-header {
   justify-content: flex-start;
   gap: var(--space-3);
+}
+
+.sidebar-logo {
+  width: 28px;
+  height: 28px;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 .logo, .logo-mini {

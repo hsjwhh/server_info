@@ -8,95 +8,67 @@
       </h3>
     </div>
 
-    <!-- M.2 SSD -->
-    <div class="storage-group">
-      <div class="group-header">
-        <span class="label">M.2 SSD</span>
-        <VaButton preset="secondary" size="small" icon="mdi-plus" @click="addItem(m2Items, { capacity: '512GB', count: 1 })">
-          添加
-        </VaButton>
-      </div>
-      
-      <div v-if="m2Items.length === 0" class="empty-text">未添加 M.2 设备</div>
-      
-      <div v-else class="config-table">
-        <div class="config-table-header">
-          <span class="col-capacity">容量</span>
-          <span class="col-count">数量</span>
-          <span class="col-action"></span>
-        </div>
-        <div class="config-table-body">
-          <div v-for="item in m2Items" :key="item.id" class="storage-config-row">
-            <VaSelect v-model="item.capacity" :options="['256GB', '512GB', '1TB', '2TB']" size="small" class="col-capacity" />
-            <VaCounter v-model="item.count" :min="1" :max="4" size="small" class="col-count" />
-            <div class="col-action">
-              <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(m2Items, item.id)" />
-            </div>
-          </div>
+    <div class="hw-group-box">
+      <!-- M.2 系列 -->
+      <div v-if="m2Items.length > 0" class="sub-group">
+        <label class="group-label">M.2 SSD (NVMe)</label>
+        <div v-for="item in m2Items" :key="item.id" class="hw-row mb-2">
+          <VaSelect 
+            v-model="item.capacity" 
+            :options="['256GB', '512GB', '1TB', '2TB', '4TB']" 
+            size="small" 
+            class="f-grow" 
+          />
+          <VaCounter v-model="item.count" :min="1" :max="4" size="small" class="hw-counter" />
+          <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(m2Items, item.id)" />
         </div>
       </div>
-    </div>
 
-    <!-- SATA SSD -->
-    <div class="storage-group">
-      <div class="group-header">
-        <span class="label">SATA SSD</span>
-        <VaButton preset="secondary" size="small" icon="mdi-plus" @click="addItem(ssdItems, { capacity: '960GB', count: 1 })">
-          添加
-        </VaButton>
-      </div>
-
-      <div v-if="ssdItems.length === 0" class="empty-text">未添加 SATA SSD</div>
-
-      <div v-else class="config-table">
-        <div class="config-table-header">
-          <span class="col-capacity">容量</span>
-          <span class="col-count">数量</span>
-          <span class="col-action"></span>
-        </div>
-        <div class="config-table-body">
-          <div v-for="item in ssdItems" :key="item.id" class="storage-config-row">
-            <VaSelect v-model="item.capacity" :options="['480GB', '960GB', '1.92TB', '3.84TB']" size="small" class="col-capacity" />
-            <VaCounter v-model="item.count" :min="1" :max="8" size="small" class="col-count" />
-            <div class="col-action">
-              <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(ssdItems, item.id)" />
-            </div>
-          </div>
+      <!-- SSD 系列 -->
+      <div v-if="ssdItems.length > 0" class="sub-group mt-3">
+        <label class="group-label">SATA/SAS SSD</label>
+        <div v-for="item in ssdItems" :key="item.id" class="hw-row mb-2">
+          <VaSelect 
+            v-model="item.capacity" 
+            :options="['480GB', '960GB', '1.92TB', '3.84TB', '7.68TB']" 
+            size="small" 
+            class="f-grow" 
+          />
+          <VaCounter v-model="item.count" :min="1" :max="12" size="small" class="hw-counter" />
+          <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(ssdItems, item.id)" />
         </div>
       </div>
-    </div>
 
-    <!-- HDD -->
-    <div class="storage-group">
-      <div class="group-header">
-        <span class="label">HDD 机械硬盘</span>
-        <VaButton preset="secondary" size="small" icon="mdi-plus" @click="addItem(hddItems, { capacity: '4TB', count: 1 })">
-          添加
-        </VaButton>
+      <!-- HDD 系列 -->
+      <div v-if="hddItems.length > 0" class="sub-group mt-3">
+        <label class="group-label">HDD 机械硬盘</label>
+        <div v-for="item in hddItems" :key="item.id" class="hw-row mb-2">
+          <VaSelect 
+            v-model="item.capacity" 
+            :options="['2TB', '4TB', '8TB', '12TB', '16TB', '18TB']" 
+            size="small" 
+            class="f-grow" 
+          />
+          <VaCounter v-model="item.count" :min="1" :max="12" size="small" class="hw-counter" />
+          <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(hddItems, item.id)" />
+        </div>
       </div>
 
-      <div v-if="hddItems.length === 0" class="empty-text">未添加 HDD 设备</div>
+      <!-- 空状态 -->
+      <div v-if="m2Items.length === 0 && ssdItems.length === 0 && hddItems.length === 0" class="empty-placeholder">
+        尚未配置任何存储设备
+      </div>
 
-      <div v-else class="config-table">
-        <div class="config-table-header">
-          <span class="col-capacity">容量</span>
-          <span class="col-count">数量</span>
-          <span class="col-action"></span>
-        </div>
-        <div class="config-table-body">
-          <div v-for="item in hddItems" :key="item.id" class="storage-config-row">
-            <VaSelect v-model="item.capacity" :options="['2TB', '4TB', '8TB', '10TB', '12TB']" size="small" class="col-capacity" />
-            <VaCounter v-model="item.count" :min="1" :max="12" size="small" class="col-count" />
-            <div class="col-action">
-              <VaButton preset="plain" icon="mdi-close" color="danger" size="small" @click="removeItem(hddItems, item.id)" />
-            </div>
-          </div>
-        </div>
+      <!-- 统一底部操作栏 -->
+      <div class="flex gap-2 mt-4 pt-3 border-t">
+        <VaButton size="small" preset="secondary" @click="addItem(m2Items, { capacity: '512GB', count: 1 })">+ M.2</VaButton>
+        <VaButton size="small" preset="secondary" @click="addItem(ssdItems, { capacity: '960GB', count: 1 })">+ SSD</VaButton>
+        <VaButton size="small" preset="secondary" @click="addItem(hddItems, { capacity: '4TB', count: 1 })">+ HDD</VaButton>
       </div>
     </div>
 
     <div class="storage-summary">
-      <VaChip color="info">总预估功耗: {{ storagePower }}W</VaChip>
+      <VaChip color="info" outline size="small">总预估功耗: {{ storagePower }}W</VaChip>
     </div>
   </div>
 </template>
@@ -107,11 +79,7 @@ import { storeToRefs } from 'pinia'
 import { useConfigPlanStore } from '../../stores/configPlan'
 
 const store = useConfigPlanStore()
-const {
-  m2Items, ssdItems, hddItems,
-  storagePower
-} = storeToRefs(store)
-
+const { m2Items, ssdItems, hddItems, storagePower } = storeToRefs(store)
 const { addItem, removeItem } = store
 </script>
 
@@ -119,114 +87,48 @@ const { addItem, removeItem } = store
 .form-section {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
 }
 
-.storage-group {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: var(--space-4);
-  background: var(--color-bg-page);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--color-border-subtle);
+.hw-group-box {
+  padding: var(--space-2) 0;
 }
 
-.group-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--space-2);
-}
-
-.group-header .label {
+.group-label {
+  font-size: 0.7rem;
   font-weight: 700;
-  font-size: var(--text-sm);
-  color: var(--va-primary);
+  color: var(--va-secondary);
   text-transform: uppercase;
+  margin-bottom: var(--space-1);
+  display: block;
   letter-spacing: 0.05em;
 }
 
-.config-table {
-  background: white;
-  border: 1px solid var(--color-border-subtle);
-  border-radius: var(--radius-sm);
-  overflow: hidden;
-}
-
-.config-table-header {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 140px 32px;
-  column-gap: var(--space-4);
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-bg-subtle);
-  border-bottom: 1px solid var(--color-border-subtle);
-  align-items: center;
-}
-
-.config-table-header span {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-  font-weight: 600;
-  /* 对齐修正：补偿 VaSelect/VaCounter 的内部 layout */
-  padding-left: 2px;
-}
-
-.config-table-header .col-capacity {
-  min-width: 0;
-}
-
-.config-table-header .col-count {
-  text-align: center;
-  padding-left: 0;
-}
-
-.config-table-header .col-action {
-  text-align: center;
-}
-
-.config-table-body {
-  padding: var(--space-1) 0;
-}
-
-.storage-config-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 140px 32px;
-  column-gap: var(--space-4);
-  align-items: center;
-  padding: var(--space-1) var(--space-3);
-  transition: background 0.2s ease;
-}
-
-.storage-config-row:not(:last-child) {
-  border-bottom: 1px dashed var(--color-border-subtle);
-}
-
-.storage-config-row:hover {
-  background: var(--color-bg-hover);
-}
-
-.col-capacity {
-  min-width: 0;
-}
-
-.col-count {
-  min-width: 0;
-}
-
-.col-action {
+.hw-row {
   display: flex;
-  justify-content: center;
+  gap: var(--space-2);
+  align-items: center;
 }
 
-.empty-text {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-  text-align: center;
+.f-grow {
+  flex-grow: 1;
+}
+
+.hw-counter {
+  width: 110px;
+}
+
+.empty-placeholder {
   padding: var(--space-6);
-  background: rgba(0,0,0,0.01);
-  border-radius: var(--radius-sm);
-  border: 1px dashed var(--color-border);
+  text-align: center;
+  color: var(--va-secondary);
+  font-size: var(--text-sm);
+  background: var(--va-background-element);
+  border-radius: var(--va-card-border-radius);
+  border: 1px dashed var(--va-background-border);
+}
+
+.border-t {
+  border-top: 1px solid var(--va-background-border);
 }
 
 .storage-summary {
@@ -235,22 +137,8 @@ const { addItem, removeItem } = store
   margin-top: var(--space-2);
 }
 
-@media (max-width: 640px) {
-  .config-table-header {
-    display: none;
-  }
-  .config-table-body {
-    padding: var(--space-2);
-  }
-  .storage-config-row {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    padding: var(--space-3) 0;
-    gap: var(--space-2);
-  }
-  .col-count {
-    width: 100%;
-  }
-}
+.mt-3 { margin-top: var(--space-3); }
+.mt-4 { margin-top: var(--space-4); }
+.mb-2 { margin-bottom: var(--space-2); }
+.pt-3 { padding-top: var(--space-3); }
 </style>

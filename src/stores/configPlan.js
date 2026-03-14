@@ -247,24 +247,63 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
     }
 
     /**
+     * 内部辅助函数：将硬件列表格式化为“单型号保持，多型号合并”的存储格式
+     * 对齐 ServerEntryPage 的存储逻辑
+     */
+    const formatHardwareList = (items, modelKey = 'model') => {
+        if (!items || items.length === 0) return { model: '', count: '' }
+        
+        if (items.length === 1) {
+            return { 
+                model: items[0][modelKey] || items[0].capacity, 
+                count: items[0].count 
+            }
+        }
+
+        // 多个项目：合并为 "A * 1;B * 2"，数量标记为 0
+        const mergedModel = items
+            .map(it => `${it[modelKey] || it.capacity} * ${it.count}`)
+            .join(';')
+        
+        return { model: mergedModel, count: 0 }
+    }
+
+    /**
      * 序列化整个方案配置给前端复制或下载
+     * 已对齐入库页的多型号合并存储逻辑
      */
     const exportConfigData = () => {
+        const m2 = formatHardwareList(m2Items.value, 'capacity')
+        const ssd = formatHardwareList(ssdItems.value, 'capacity')
+        const hdd = formatHardwareList(hddItems.value, 'capacity')
+        const nic = formatHardwareList(nicItems.value, 'model')
+        const gpu = formatHardwareList(gpuItems.value, 'model')
+        const raid = formatHardwareList(raidItems.value, 'model')
+
         return {
             cpu: { id: selectedCpu.value?.id, name: selectedCpu.value?.cpu_short_name, count: cpuCount.value },
             motherboard: selectedMotherboard.value,
-            memory: { type: memoryType.value, capacity: memoryCapacity.value, count: memoryCount.value, total: `${totalMemory.value}GB` },
+            memory: { 
+                type: memoryType.value, 
+                capacity: memoryCapacity.value, 
+                count: memoryCount.value, 
+                total: `${totalMemory.value}GB` 
+            },
+            // 存储与扩展设备：已适配分号合并逻辑
             storage: {
-                m2: m2Items.value.map(it => `${it.capacity} × ${it.count}`),
-                ssd: ssdItems.value.map(it => `${it.capacity} × ${it.count}`),
-                hdd: hddItems.value.map(it => `${it.capacity} × ${it.count}`),
+                m2: m2.model, m2n: m2.count,
+                ssd: ssd.model, ssdn: ssd.count,
+                hdd: hdd.model, hddn: hdd.count
             },
             expansion: {
-                nic: nicItems.value.map(it => `${it.model} × ${it.count}`),
-                gpu: gpuItems.value.map(it => `${it.model} × ${it.count}`),
-                raid: raidItems.value.map(it => `${it.model} × ${it.count}`),
+                nic: nic.model, nicn: nic.count,
+                gpu: gpu.model, gpun: gpu.count,
+                raid: raid.model, raidn: raid.count
             },
-            power: { total: `${totalPower.value}W`, recommended: `${recommendedPSU.value}W` }
+            power: { 
+                total: `${totalPower.value}W`, 
+                recommended: `${recommendedPSU.value}W` 
+            }
         }
     }
 
