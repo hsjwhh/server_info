@@ -90,20 +90,31 @@
                 <!-- 主板：改为搜索式，解除与 CPU 的联动 -->
                 <div class="cpu-container mb-3">
                   <label class="va-input-label cpu-standalone-label">主板型号 *</label>
-                  <VaInput
-                    v-model="mbKeyword"
-                    placeholder="输入主板型号搜索..."
-                    required
-                    clearable
-                    :loading="loadingMbs"
-                    class="w-full"
-                    @update:model-value="handleMbSearch"
-                    @clear="clearMb"
-                  >
-                    <template #prependInner>
-                      <VaIcon name="mdi-magnify" size="small" />
-                    </template>
-                  </VaInput>
+                  <div class="cpu-input-row">
+                    <VaInput
+                      v-model="mbKeyword"
+                      placeholder="输入主板型号搜索..."
+                      required
+                      clearable
+                      :loading="loadingMbs"
+                      class="f-grow"
+                      @update:model-value="handleMbSearch"
+                      @clear="clearMb"
+                    >
+                      <template #prependInner>
+                        <VaIcon name="mdi-magnify" size="small" />
+                      </template>
+                    </VaInput>
+                    <VaButton
+                      preset="secondary"
+                      icon="mdi-plus"
+                      class="cpu-add-btn"
+                      title="新增主板到数据库"
+                      @click="showMbAddModal = true"
+                    >
+                      录入新主板
+                    </VaButton>
+                  </div>
                   
                   <div v-if="mbSuggestions.length > 0" class="suggestions-list">
                     <div
@@ -264,6 +275,12 @@
       @saved="onCpuSaved"
     />
 
+    <!-- 主板 新增弹窗 -->
+    <MotherboardAddModal
+      v-model="showMbAddModal"
+      @saved="onMbSaved"
+    />
+
     <!-- 批量导入弹窗 -->
     <BatchImportModal
       v-model="showBatchImport"
@@ -283,6 +300,7 @@ import { createServer, checkSnUnique } from '../../api/server'
 import { searchCpu, getMbBySocket } from '../../api/configPlan'
 import { formatSocket } from '../../utils/hardware'
 import CpuAddModal from '../../components/ConfigPlan/CpuAddModal.vue'
+import MotherboardAddModal from '../../components/ConfigPlan/MotherboardAddModal.vue'
 import BatchImportModal from '../../components/ConfigPlan/BatchImportModal.vue'
 
 const { init: notify } = useToast()
@@ -297,6 +315,7 @@ const mbSuggestions = ref([])
 const searchingCpu = ref(false)
 const loadingMbs = ref(false)
 const showCpuAddModal = ref(false)
+const showMbAddModal = ref(false)
 const showBatchImport = ref(false)
 const checkingSn = ref(false)
 
@@ -452,6 +471,17 @@ const onCpuSaved = (newCpu) => {
     onCpuSelect(newCpu)
   }
   showCpuAddModal.value = false
+}
+
+/**
+ * 当成功新增主板后的处理逻辑：自动选中该主板
+ */
+const onMbSaved = (newMb) => {
+  notify({ message: '新主板已成功录入数据库并自动选中', color: 'success' })
+  if (newMb) {
+    onMbSelect(newMb)
+  }
+  showMbAddModal.value = false
 }
 
 const clearCpu = () => {

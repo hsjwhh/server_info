@@ -22,9 +22,13 @@
           </div>
 
           <div class="hardware-form">
-            <div id="section-cpu" class="scroll-mt section-anchor"><CpuSelector /></div>
+            <div id="section-cpu" class="scroll-mt section-anchor">
+              <CpuSelector @add-cpu="showCpuAddModal = true" />
+            </div>
             <VaDivider />
-            <div id="section-mb" class="scroll-mt section-anchor"><MotherboardSelector /></div>
+            <div id="section-mb" class="scroll-mt section-anchor">
+              <MotherboardSelector @add-mb="showMbAddModal = true" />
+            </div>
             <VaDivider />
             <div id="section-mem" class="scroll-mt section-anchor"><MemorySelector /></div>
             <VaDivider />
@@ -42,6 +46,18 @@
         <CompatibilityAlert class="mt-4" />
       </div>
     </div>
+
+    <!-- 弹窗挂载：CPU 新增 -->
+    <CpuAddModal
+      v-model="showCpuAddModal"
+      @saved="onCpuSaved"
+    />
+
+    <!-- 弹窗挂载：主板 新增 -->
+    <MotherboardAddModal
+      v-model="showMbAddModal"
+      @saved="onMbSaved"
+    />
   </div>
 </template>
 
@@ -56,6 +72,12 @@ import ExpansionSelector  from '../components/ConfigPlan/ExpansionSelector.vue'
 import ConfigSummary      from '../components/ConfigPlan/ConfigSummary.vue'
 import PowerAnalysis      from '../components/ConfigPlan/PowerAnalysis.vue'
 import CompatibilityAlert from '../components/ConfigPlan/CompatibilityAlert.vue'
+import CpuAddModal        from '../components/ConfigPlan/CpuAddModal.vue'
+import MotherboardAddModal from '../components/ConfigPlan/MotherboardAddModal.vue'
+import { useConfigPlanStore } from '../stores/configPlan'
+
+const store = useConfigPlanStore()
+const { selectCpu } = store
 
 const sections = [
   { id: 'section-cpu', label: 'CPU', icon: 'memory' },
@@ -66,7 +88,31 @@ const sections = [
 ]
 
 const activeSection = ref(sections[0].id)
+const showCpuAddModal = ref(false)
+const showMbAddModal = ref(false)
 let observer = null
+
+/**
+ * 当成功新增 CPU 后的处理逻辑：自动在方案中选中该 CPU
+ */
+const onCpuSaved = async (newCpu) => {
+  if (newCpu) {
+    await selectCpu(newCpu)
+  }
+  showCpuAddModal.value = false
+}
+
+/**
+ * 当成功新增主板后的处理逻辑：自动在方案中选中该主板
+ */
+const onMbSaved = (newMb) => {
+  if (newMb) {
+    store.selectedMotherboard = newMb.model
+    // 刷新主板列表以确保新录入的项出现在当前 Socket 过滤结果中
+    store.loadCompatibleMotherboards()
+  }
+  showMbAddModal.value = false
+}
 
 const scrollToSection = (id) => {
   const element = document.getElementById(id)

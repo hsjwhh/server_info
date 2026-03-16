@@ -147,7 +147,7 @@ export function deleteConfig(configId) {
 
 /**
  * 新增 CPU 信息
- * @param {Object} data - CPU 详细数据
+ * @param {Object} data - CPU 详细数据，字段对应 cpu_info 表
  * @returns {Promise<Object>} 新增后的记录信息
  */
 export function addCpu(data) {
@@ -155,8 +155,28 @@ export function addCpu(data) {
 }
 
 /**
- * 修改 CPU 信息 (可选，留作后续扩展)
+ * 更新 CPU 信息
+ * @param {string|number} id - CPU 的 HashID 或主键
+ * @param {Object} data - 需要更新的字段
  */
 export function updateCpu(id, data) {
   return request.put(`/hw/cpu/${id}`, data)
+}
+
+/**
+ * 新增 主板 信息
+ * @param {Object} data - 主板数据，字段对应 mb_info 表
+ * @returns {Promise<Object>} 新增结果
+ */
+export function addMotherboard(data) {
+  return request.post('/hw/mb', data)
+}
+
+/**
+ * 更新 主板 信息
+ * @param {string|number} id - 主板的 HashID 或主键
+ * @param {Object} data - 需要更新的字段
+ */
+export function updateMotherboard(id, data) {
+  return request.put(`/hw/mb/${id}`, data)
 }

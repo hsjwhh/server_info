@@ -9,25 +9,40 @@
     <div v-if="!selectedCpu" class="empty-placeholder">
       <VaIcon name="mdi-cpu-64-bit" size="large" color="secondary" />
       <p>请先在上方选择 CPU 以匹配兼容主板</p>
-    </div>
-
     <div v-else class="selector-content">
-      <VaSelect
-        v-model="selectedMotherboard"
-        label="选择主板"
-        placeholder="选择兼容的主板..."
-        :options="compatibleMotherboards"
-        text-by="model"
-        value-by="model"
-        searchable
-        clearable
-      >
-        <template #prependInner>
-          <VaIcon name="mdi-expansion-card" size="small" />
-        </template>
-      </VaSelect>
+      <div class="flex gap-1 items-end">
+        <VaSelect
+          v-model="selectedMotherboard"
+          label="选择主板"
+          placeholder="选择兼容的主板..."
+          :options="compatibleMotherboards"
+          text-by="model"
+          value-by="model"
+          searchable
+          clearable
+          class="flex-grow"
+        >
+          <template #prependInner>
+            <VaIcon name="mdi-expansion-card" size="small" />
+          </template>
+        </VaSelect>
+        <VaButton
+          preset="secondary"
+          icon="mdi-plus"
+          title="录入新主板"
+          class="add-hw-btn"
+          @click="$emit('add-mb')"
+        />
+      </div>
+    ...
+    <style scoped>
+    .add-hw-btn {
+    height: 36px; /* 强制与 VaSelect 的框体高度一致 */
+    min-width: 36px;
+    }
+    .form-section {
+    ...
 
-      <div v-if="selectedMotherboardDetail" class="selected-item-card mt-3">
         <div class="card-header">
           <a
             v-if="selectedMotherboardDetail.url"

@@ -19,26 +19,40 @@
             clearable
             style="width: 120px; min-width: 120px; flex: 0 0 120px;"
             @update:model-value="handleCoresChange"
-          />
-
           <!-- 型号输入框 (占据左半区所有剩余空间) -->
-          <VaInput
-            v-model="cpuKeyword"
-            label="CPU 型号"
-            placeholder="型号搜索..."
-            clearable
-            :loading="loadingCpuDetail"
-            style="flex-grow: 1 !important;"
-            @update:model-value="handleCpuSearch"
-            @clear="clearCpu"
-          >
-            <template #prependInner>
-              <VaIcon name="mdi-magnify" size="small" />
-            </template>
-          </VaInput>
-        </div>
+          <div class="flex gap-1 items-end flex-grow">
+            <VaInput
+              v-model="cpuKeyword"
+              label="CPU 型号"
+              placeholder="型号搜索..."
+              clearable
+              :loading="loadingCpuDetail"
+              class="flex-grow"
+              @update:model-value="handleCpuSearch"
+              @clear="clearCpu"
+            >
+              <template #prependInner>
+                <VaIcon name="mdi-magnify" size="small" />
+              </template>
+            </VaInput>
+            <VaButton
+              preset="secondary"
+              icon="mdi-plus"
+              title="录入新型号"
+              class="add-hw-btn"
+              @click="$emit('add-cpu')"
+            />
+          </div>
+          </div>
+          ...
+          <style scoped>
+          .add-hw-btn {
+          height: 36px; /* 强制与 VaInput 的框体高度一致 */
+          min-width: 36px;
+          }
+          .cpu-count-section {
+          ...
 
-        <!-- 右半区 (50%)：留白 -->
         <div style="width: 50%;"></div>
       </div>
   <!-- 搜索建议列表 -->
