@@ -10,6 +10,11 @@
  *   - accessToken 存于 authStore 内存（不读 localStorage）
  *   - 页面刷新时 authStore 为空 → 自动调用 silentRefresh() 换取新 token
  *   - silentRefresh() 通过 HttpOnly Cookie 中的 refreshToken 完成，对用户透明
+ *
+ * 路由守卫策略：
+ *   - 白名单模式：所有页面默认需要登录，仅 meta.public: true 的页面例外
+ *   - meta.allowDirectAccess: false 可禁止用户直接访问某页面（跳回 Dashboard）
+ *   - 无需在每条路由上标记 requiresAuth，降低漏配风险
  */
 
 import { createRouter, createWebHistory } from 'vue-router'
@@ -38,8 +43,7 @@ const routes = [
           showInMenu: true,
           breadcrumbs: [
             { label: '首页', to: '/' }
-          ],
-          requiresAuth: true
+          ]
         },
       },
       {
@@ -53,8 +57,7 @@ const routes = [
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '服务器列表', to: '/servers' }
-          ],
-          requiresAuth: true
+          ]
         }
       },
       {
@@ -69,8 +72,7 @@ const routes = [
             { label: '首页', to: '/' },
             { label: '服务器列表', to: '/servers' },
             { label: '服务器详情' }
-          ],
-          requiresAuth: true
+          ]
         }
       },
       {
@@ -80,12 +82,12 @@ const routes = [
         meta: {
           title: '配置方案',
           icon: 'mdi-clipboard-text-outline',
-          showInMenu: true,
+          showInMenu: false,
+          allowDirectAccess: false,
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '配置方案', to: '/config-plan' }
-          ],
-          requiresAuth: true
+          ]
         }
       },
       {
@@ -95,12 +97,12 @@ const routes = [
         meta: { 
           title: '服务器录入', 
           icon: 'mdi-database-plus', 
-          showInMenu: true, 
+          showInMenu: false,
+          allowDirectAccess: false,
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '服务器录入', to: '/server/entry' }
-          ],
-          requiresAuth: true 
+          ]
         }
       },
       {
@@ -114,8 +116,7 @@ const routes = [
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '个人设置', to: '/settings' }
-          ],
-          requiresAuth: true
+          ]
         }
       },
     ]
@@ -132,48 +133,35 @@ const router = createRouter({
  * ============================================================
  * 全局路由守卫
  * ============================================================
- *
- * 逻辑：
- *   1. accessToken 存在 → 正常放行
- *   2. accessToken 不存在 → 尝试 silentRefresh()（利用 HttpOnly Cookie）
- *   3. silentRefresh 成功 → 放行
- *   4. silentRefresh 失败 → 跳转登录页
- *   5. 已登录却访问 /login → 自动跳首页
  */
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
 
-  // 访问公开页面直接放行
+  // 1. 公开页面处理（包含已登录跳离 /login）
   if (to.meta.public) {
-    // 但如果已登录访问 /login，跳回首页
-    if (authStore.isLoggedIn) {
+    if (authStore.isLoggedIn && to.path === '/login') {
       return next('/')
     }
     return next()
   }
 
-  // 需要登录的页面
-  if (to.meta.requiresAuth) {
-    // 内存中有 token，直接放行
-    if (authStore.isLoggedIn) {
-      return next()
-    }
-
-    // 内存中无 token（页面刷新导致）→ 尝试静默刷新
-    const refreshed = await authStore.silentRefresh()
-    if (refreshed) {
-      return next()
-    }
-
-    // 刷新也失败 → 跳转登录页
+  // 2. 身份验证 (Authentication)
+  // 白名单策略：所有非 public 页面默认要求登录，无需逐一标记 requiresAuth
+  let isAuth = authStore.isLoggedIn
+  if (!isAuth) {
+    isAuth = await authStore.silentRefresh()
+  }
+  if (!isAuth) {
     return next('/login')
   }
 
-  // [拦截逻辑]：若路由明确禁止直连访问（allowDirectAccess: false），则重定向至 Dashboard
+  // 3. 访问限制 (Authorization)
+  // 走到这里说明用户一定已登录，再判断页面级别的特定限制
   if (to.meta.allowDirectAccess === false) {
     return next({ name: 'Dashboard' })
   }
 
+  // 4. 所有检查通过，正常放行
   next()
 })
 
