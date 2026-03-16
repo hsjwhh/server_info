@@ -95,7 +95,7 @@
                   <VaSelect
                     v-model="item.manualType"
                     label="设备类型"
-                    :options="['CPU', '主板', '内存', '存储', '阵列卡', '网卡', '机箱', '电源', '其他']"
+                    :options="['CPU', '主板', '内存', '存储', '阵列卡', '网卡', '机箱', '电源', '操作系统', '其他']"
                     class="type-select"
                   />
                   <VaInput
@@ -153,6 +153,7 @@ const processText = async () => {
     else if (/^(硬盘|磁盘|存储|SSD|HDD)/i.test(line)) predictedType = '存储'
     else if (/^机箱/i.test(line)) predictedType = '机箱'
     else if (/^电源/i.test(line)) predictedType = '电源'
+    else if (/^(OS|系统)/i.test(line)) predictedType = '操作系统'
     else if (/^(阵列卡|RAID)/i.test(line)) predictedType = '阵列卡'
     else if (/^(网卡|NIC|LAN)/i.test(line)) predictedType = '网卡'
     else if (/^(散热器|风扇|配件|线缆)/i.test(line)) predictedType = '其他'
@@ -291,7 +292,8 @@ const handleConfirm = () => {
     lan: [],
     others: [],
     chassis: '',
-    psu: ''
+    psu: '',
+    os: ''
   }
 
   parsedItems.value.forEach(item => {
@@ -307,6 +309,8 @@ const handleConfirm = () => {
       result.chassis = model
     } else if (type === '电源') {
       result.psu = model
+    } else if (type === '操作系统') {
+      result.os = model
     } else if (type === '内存') {
       result.memory.push({ model, count })
     } else if (type === '存储') {
@@ -330,6 +334,56 @@ const handleConfirm = () => {
   show.value = false
 }
 </script>
+
+<style scoped>
+.batch-import-container {
+  min-height: 200px;
+}
+
+.batch-textarea {
+  min-height: 200px;
+}
+
+.help-text {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  line-height: 1.6;
+}
+
+.parsed-list {
+  max-height: 50vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.parsed-item {
+  background-color: var(--color-bg-subtle);
+}
+
+.item-input-info {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.label {
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
+}
+
+.value {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.type-select {
+  width: 120px;
+}
+
+.suggestions {
+  margin-top: 4px;
+}
+</style>
 
 <style scoped>
 .batch-import-container {

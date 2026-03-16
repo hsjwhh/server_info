@@ -19,7 +19,15 @@
             <VaCardContent>
               <div class="vertical-form mt-2">
                 <VaDateInput v-model="entryDate" label="入库日期 *" required class="w-full mb-3" />
-                <VaInput v-model="form.sn" label="序列号 (SN) *" placeholder="唯一序列号" required class="w-full mb-3" />
+                <VaInput
+                  v-model="form.sn"
+                  label="序列号 (SN) *"
+                  placeholder="唯一序列号"
+                  required
+                  :rules="snRules"
+                  :loading="checkingSn"
+                  class="w-full mb-3"
+                />
                 <VaCounter v-model="form.number" label="入库数量 *" :min="1" class="mb-3" />
                 <VaInput v-model="form.customer" label="客户名称 *" required class="w-full mb-3" />
                 <VaInput v-model="form.owner" label="所属者" class="w-full mb-3" />
@@ -271,7 +279,7 @@ import {
   VaCard, VaCardTitle, VaCardContent, VaInput, VaForm, VaButton, VaChip,
   VaDateInput, VaCounter, VaIcon, VaTextarea, VaSelect, useToast 
 } from 'vuestic-ui'
-import { createServer } from '../../api/server'
+import { createServer, checkSnUnique } from '../../api/server'
 import { searchCpu, getMbBySocket } from '../../api/configPlan'
 import { formatSocket } from '../../utils/hardware'
 import CpuAddModal from '../../components/ConfigPlan/CpuAddModal.vue'
@@ -290,6 +298,28 @@ const searchingCpu = ref(false)
 const loadingMbs = ref(false)
 const showCpuAddModal = ref(false)
 const showBatchImport = ref(false)
+const checkingSn = ref(false)
+
+/**
+ * SN 异步校验规则
+ */
+const snRules = [
+  (v) => !!v || '序列号必填',
+  (v) => v.length >= 4 || '序列号至少4位',
+  async (v) => {
+    if (!v || v.length < 4) return true
+    checkingSn.value = true
+    try {
+      const res = await checkSnUnique(v)
+      // 根据后端返回：res.unique 为 true 表示不存在（可用），false 表示已存在
+      return res.unique || '该序列号已在库中，请核对'
+    } catch (err) {
+      return '校验失败'
+    } finally {
+      checkingSn.value = false
+    }
+  }
+]
 
 const hwLists = reactive({
   m2: [],
@@ -382,6 +412,10 @@ const handleImported = (data) => {
 
   if (data.chassis) {
     form.chassis = data.chassis
+  }
+
+  if (data.os) {
+    form.os = data.os
   }
 
   notify({ message: '配置已批量填充，请检查并完善其它信息', color: 'info' })
