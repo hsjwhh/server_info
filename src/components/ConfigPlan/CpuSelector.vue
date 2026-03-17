@@ -7,57 +7,54 @@
     </h3>
     <div ref="inputWrapperRef" class="input-wrapper relative">
       <!-- 整体容器 -->
-      <div class="flex items-center w-full">
+      <div class="flex w-full gap-4">
         <!-- 左半区 (50%)：包含核心数 + 型号搜索 -->
-        <div class="flex gap-2 items-end" style="width: 50%;">
-          <!-- 核心数下拉框 (严格锁定 120px) -->
+        <div class="flex gap-2" style="width: 50%;">
+          <!-- 核心数下拉框 -->
           <VaSelect
             v-model="cpuCoresFilter"
             :options="[8, 16, 24, 32, 48, 64, 96, 128]"
             label="核心数"
             placeholder="核心"
             clearable
-            style="width: 120px; min-width: 120px; flex: 0 0 120px;"
+            style="width: 100px; min-width: 100px;"
             @update:model-value="handleCoresChange"
-          <!-- 型号输入框 (占据左半区所有剩余空间) -->
-          <div class="flex gap-1 items-end flex-grow">
-            <VaInput
-              v-model="cpuKeyword"
-              label="CPU 型号"
-              placeholder="型号搜索..."
-              clearable
-              :loading="loadingCpuDetail"
-              class="flex-grow"
-              @update:model-value="handleCpuSearch"
-              @clear="clearCpu"
-            >
-              <template #prependInner>
-                <VaIcon name="mdi-magnify" size="small" />
-              </template>
-            </VaInput>
+          />
+
+          <!-- 型号输入框 -->
+          <VaInput
+            v-model="cpuKeyword"
+            label="CPU 型号"
+            placeholder="型号搜索..."
+            clearable
+            :loading="loadingCpuDetail"
+            class="flex-grow"
+            @update:model-value="handleCpuSearch"
+            @clear="clearCpu"
+          >
+            <template #prependInner>
+              <VaIcon name="mdi-magnify" size="small" />
+            </template>
+          </VaInput>
+        </div>
+
+        <!-- 右半区 (50%)：采用占位符方案对齐按钮 -->
+        <div style="width: 50%;">
+          <div class="flex flex-col">
+            <div style="height: 20px;"></div> <!-- Label 占位 -->
             <VaButton
               preset="secondary"
               icon="mdi-plus"
-              title="录入新型号"
               class="add-hw-btn"
               @click="$emit('add-cpu')"
-            />
+            >
+              录入新 CPU 型号
+            </VaButton>
           </div>
-          </div>
-          ...
-          <style scoped>
-          .add-hw-btn {
-          height: 36px; /* 强制与 VaInput 的框体高度一致 */
-          min-width: 36px;
-          }
-          .cpu-count-section {
-          ...
-
-        <div style="width: 50%;"></div>
+        </div>
       </div>
-  <!-- 搜索建议列表 -->
 
-      <!-- 搜索建议列表：移入 relative 容器内，防止覆盖输入框 -->
+      <!-- 搜索建议列表 -->
       <div v-if="showSuggestions && cpuSuggestions.length > 0" class="suggestions-list">
         <div
           v-for="cpu in cpuSuggestions"
@@ -138,17 +135,13 @@
           />
         </div>
       </div>
-
-      <VaAlert v-if="cpuScalability.max > 1" color="primary" border="left" class="mt-3" dense>
-        当前 CPU 已开启多路并行计算支持
-      </VaAlert>
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, onUnmounted } from 'vue'
-import { VaInput, VaIcon, VaButton, VaChip, VaAlert, VaSelect } from 'vuestic-ui'
+import { VaInput, VaIcon, VaButton, VaChip, VaSelect } from 'vuestic-ui'
 import { storeToRefs } from 'pinia'
 import { useConfigPlanStore } from '../../stores/configPlan'
 
@@ -175,6 +168,16 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 </script>
 
 <style scoped>
+.add-hw-btn {
+  height: 36px;
+  white-space: nowrap;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
 .cpu-count-section {
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-border-subtle);

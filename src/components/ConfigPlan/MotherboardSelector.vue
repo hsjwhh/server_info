@@ -9,8 +9,11 @@
     <div v-if="!selectedCpu" class="empty-placeholder">
       <VaIcon name="mdi-cpu-64-bit" size="large" color="secondary" />
       <p>请先在上方选择 CPU 以匹配兼容主板</p>
+    </div>
+
     <div v-else class="selector-content">
-      <div class="flex gap-1 items-end">
+      <!-- 使用占位符方案对齐按钮 -->
+      <div class="flex gap-4">
         <VaSelect
           v-model="selectedMotherboard"
           label="选择主板"
@@ -26,23 +29,21 @@
             <VaIcon name="mdi-expansion-card" size="small" />
           </template>
         </VaSelect>
-        <VaButton
-          preset="secondary"
-          icon="mdi-plus"
-          title="录入新主板"
-          class="add-hw-btn"
-          @click="$emit('add-mb')"
-        />
+        
+        <div class="flex flex-col">
+          <div style="height: 20px;"></div> <!-- Label 占位 -->
+          <VaButton
+            preset="secondary"
+            icon="mdi-plus"
+            class="add-hw-btn"
+            @click="$emit('add-mb')"
+          >
+            录入新主板
+          </VaButton>
+        </div>
       </div>
-    ...
-    <style scoped>
-    .add-hw-btn {
-    height: 36px; /* 强制与 VaSelect 的框体高度一致 */
-    min-width: 36px;
-    }
-    .form-section {
-    ...
 
+      <div v-if="selectedMotherboardDetail" class="selected-item-card mt-3">
         <div class="card-header">
           <a
             v-if="selectedMotherboardDetail.url"
@@ -108,7 +109,7 @@
 </template>
 
 <script setup>
-import { VaIcon, VaSelect, VaChip } from 'vuestic-ui'
+import { VaIcon, VaSelect, VaChip, VaButton } from 'vuestic-ui'
 import { storeToRefs } from 'pinia'
 import { useConfigPlanStore } from '../../stores/configPlan'
 
@@ -122,6 +123,16 @@ const { splitItems } = store
 </script>
 
 <style scoped>
+.add-hw-btn {
+  height: 36px;
+  white-space: nowrap;
+}
+
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
 .form-section {
   display: flex;
   flex-direction: column;

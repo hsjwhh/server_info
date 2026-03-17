@@ -82,8 +82,8 @@ const routes = [
         meta: {
           title: '配置方案',
           icon: 'mdi-clipboard-text-outline',
-          showInMenu: false,
-          allowDirectAccess: false,
+          showInMenu: true,
+          // allowDirectAccess: false,
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '配置方案', to: '/config-plan' }
@@ -97,8 +97,8 @@ const routes = [
         meta: { 
           title: '服务器录入', 
           icon: 'mdi-database-plus', 
-          showInMenu: false,
-          allowDirectAccess: false,
+          showInMenu: true,
+          // allowDirectAccess: false,
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '服务器录入', to: '/server/entry' }
