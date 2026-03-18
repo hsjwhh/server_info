@@ -56,7 +56,17 @@
             <VaIcon name="mdi-open-in-new" size="small" />
           </a>
           <span v-else class="item-name">{{ selectedMotherboardDetail.model }}</span>
+
+          <VaButton
+            preset="plain"
+            icon="mdi-pencil"
+            size="small"
+            title="修改主板规格"
+            class="ml-2"
+            @click="$emit('edit-mb', selectedMotherboardDetail)"
+          />
         </div>
+      ...
 
         <div class="item-details-grid">
           <div class="detail-tile">

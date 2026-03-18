@@ -14,13 +14,13 @@
     "cookie-parser": "^1.4.7",
     "lodash.debounce": "^4.0.8",
     "pinia": "^3.0.4",
-    "vue": "^3.5.24",
+    "vue": "^3.5.30",
     "vue-router": "^4.6.4",
     "vuestic-ui": "^1.10.3"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.2.4"
+    "@vitejs/plugin-vue": "^6.0.5",
+    "vite": "^7.3.1"
   },
   "packageManager": "pnpm@10.29.2+sha512.bef43fa759d91fd2da4b319a5a0d13ef7a45bb985a3d7342058470f9d2051a3ba8674e629672654686ef9443ad13a82da2beb9eeb3e0221c87b8154fff9d74b8"
 }

@@ -77,8 +77,18 @@
     <div v-if="selectedCpu" class="selected-item-card mt-3">
       <div class="card-header">
         <span class="item-name">{{ selectedCpu.cpu_short_name }}</span>
-        <VaButton preset="plain" icon="mdi-close" size="small" color="danger" @click="clearCpu" />
+        <div class="flex gap-2">
+          <VaButton
+            preset="plain"
+            icon="mdi-pencil"
+            size="small"
+            title="修改 CPU 规格"
+            @click="$emit('edit-cpu', selectedCpu)"
+          />
+          <VaButton preset="plain" icon="mdi-close" size="small" color="danger" @click="clearCpu" />
+        </div>
       </div>
+    ...
 
       <div class="item-details-grid">
         <div class="detail-tile">

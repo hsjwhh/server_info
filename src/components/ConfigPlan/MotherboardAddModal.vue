@@ -2,8 +2,8 @@
 <template>
   <VaModal
     v-model="show"
-    title="新增主板信息"
-    ok-text="确认添加"
+    :title="isEdit ? '修改主板信息' : '新增主板信息'"
+    :ok-text="isEdit ? '保存修改' : '确认添加'"
     cancel-text="取消"
     size="large"
     fixed-layout
@@ -71,17 +71,22 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, computed } from 'vue'
 import { VaModal, VaForm, VaInput } from 'vuestic-ui'
-import { addMotherboard } from '../../api/configPlan'
+import { addMotherboard, updateMotherboard } from '../../api/configPlan'
 
 const props = defineProps({
-  modelValue: Boolean
+  modelValue: Boolean,
+  initData: {
+    type: Object,
+    default: () => null
+  }
 })
 const emit = defineEmits(['update:model-value', 'saved'])
 
 const show = ref(false)
 const formRef = ref(null)
+const isEdit = computed(() => !!(props.initData && (props.initData.id || props.initData.hashId)))
 
 const initialForm = {
   url: '',
@@ -101,7 +106,20 @@ const initialForm = {
 
 const form = reactive({ ...initialForm })
 
-watch(() => props.modelValue, (val) => { show.value = val })
+watch(() => props.modelValue, (val) => { 
+  show.value = val 
+  if (val && props.initData) {
+    // 填充表单
+    Object.assign(form, initialForm)
+    Object.keys(initialForm).forEach(key => {
+      if (props.initData[key] !== undefined) {
+        form[key] = props.initData[key]
+      }
+    })
+  } else if (val && !props.initData) {
+    resetForm()
+  }
+})
 watch(show, (val) => { emit('update:model-value', val) })
 
 const handleSave = async (e) => {
@@ -112,7 +130,13 @@ const handleSave = async (e) => {
   }
 
   try {
-    const response = await addMotherboard(form)
+    let response
+    if (isEdit.value) {
+      const id = props.initData.id || props.initData.hashId
+      response = await updateMotherboard(id, form)
+    } else {
+      response = await addMotherboard(form)
+    }
     emit('saved', response)
     resetForm()
   } catch (err) {
@@ -125,6 +149,32 @@ const resetForm = () => {
   Object.assign(form, initialForm)
 }
 </script>
+
+<style scoped>
+.section-divider {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--va-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--color-border-light);
+  padding-bottom: 4px;
+}
+
+.mb-add-form {
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+/* Layout helpers */
+.grid { display: grid; }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gap-4 { gap: 1rem; }
+.col-span-2 { grid-column: span 2 / span 2; }
+.mt-4 { margin-top: 1rem; }
+.p-2 { padding: 0.5rem; }
+</style>
 
 <style scoped>
 .section-divider {

@@ -58,15 +58,24 @@
                         <VaIcon name="mdi-magnify" size="small" />
                       </template>
                     </VaInput>
-                    <VaButton
-                      preset="secondary"
-                      icon="mdi-plus"
-                      class="cpu-add-btn"
-                      title="新增 CPU 到数据库"
-                      @click="showCpuAddModal = true"
-                    >
-                      录入新型号
-                    </VaButton>
+                    <div class="flex gap-1">
+                      <VaButton
+                        v-if="form.cpu_id"
+                        preset="secondary"
+                        icon="mdi-pencil"
+                        title="修改当前 CPU 规格"
+                        @click="handleEditCpu"
+                      />
+                      <VaButton
+                        preset="secondary"
+                        icon="mdi-plus"
+                        class="cpu-add-btn"
+                        title="新增 CPU 到数据库"
+                        @click="handleAddNewCpu"
+                      >
+                        录入
+                      </VaButton>
+                    </div>
                   </div>
                   
                   <div v-if="cpuSuggestions.length > 0" class="suggestions-list">
@@ -105,15 +114,24 @@
                         <VaIcon name="mdi-magnify" size="small" />
                       </template>
                     </VaInput>
-                    <VaButton
-                      preset="secondary"
-                      icon="mdi-plus"
-                      class="cpu-add-btn"
-                      title="新增主板到数据库"
-                      @click="showMbAddModal = true"
-                    >
-                      录入新主板
-                    </VaButton>
+                    <div class="flex gap-1">
+                      <VaButton
+                        v-if="form.mb_id"
+                        preset="secondary"
+                        icon="mdi-pencil"
+                        title="修改当前主板规格"
+                        @click="handleEditMb"
+                      />
+                      <VaButton
+                        preset="secondary"
+                        icon="mdi-plus"
+                        class="cpu-add-btn"
+                        title="新增主板到数据库"
+                        @click="handleAddNewMb"
+                      >
+                        录入
+                      </VaButton>
+                    </div>
                   </div>
                   
                   <div v-if="mbSuggestions.length > 0" class="suggestions-list">
@@ -269,15 +287,17 @@
       </div>
     </VaForm>
 
-    <!-- CPU 新增弹窗 -->
+    <!-- CPU 新增/修改弹窗 -->
     <CpuAddModal
       v-model="showCpuAddModal"
+      :init-data="currentEditCpu"
       @saved="onCpuSaved"
     />
 
-    <!-- 主板 新增弹窗 -->
+    <!-- 主板 新增/修改弹窗 -->
     <MotherboardAddModal
       v-model="showMbAddModal"
+      :init-data="currentEditMb"
       @saved="onMbSaved"
     />
 
@@ -297,8 +317,7 @@ import {
   VaDateInput, VaCounter, VaIcon, VaTextarea, VaSelect, useToast 
 } from 'vuestic-ui'
 import { createServer, checkSnUnique } from '../../api/server'
-import { searchCpu, getMbBySocket } from '../../api/configPlan'
-import { formatSocket } from '../../utils/hardware'
+import { searchCpu, getCpuDetail, searchMotherboard } from '../../api/configPlan'
 import CpuAddModal from '../../components/ConfigPlan/CpuAddModal.vue'
 import MotherboardAddModal from '../../components/ConfigPlan/MotherboardAddModal.vue'
 import BatchImportModal from '../../components/ConfigPlan/BatchImportModal.vue'
@@ -319,6 +338,12 @@ const showMbAddModal = ref(false)
 const showBatchImport = ref(false)
 const checkingSn = ref(false)
 
+const currentEditCpu = ref(null)
+const currentEditMb = ref(null)
+
+const selectedCpuRaw = ref(null)
+const selectedMbRaw = ref(null)
+
 /**
  * SN 异步校验规则
  */
@@ -330,7 +355,6 @@ const snRules = [
     checkingSn.value = true
     try {
       const res = await checkSnUnique(v)
-      // 根据后端返回：res.unique 为 true 表示不存在（可用），false 表示已存在
       return res.unique || '该序列号已在库中，请核对'
     } catch (err) {
       return '校验失败'
@@ -384,7 +408,6 @@ const handleImported = (data) => {
   }
 
   if (data.memory && data.memory.length > 0) {
-    // 内存目前表单只支持单一型号
     form.mem = data.memory[0].model
     form.memn = data.memory[0].count
   }
@@ -425,17 +448,9 @@ const handleImported = (data) => {
     form.note = form.note ? `${form.note}\n${othersText}` : othersText
   }
 
-  if (data.psu) {
-    form.psu = data.psu
-  }
-
-  if (data.chassis) {
-    form.chassis = data.chassis
-  }
-
-  if (data.os) {
-    form.os = data.os
-  }
+  if (data.psu) form.psu = data.psu
+  if (data.chassis) form.chassis = data.chassis
+  if (data.os) form.os = data.os
 
   notify({ message: '配置已批量填充，请检查并完善其它信息', color: 'info' })
 }
@@ -458,41 +473,48 @@ const onCpuSelect = (cpu) => {
   cpuKeyword.value = cpu.cpu_short_name
   form.cpu = cpu.cpu_short_name
   form.cpu_id = cpu.id
+  selectedCpuRaw.value = cpu
   cpuSuggestions.value = []
 }
 
-/**
- * 当成功新增 CPU 后的处理逻辑：自动选中该 CPU
- */
-const onCpuSaved = (newCpu) => {
-  notify({ message: '新 CPU 已成功录入数据库并自动选中', color: 'success' })
-  // 触发自动选中逻辑
-  if (newCpu) {
-    onCpuSelect(newCpu)
-  }
-  showCpuAddModal.value = false
+const handleAddNewCpu = () => {
+  currentEditCpu.value = null
+  showCpuAddModal.value = true
 }
 
-/**
- * 当成功新增主板后的处理逻辑：自动选中该主板
- */
-const onMbSaved = (newMb) => {
-  notify({ message: '新主板已成功录入数据库并自动选中', color: 'success' })
-  if (newMb) {
-    onMbSelect(newMb)
+const handleEditCpu = async () => {
+  if (!form.cpu_id) return
+  // 如果当前已经有缓存的完整数据，直接用
+  if (selectedCpuRaw.value && selectedCpuRaw.value.id === form.cpu_id && selectedCpuRaw.value.cores) {
+    currentEditCpu.value = selectedCpuRaw.value
+  } else {
+    // 否则去后端查一次完整数据
+    try {
+      currentEditCpu.value = await getCpuDetail(form.cpu_id)
+    } catch (e) {
+      notify({ message: '获取 CPU 详情失败', color: 'danger' })
+      return
+    }
   }
-  showMbAddModal.value = false
+  showCpuAddModal.value = true
+}
+
+const onCpuSaved = (newCpu) => {
+  notify({ message: 'CPU 信息已更新并自动选中', color: 'success' })
+  if (newCpu) onCpuSelect(newCpu)
+  showCpuAddModal.value = false
 }
 
 const clearCpu = () => {
   cpuKeyword.value = ''
   form.cpu = ''
   form.cpu_id = null
+  selectedCpuRaw.value = null
   cpuSuggestions.value = []
 }
 
 /**
- * 主板搜索和选择逻辑 (独立)
+ * 主板搜索和选择逻辑
  */
 const handleMbSearch = debounce(async () => {
   if (!mbKeyword.value || mbKeyword.value.length < 2) {
@@ -501,7 +523,6 @@ const handleMbSearch = debounce(async () => {
   }
   loadingMbs.value = true
   try {
-    const { searchMotherboard } = await import('../../api/configPlan')
     mbSuggestions.value = await searchMotherboard(mbKeyword.value)
   } finally {
     loadingMbs.value = false
@@ -513,13 +534,38 @@ const onMbSelect = (mb) => {
   mbKeyword.value = mb.model
   form.mb = mb.model
   form.mb_id = mb.id
+  selectedMbRaw.value = mb
   mbSuggestions.value = []
+}
+
+const handleAddNewMb = () => {
+  currentEditMb.value = null
+  showMbAddModal.value = true
+}
+
+const handleEditMb = async () => {
+  if (!form.mb_id) return
+  // 如果当前已经有数据，直接用
+  if (selectedMbRaw.value && selectedMbRaw.value.id === form.mb_id && selectedMbRaw.value.sockets) {
+    currentEditMb.value = selectedMbRaw.value
+  } else {
+    // 简单起见，如果 suggestion 里数据够全也可以，或者需要专门的 getMbDetail
+    currentEditMb.value = selectedMbRaw.value
+  }
+  showMbAddModal.value = true
+}
+
+const onMbSaved = (newMb) => {
+  notify({ message: '主板信息已更新并自动选中', color: 'success' })
+  if (newMb) onMbSelect(newMb)
+  showMbAddModal.value = false
 }
 
 const clearMb = () => {
   mbKeyword.value = ''
   form.mb = ''
   form.mb_id = null
+  selectedMbRaw.value = null
   mbSuggestions.value = []
 }
 
@@ -548,19 +594,14 @@ const handleSubmit = async () => {
 
     Object.keys(hwLists).forEach(key => {
       const validItems = hwLists[key].filter(i => i.model && i.model.trim())
-      
       if (validItems.length === 0) {
         form[key] = ''
         form[key + 'n'] = ''
       } else if (validItems.length === 1) {
-        // 规则：只有一个型号时，保持原样存储
         form[key] = validItems[0].model.trim()
         form[key + 'n'] = validItems[0].count
       } else {
-        // 规则：多个型号时，合并为 "型号1 * 数量1;型号2 * 数量2"，数量字段存 0
-        form[key] = validItems
-          .map(i => `${i.model.trim()} * ${i.count}`)
-          .join(';')
+        form[key] = validItems.map(i => `${i.model.trim()} * ${i.count}`).join(';')
         form[key + 'n'] = 0
       }
     })
@@ -577,105 +618,21 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.server-entry-page {
-  /* height: 100% - Removed to avoid vertical centering issues */
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.layout-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-6);
-}
-
-.card-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-6);
-}
-
-.flex-1 {
-  flex: 1;
-  min-width: 400px;
-}
-
-.vertical-form {
-  display: flex;
-  flex-direction: column;
-}
-
-.hw-group-box {
-  display: flex;
-  flex-direction: column;
-}
-
-.group-label {
-  font-size: var(--text-xs);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  margin-bottom: var(--space-2);
-  display: block;
-}
-
-.sub-label {
-  display: block;
-  font-size: 0.7rem;
-  font-weight: 700;
-  color: var(--va-secondary);
-  text-transform: uppercase;
-  margin-bottom: 4px;
-  letter-spacing: 0.05em;
-}
-
-.hw-row {
-  display: flex;
-  gap: var(--space-2);
-  align-items: flex-end;
-}
-
-.hw-counter {
-  width: 120px;
-}
-
-.btn-placeholder {
-  width: 36px;
-  flex-shrink: 0;
-}
-
-:deep(.va-card__title) {
-  font-size: var(--text-base);
-  font-weight: var(--font-weight-semibold);
-  border-bottom: 1px solid var(--color-border-light);
-  padding: var(--space-4) var(--space-5);
-}
-
-.cpu-container {
-  position: relative;
-  margin-bottom: var(--space-3);
-}
-
-.cpu-standalone-label {
-  display: block;
-  margin-bottom: 4px;
-  font-size: var(--text-sm);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-primary);
-}
-
-/* input 与按钮同行，按钮高度跟随 input */
-.cpu-input-row {
-  display: flex;
-  gap: var(--space-2);
-  align-items: stretch;
-}
-
-.cpu-add-btn {
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
+.server-entry-page { display: flex; flex-direction: column; gap: var(--space-6); }
+.layout-container { display: flex; flex-direction: column; gap: var(--space-6); }
+.card-row { display: flex; flex-wrap: wrap; gap: var(--space-6); }
+.flex-1 { flex: 1; min-width: 400px; }
+.vertical-form { display: flex; flex-direction: column; }
+.hw-group-box { display: flex; flex-direction: column; }
+.group-label { font-size: var(--text-xs); font-weight: var(--font-weight-bold); color: var(--color-text-secondary); text-transform: uppercase; margin-bottom: var(--space-2); display: block; }
+.sub-label { display: block; font-size: 0.7rem; font-weight: 700; color: var(--va-secondary); text-transform: uppercase; margin-bottom: 4px; letter-spacing: 0.05em; }
+.hw-row { display: flex; gap: var(--space-2); align-items: flex-end; }
+.hw-counter { width: 120px; }
+.btn-placeholder { width: 36px; flex-shrink: 0; }
+:deep(.va-card__title) { font-size: var(--text-base); font-weight: var(--font-weight-semibold); border-bottom: 1px solid var(--color-border-light); padding: var(--space-4) var(--space-5); }
+.cpu-container { position: relative; margin-bottom: var(--space-3); }
+.cpu-standalone-label { display: block; margin-bottom: 4px; font-size: var(--text-sm); font-weight: var(--font-weight-medium); color: var(--color-text-primary); }
+.cpu-input-row { display: flex; gap: var(--space-2); align-items: stretch; }
+.cpu-add-btn { white-space: nowrap; flex-shrink: 0; }
 .border-t { border-top: 1px solid var(--color-border-light); }
 </style>

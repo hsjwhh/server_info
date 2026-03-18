@@ -431,6 +431,26 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
         recommendedPSU: recommendedPSU.value
     }))
 
+    /**
+     * 一键重置整个配置方案到初始状态
+     */
+    const resetConfig = () => {
+        clearCpu() // 清空 CPU 相关
+        
+        // 重置内存
+        memoryType.value = ''
+        memoryCapacity.value = '32GB'
+        memoryCount.value = 2
+        
+        // 清空列表
+        m2Items.value = []
+        ssdItems.value = []
+        hddItems.value = []
+        nicItems.value = []
+        gpuItems.value = []
+        raidItems.value = []
+    }
+
     return {
         // ==== 导出 State ====
         cpuKeyword, cpuCoresFilter, cpuSuggestions, showSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
@@ -447,6 +467,6 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
 
         // ==== 导出 Actions ====
         addItem, removeItem, handleCpuSearch, handleCoresChange, closeSuggestions, selectCpu, clearCpu, validateCpuCount,
-        splitItems, exportConfigData
+        splitItems, exportConfigData, resetConfig
     }
 })

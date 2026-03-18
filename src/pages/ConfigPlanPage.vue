@@ -1,7 +1,18 @@
 <!-- src/pages/ConfigPlanPage.vue -->
 <template>
   <div class="config-plan-page">
-    <h1 class="page-title mb-6">服务器配置方案</h1>
+    <div class="page-header mb-6 flex items-center justify-between">
+      <h1 class="page-title">服务器配置方案</h1>
+      <VaButton
+        preset="secondary"
+        border-color="danger"
+        color="danger"
+        icon="mdi-delete-sweep"
+        @click="confirmReset"
+      >
+        重置方案
+      </VaButton>
+    </div>
 
     <div class="config-container">
       <!-- 左侧：硬件选择区 (带内部导航) -->
@@ -23,11 +34,17 @@
 
           <div class="hardware-form">
             <div id="section-cpu" class="scroll-mt section-anchor">
-              <CpuSelector @add-cpu="showCpuAddModal = true" />
+              <CpuSelector 
+                @add-cpu="handleAddNewCpu" 
+                @edit-cpu="handleEditCpu"
+              />
             </div>
             <VaDivider />
             <div id="section-mb" class="scroll-mt section-anchor">
-              <MotherboardSelector @add-mb="showMbAddModal = true" />
+              <MotherboardSelector 
+                @add-mb="handleAddNewMb" 
+                @edit-mb="handleEditMb"
+              />
             </div>
             <VaDivider />
             <div id="section-mem" class="scroll-mt section-anchor"><MemorySelector /></div>
@@ -47,15 +64,17 @@
       </div>
     </div>
 
-    <!-- 弹窗挂载：CPU 新增 -->
+    <!-- 弹窗挂载：CPU 新增/修改 -->
     <CpuAddModal
       v-model="showCpuAddModal"
+      :init-data="currentEditCpu"
       @saved="onCpuSaved"
     />
 
-    <!-- 弹窗挂载：主板 新增 -->
+    <!-- 弹窗挂载：主板 新增/修改 -->
     <MotherboardAddModal
       v-model="showMbAddModal"
+      :init-data="currentEditMb"
       @saved="onMbSaved"
     />
   </div>
@@ -63,7 +82,7 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick } from 'vue'
-import { VaCard, VaCardContent, VaDivider, VaIcon } from 'vuestic-ui'
+import { VaCard, VaCardContent, VaDivider, VaIcon, VaButton, useModal } from 'vuestic-ui'
 import CpuSelector        from '../components/ConfigPlan/CpuSelector.vue'
 import MotherboardSelector from '../components/ConfigPlan/MotherboardSelector.vue'
 import MemorySelector     from '../components/ConfigPlan/MemorySelector.vue'
@@ -77,7 +96,8 @@ import MotherboardAddModal from '../components/ConfigPlan/MotherboardAddModal.vu
 import { useConfigPlanStore } from '../stores/configPlan'
 
 const store = useConfigPlanStore()
-const { selectCpu } = store
+const { selectCpu, resetConfig } = store
+const { confirm } = useModal()
 
 const sections = [
   { id: 'section-cpu', label: 'CPU', icon: 'memory' },
@@ -90,7 +110,53 @@ const sections = [
 const activeSection = ref(sections[0].id)
 const showCpuAddModal = ref(false)
 const showMbAddModal = ref(false)
+const currentEditCpu = ref(null)
+const currentEditMb = ref(null)
 let observer = null
+
+/**
+ * 确认重置方案
+ */
+const confirmReset = async () => {
+  const result = await confirm({
+    title: '确认重置方案？',
+    message: '此操作将清空当前已选的所有硬件配置，且不可撤销。',
+    okText: '确定清空',
+    cancelText: '取消',
+    size: 'small',
+    maxWidth: '400px'
+  })
+
+  if (result) {
+    resetConfig()
+  }
+}
+
+/**
+ * 处理新增按钮点击
+ */
+const handleAddNewCpu = () => {
+  currentEditCpu.value = null
+  showCpuAddModal.value = true
+}
+
+const handleAddNewMb = () => {
+  currentEditMb.value = null
+  showMbAddModal.value = true
+}
+
+/**
+ * 处理编辑按钮点击
+ */
+const handleEditCpu = (cpu) => {
+  currentEditCpu.value = cpu
+  showCpuAddModal.value = true
+}
+
+const handleEditMb = (mb) => {
+  currentEditMb.value = mb
+  showMbAddModal.value = true
+}
 
 /**
  * 当成功新增 CPU 后的处理逻辑：自动在方案中选中该 CPU
@@ -165,6 +231,12 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .config-container {
   display: grid;
   grid-template-columns: 1fr 400px;
@@ -252,6 +324,11 @@ onUnmounted(() => {
 }
 
 @media (max-width: 1280px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
   .config-container {
     grid-template-columns: 1fr;
   }
