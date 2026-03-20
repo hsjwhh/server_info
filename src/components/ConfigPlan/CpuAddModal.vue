@@ -7,11 +7,11 @@
     cancel-text="取消"
     size="large"
     fixed-layout
-    @ok="handleSave"
+    @ok.prevent="handleSave"
   >
     <VaForm ref="formRef" class="cpu-add-form p-2">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
+      <div class="grid grid-cols-2 gap-4">
+
         <!-- 第一组：核心标识 -->
         <div class="col-span-2 section-divider">基础标识 (Identity)</div>
         <VaInput
@@ -106,11 +106,10 @@ const initialForm = {
 
 const form = reactive({ ...initialForm })
 
-watch(() => props.modelValue, (val) => { 
-  show.value = val 
+watch(() => props.modelValue, (val) => {
+  show.value = val
   if (val && props.initData) {
-    // 填充表单
-    Object.assign(form, initialForm) // 先重置
+    Object.assign(form, initialForm)
     Object.keys(initialForm).forEach(key => {
       if (props.initData[key] !== undefined) {
         form[key] = props.initData[key]
@@ -127,13 +126,9 @@ const syncSName = (val) => {
   form.cpu_s_name = val.toUpperCase().replace(/\s+/g, '')
 }
 
-const handleSave = async (e) => {
+const handleSave = async () => {
   const isValid = await formRef.value.validate()
-  if (!isValid) {
-    // 阻止 VaModal 自动关闭
-    e.preventDefault()
-    return
-  }
+  if (!isValid) return
 
   try {
     let response
@@ -143,12 +138,11 @@ const handleSave = async (e) => {
     } else {
       response = await addCpu(form)
     }
-    // 假设后端返回新增的对象或 ID
-    emit('saved', response) 
+    emit('saved', response)
+    show.value = false
     resetForm()
   } catch (err) {
     console.error('Failed to save CPU:', err)
-    e.preventDefault()
   }
 }
 
@@ -158,55 +152,17 @@ const resetForm = () => {
 </script>
 
 <style scoped>
-.section-divider {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--va-primary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-bottom: 1px solid var(--color-border-light);
-  padding-bottom: 4px;
-}
-
 .cpu-add-form {
   max-height: 70vh;
   overflow-y: auto;
 }
 
-/* 适配 Vuestic 默认没有的类 */
-.grid { display: grid; }
-.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.gap-4 { gap: 1rem; }
-.gap-2 { gap: 0.5rem; }
-.col-span-2 { grid-column: span 2 / span 2; }
-.mt-4 { margin-top: 1rem; }
-.p-2 { padding: 0.5rem; }
-</style>
-
-<style scoped>
-.section-divider {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--va-primary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-bottom: 1px solid var(--color-border-light);
-  padding-bottom: 4px;
-}
-
-.cpu-add-form {
-  max-height: 70vh;
-  overflow-y: auto;
-}
-
-/* 适配 Vuestic 默认没有的类 */
-.grid { display: grid; }
-.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.gap-4 { gap: 1rem; }
-.gap-2 { gap: 0.5rem; }
-.col-span-2 { grid-column: span 2 / span 2; }
-.mt-4 { margin-top: 1rem; }
-.p-2 { padding: 0.5rem; }
+/* 布局工具类 */
+.grid         { display: grid; }
+.grid-cols-2  { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gap-4        { gap: 1rem; }
+.gap-2        { gap: 0.5rem; }
+.col-span-2   { grid-column: span 2 / span 2; }
+.mt-4         { margin-top: 1rem; }
+.p-2          { padding: 0.5rem; }
 </style>

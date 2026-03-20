@@ -7,11 +7,11 @@
     cancel-text="取消"
     size="large"
     fixed-layout
-    @ok="handleSave"
+    @ok.prevent="handleSave"
   >
     <VaForm ref="formRef" class="mb-add-form p-2">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        
+      <div class="grid grid-cols-2 gap-4">
+
         <!-- 第一组：基础信息 -->
         <div class="col-span-2 section-divider">基础信息 (General)</div>
         <VaInput
@@ -60,10 +60,50 @@
 
         <!-- 第四组：扩展与接口 -->
         <div class="col-span-2 section-divider mt-4">扩展能力 (I/O & Expansion)</div>
-        <VaInput v-model="form.pcie_number" label="PCIe 数量" placeholder="例如: 4" />
-        <VaInput v-model="form.pcie_list" label="PCIe 分布" placeholder="例如: 4 PCI-E 3.0 x16" />
-        <VaInput v-model="form.m2" label="M.2 接口" placeholder="例如: 1 M.2 接口" />
-        <VaInput v-model="form.input" label="其他接口" placeholder="例如: SATA 3.0" />
+
+        <!-- PCIe：数量（窄）+ 分布（textarea）同行 -->
+        <div class="col-span-2 pcie-row">
+          <VaInput
+            v-model.number="form.pcie_number"
+            type="number"
+            label="PCIe 数量"
+            placeholder="例如: 4"
+            class="pcie-number-input"
+            :min="0"
+            :max="99"
+          />
+          <VaTextarea
+            v-model="form.pcie_list"
+            label="PCIe 分布（每行一条）"
+            placeholder="例如:&#10;4 PCI-E 3.0 x16&#10;2 PCI-E 3.0 x8"
+            auto-grow
+            :min-rows="2"
+            :max-rows="6"
+            class="pcie-list-textarea"
+          />
+        </div>
+
+        <!-- M.2 接口：多行 -->
+        <VaTextarea
+          v-model="form.m2"
+          label="M.2 接口（每行一条）"
+          placeholder="例如:&#10;1 M.2 PCIe 4.0 x4&#10;1 M.2 SATA"
+          auto-grow
+          :min-rows="2"
+          :max-rows="6"
+          class="col-span-2"
+        />
+
+        <!-- 其他接口：多行 -->
+        <VaTextarea
+          v-model="form.input"
+          label="其他接口（每行一条）"
+          placeholder="例如:&#10;8x SATA 3.0&#10;2x USB 3.2 Gen2"
+          auto-grow
+          :min-rows="2"
+          :max-rows="6"
+          class="col-span-2"
+        />
 
       </div>
     </VaForm>
@@ -72,7 +112,7 @@
 
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
-import { VaModal, VaForm, VaInput } from 'vuestic-ui'
+import { VaModal, VaForm, VaInput, VaTextarea } from 'vuestic-ui'
 import { addMotherboard, updateMotherboard } from '../../api/configPlan'
 
 const props = defineProps({
@@ -88,6 +128,13 @@ const show = ref(false)
 const formRef = ref(null)
 const isEdit = computed(() => !!(props.initData && (props.initData.id || props.initData.hashId)))
 
+// 多行字段列表（存取时需转换）
+const MULTILINE_FIELDS = ['pcie_list', 'm2', 'input']
+
+// DB 存取转换：换行 <-> 中文分号
+const toDb   = (str) => (str || '').split('\n').map(s => s.trim()).filter(Boolean).join('；')
+const fromDb = (str) => (str || '').split('；').join('\n')
+
 const initialForm = {
   url: '',
   model: '',
@@ -98,7 +145,7 @@ const initialForm = {
   memory_type: '',
   dimm_number: '',
   max_memory: '',
-  pcie_number: '',
+  pcie_number: null,
   pcie_list: '',
   m2: '',
   input: ''
@@ -106,14 +153,15 @@ const initialForm = {
 
 const form = reactive({ ...initialForm })
 
-watch(() => props.modelValue, (val) => { 
-  show.value = val 
+watch(() => props.modelValue, (val) => {
+  show.value = val
   if (val && props.initData) {
-    // 填充表单
     Object.assign(form, initialForm)
     Object.keys(initialForm).forEach(key => {
       if (props.initData[key] !== undefined) {
-        form[key] = props.initData[key]
+        form[key] = MULTILINE_FIELDS.includes(key)
+          ? fromDb(props.initData[key])
+          : props.initData[key]
       }
     })
   } else if (val && !props.initData) {
@@ -122,26 +170,29 @@ watch(() => props.modelValue, (val) => {
 })
 watch(show, (val) => { emit('update:model-value', val) })
 
-const handleSave = async (e) => {
+const handleSave = async () => {
   const isValid = await formRef.value.validate()
-  if (!isValid) {
-    e.preventDefault()
-    return
-  }
+  if (!isValid) return
+
+  // 构造提交数据，多行字段转换为分号分隔
+  const payload = { ...form }
+  MULTILINE_FIELDS.forEach(key => {
+    payload[key] = toDb(form[key])
+  })
 
   try {
     let response
     if (isEdit.value) {
       const id = props.initData.id || props.initData.hashId
-      response = await updateMotherboard(id, form)
+      response = await updateMotherboard(id, payload)
     } else {
-      response = await addMotherboard(form)
+      response = await addMotherboard(payload)
     }
     emit('saved', response)
+    show.value = false
     resetForm()
   } catch (err) {
     console.error('Failed to save motherboard:', err)
-    e.preventDefault()
   }
 }
 
@@ -151,53 +202,30 @@ const resetForm = () => {
 </script>
 
 <style scoped>
-.section-divider {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--va-primary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-bottom: 1px solid var(--color-border-light);
-  padding-bottom: 4px;
-}
-
 .mb-add-form {
   max-height: 70vh;
   overflow-y: auto;
 }
 
-/* Layout helpers */
-.grid { display: grid; }
-.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.gap-4 { gap: 1rem; }
-.col-span-2 { grid-column: span 2 / span 2; }
-.mt-4 { margin-top: 1rem; }
-.p-2 { padding: 0.5rem; }
-</style>
+/* 布局工具类 */
+.grid         { display: grid; }
+.grid-cols-2  { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gap-4        { gap: 1rem; }
+.col-span-2   { grid-column: span 2 / span 2; }
+.mt-4         { margin-top: 1rem; }
+.p-2          { padding: 0.5rem; }
 
-<style scoped>
-.section-divider {
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--va-primary);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  border-bottom: 1px solid var(--color-border-light);
-  padding-bottom: 4px;
+/* PCIe 同行布局：数量窄 + 分布宽 */
+.pcie-row {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
 }
-
-.mb-add-form {
-  max-height: 70vh;
-  overflow-y: auto;
+.pcie-number-input {
+  width: 90px;
+  flex-shrink: 0;
 }
-
-/* Layout helpers */
-.grid { display: grid; }
-.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
-.grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.gap-4 { gap: 1rem; }
-.col-span-2 { grid-column: span 2 / span 2; }
-.mt-4 { margin-top: 1rem; }
-.p-2 { padding: 0.5rem; }
+.pcie-list-textarea {
+  flex: 1;
+}
 </style>

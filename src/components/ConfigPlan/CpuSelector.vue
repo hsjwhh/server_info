@@ -109,7 +109,7 @@
         </div>
         <div class="detail-tile full-width">
           <span class="tile-label">内存支持</span>
-          <span class="tile-value">{{ selectedCpu.memory_speed }} {{ selectedCpu.max_memory_speed }}</span>
+          <span class="tile-value">{{ selectedCpu.memory_speed }} {{ selectedCpu.max_memory_speed }} ; {{ selectedCpu.memory_channels }} 通道</span>
         </div>
       </div>
 

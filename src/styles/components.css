@@ -111,3 +111,14 @@
     grid-column: span 1;
   }
 }
+
+/* ④ Modal Form Section Divider (弹窗分组标题) */
+.section-divider {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--va-primary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--color-border-light);
+  padding-bottom: 4px;
+}

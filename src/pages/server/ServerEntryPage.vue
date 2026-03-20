@@ -310,7 +310,7 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import debounce from 'lodash.debounce'
 import { 
   VaCard, VaCardTitle, VaCardContent, VaInput, VaForm, VaButton, VaChip,
@@ -343,6 +343,8 @@ const currentEditMb = ref(null)
 
 const selectedCpuRaw = ref(null)
 const selectedMbRaw = ref(null)
+
+const DRAFT_KEY = 'server_entry_draft'
 
 /**
  * SN 异步校验规则
@@ -389,6 +391,47 @@ const initialForm = {
 }
 
 const form = reactive({ ...initialForm })
+
+/**
+ * 自动保存草稿逻辑
+ */
+watch([form, hwLists, entryDate], () => {
+  // 仅在非加载状态下保存草稿
+  if (loading.value) return
+  
+  localStorage.setItem(DRAFT_KEY, JSON.stringify({
+    form: { ...form, sn: '' }, // 不保存 SN，防止恢复时触发校验
+    hwLists,
+    entryDate: entryDate.value,
+    cpuKeyword: cpuKeyword.value,
+    mbKeyword: mbKeyword.value
+  }))
+}, { deep: true })
+
+/**
+ * 恢复草稿
+ */
+const restoreDraft = () => {
+  const draft = localStorage.getItem(DRAFT_KEY)
+  if (!draft) return
+
+  try {
+    const data = JSON.parse(draft)
+    Object.assign(form, data.form)
+    Object.assign(hwLists, data.hwLists)
+    if (data.entryDate) entryDate.value = new Date(data.entryDate)
+    if (data.cpuKeyword) cpuKeyword.value = data.cpuKeyword
+    if (data.mbKeyword) mbKeyword.value = data.mbKeyword
+    
+    notify({ message: '已自动恢复上次填写的草稿', color: 'info', duration: 4000 })
+  } catch (e) {
+    console.error('恢复草稿失败:', e)
+  }
+}
+
+onMounted(() => {
+  restoreDraft()
+})
 
 /**
  * 处理批量导入的数据
@@ -484,11 +527,9 @@ const handleAddNewCpu = () => {
 
 const handleEditCpu = async () => {
   if (!form.cpu_id) return
-  // 如果当前已经有缓存的完整数据，直接用
   if (selectedCpuRaw.value && selectedCpuRaw.value.id === form.cpu_id && selectedCpuRaw.value.cores) {
     currentEditCpu.value = selectedCpuRaw.value
   } else {
-    // 否则去后端查一次完整数据
     try {
       currentEditCpu.value = await getCpuDetail(form.cpu_id)
     } catch (e) {
@@ -513,9 +554,6 @@ const clearCpu = () => {
   cpuSuggestions.value = []
 }
 
-/**
- * 主板搜索和选择逻辑
- */
 const handleMbSearch = debounce(async () => {
   if (!mbKeyword.value || mbKeyword.value.length < 2) {
     mbSuggestions.value = []
@@ -545,11 +583,9 @@ const handleAddNewMb = () => {
 
 const handleEditMb = async () => {
   if (!form.mb_id) return
-  // 如果当前已经有数据，直接用
   if (selectedMbRaw.value && selectedMbRaw.value.id === form.mb_id && selectedMbRaw.value.sockets) {
     currentEditMb.value = selectedMbRaw.value
   } else {
-    // 简单起见，如果 suggestion 里数据够全也可以，或者需要专门的 getMbDetail
     currentEditMb.value = selectedMbRaw.value
   }
   showMbAddModal.value = true
@@ -580,6 +616,7 @@ const resetForm = () => {
   cpuSuggestions.value = []
   mbSuggestions.value = []
   Object.keys(hwLists).forEach(k => { hwLists[k] = [] })
+  localStorage.removeItem(DRAFT_KEY)
 }
 
 const handleSubmit = async () => {
@@ -608,7 +645,8 @@ const handleSubmit = async () => {
 
     await createServer(form)
     notify({ message: '服务器入库成功！', color: 'success' })
-    form.sn = ''
+    localStorage.removeItem(DRAFT_KEY)
+    resetForm()
   } catch (err) {
     console.error('保存失败:', err)
   } finally {
