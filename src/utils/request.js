@@ -109,9 +109,18 @@ service.interceptors.response.use(
     }
 
     // ============================
-    // 3. 其它错误
+    // 3. 其它特定错误处理 (409, 403, 500 等)
     // ============================
-    const msg = error.response?.data?.message || error.message || '请求失败'
+    let msg = error.response?.data?.message || error.message || '请求失败'
+    
+    if (status === 409) {
+      msg = error.response?.data?.message || '数据已存在，请核对后重试'
+    } else if (status === 403) {
+      msg = '您没有权限执行此操作'
+    } else if (status >= 500) {
+      msg = '服务器开小差了，请稍后再试'
+    }
+
     const notify = getToast()
     notify({ message: msg, color: 'danger' })
     return Promise.reject(error)

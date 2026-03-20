@@ -178,18 +178,16 @@ watch(() => props.modelValue, (val) => {
   }
 })
 watch(show, (val) => { emit('update:model-value', val) })
-
 const handleSave = async () => {
-  console.log('[MbAddModal] handleSave triggered')
   const isValid = await formRef.value.validate()
-  if (!isValid) {
-    console.warn('[MbAddModal] Form validation failed')
-    return
-  }
+  if (!isValid) return
 
   saving.value = true
   // 构造提交数据
   const payload = { ...form }
+  delete payload.id
+  delete payload.hashId
+
   MULTILINE_FIELDS.forEach(key => {
     payload[key] = toDb(form[key])
   })
@@ -197,10 +195,11 @@ const handleSave = async () => {
   try {
     let response
     if (isEdit.value) {
-      const id = props.initData.id || props.initData.hashId
-      console.log('[MbAddModal] Calling updateMotherboard API for ID:', id)
-      response = await updateMotherboard(id, payload)
+      const targetId = props.initData.hashId || props.initData.id
+      response = await updateMotherboard(targetId, payload)
     } else {
+...
+
       console.log('[MbAddModal] Calling addMotherboard API')
       response = await addMotherboard(payload)
     }
