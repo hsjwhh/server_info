@@ -164,7 +164,6 @@ const form = reactive({ ...initialForm })
 watch(() => props.modelValue, (val) => {
   show.value = val
   if (val && props.initData) {
-    console.log('[MbAddModal] Loading initData:', props.initData)
     Object.assign(form, initialForm)
     Object.keys(initialForm).forEach(key => {
       if (props.initData[key] !== undefined) {
@@ -178,6 +177,7 @@ watch(() => props.modelValue, (val) => {
   }
 })
 watch(show, (val) => { emit('update:model-value', val) })
+
 const handleSave = async () => {
   const isValid = await formRef.value.validate()
   if (!isValid) return
@@ -187,7 +187,7 @@ const handleSave = async () => {
   const payload = { ...form }
   delete payload.id
   delete payload.hashId
-
+  
   MULTILINE_FIELDS.forEach(key => {
     payload[key] = toDb(form[key])
   })
@@ -198,16 +198,13 @@ const handleSave = async () => {
       const targetId = props.initData.hashId || props.initData.id
       response = await updateMotherboard(targetId, payload)
     } else {
-...
-
-      console.log('[MbAddModal] Calling addMotherboard API')
       response = await addMotherboard(payload)
     }
     emit('saved', response)
     show.value = false
     resetForm()
   } catch (err) {
-    console.error('[MbAddModal] Save failed:', err)
+    console.error('Save failed:', err)
   } finally {
     saving.value = false
   }
@@ -224,6 +221,7 @@ const resetForm = () => {
   overflow-y: auto;
 }
 
+/* 布局工具类 */
 .grid         { display: grid; }
 .grid-cols-2  { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .gap-4        { gap: 1rem; }
@@ -231,6 +229,7 @@ const resetForm = () => {
 .mt-4         { margin-top: 1rem; }
 .p-2          { padding: 0.5rem; }
 
+/* PCIe 同行布局：数量窄 + 分布宽 */
 .pcie-row {
   display: flex;
   gap: 0.75rem;

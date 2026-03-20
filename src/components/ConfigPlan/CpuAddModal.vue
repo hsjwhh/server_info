@@ -141,19 +141,17 @@ const handleSave = async () => {
   saving.value = true
   try {
     let response
-    // 构造 payload，确保不把 ID 放在 Body 中发送
     const payload = { ...form }
     delete payload.id
     delete payload.hashId
-
+    
     if (isEdit.value) {
       const targetId = props.initData.hashId || props.initData.id
       response = await updateCpu(targetId, payload)
     } else {
       response = await addCpu(payload)
     }
-...
-
+    
     emit('saved', response)
     show.value = false
     resetForm()
