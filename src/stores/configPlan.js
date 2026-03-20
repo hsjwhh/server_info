@@ -156,31 +156,44 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
      * 加载兼容的主板列表
      */
     const loadCompatibleMotherboards = async () => {
-        if (!selectedCpu.value) return
+        // [修复]：如果 CPU 数据中没有 socket 信息，或者格式化后为空，则不发起请求，规避 API 报错
+        if (!selectedCpu.value || !selectedCpu.value.socket || !formattedSocket.value) {
+            compatibleMotherboards.value = []
+            return
+        }
+        
         try {
             compatibleMotherboards.value = await getMbBySocket(formattedSocket.value)
         } catch (err) {
             console.error('加载兼容主板失败:', err)
-            throw err
+            compatibleMotherboards.value = [] // 报错时清空列表，防止 UI 渲染过时数据
         }
     }
 
     /**
      * 选中某个 CPU 后的联动逻辑处理
+     * [优化]：强制从后端拉取最新详情，确保规格修改后能立即同步到 UI
      */
     const selectCpu = async (cpuSummary) => {
-        cpuKeyword.value = cpuSummary.cpu_short_name
-        cpuSuggestions.value = []
-        showSuggestions.value = false
+        if (!cpuSummary || !cpuSummary.id) return
+        
         loadingCpuDetail.value = true
         try {
+            // 每次选中或更新后，都强制请求最新的详情数据
             const cpuDetail = await getCpuDetail(cpuSummary.id)
+            
+            // 更新基础状态
             selectedCpu.value = cpuDetail
+            cpuKeyword.value = cpuDetail.cpu_short_name
+            
+            // 清理辅助状态
+            cpuSuggestions.value = []
+            showSuggestions.value = false
 
             // -- 核心联动处理 --
-            // 1. 根据 CPU 的参数自动萃取支持的内存类型 (降级回退 DDR4)
+            // 1. 根据 CPU 的参数自动萃取支持的内存类型
             memoryType.value = extractMemoryTypes(cpuDetail.memory_speed)[0] || 'DDR4'
-            // 2. 将 CPU 颗数重置为其推荐默认配置（单路为1，双路为2等） 
+            // 2. 将 CPU 颗数重置为其推荐默认配置
             cpuCount.value = cpuScalability.value.default
 
             // 3. 强制清空之前选取的主板并重新请求当前 CPU 对应针脚的新主板
@@ -188,10 +201,11 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
             compatibleMotherboards.value = []
             await loadCompatibleMotherboards()
 
-            return cpuDetail // 返回完整对象供 UI 层派发 Toast 等纯视图交互
+            return cpuDetail
         } catch (err) {
-            console.error('加载 CPU 详情失败:', err)
-            selectedCpu.value = null
+            console.error('加载/同步 CPU 详情失败:', err)
+            // 只有在彻底失败时才清空，防止闪烁
+            if (!selectedCpu.value) selectedCpu.value = null
             throw err
         } finally {
             loadingCpuDetail.value = false

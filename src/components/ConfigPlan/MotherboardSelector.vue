@@ -6,24 +6,33 @@
       主板
     </h3>
 
+    <!-- 状态 A: 尚未选择 CPU -->
     <div v-if="!selectedCpu" class="empty-placeholder">
       <VaIcon name="mdi-cpu-64-bit" size="large" color="secondary" />
       <p>请先在上方选择 CPU 以匹配兼容主板</p>
     </div>
 
+    <!-- 状态 B: 已选 CPU 但接口数据缺失 -->
+    <div v-else-if="!selectedCpu.socket" class="empty-placeholder warning-border">
+      <VaIcon name="mdi-alert-circle-outline" size="large" color="warning" />
+      <p>当前 CPU ({{ selectedCpu.cpu_short_name }}) 接口信息缺失</p>
+      <span class="text-xs text-gray-500 mt-1">无法自动匹配主板，请先修改 CPU 规格或手动录入主板</span>
+    </div>
+
     <div v-else class="selector-content">
-      <!-- 使用占位符方案对齐按钮 -->
+      <!-- 状态 C: 已选 CPU 且有接口数据 -->
       <div class="flex gap-4">
         <VaSelect
           v-model="selectedMotherboard"
           label="选择主板"
-          placeholder="选择兼容的主板..."
+          :placeholder="compatibleMotherboards.length > 0 ? '选择兼容的主板...' : '库中暂无兼容主板'"
           :options="compatibleMotherboards"
           text-by="model"
           value-by="model"
           searchable
           clearable
           class="flex-grow"
+          :disabled="compatibleMotherboards.length === 0"
         >
           <template #prependInner>
             <VaIcon name="mdi-expansion-card" size="small" />
@@ -43,6 +52,17 @@
         </div>
       </div>
 
+      <!-- 搜索不到结果时的额外提示 -->
+      <VaAlert
+        v-if="compatibleMotherboards.length === 0"
+        color="info"
+        outline
+        dense
+        class="mt-3"
+      >
+        未找到兼容 {{ formattedSocket }} 的主板？点击右侧按钮手动补全。
+      </VaAlert>
+
       <div v-if="selectedMotherboardDetail" class="selected-item-card mt-3">
         <div class="card-header">
           <a
@@ -56,7 +76,7 @@
             <VaIcon name="mdi-open-in-new" size="small" />
           </a>
           <span v-else class="item-name">{{ selectedMotherboardDetail.model }}</span>
-
+          
           <VaButton
             preset="plain"
             icon="mdi-pencil"
@@ -66,7 +86,6 @@
             @click="$emit('edit-mb', selectedMotherboardDetail)"
           />
         </div>
-      ...
 
         <div class="item-details-grid">
           <div class="detail-tile">
@@ -119,14 +138,15 @@
 </template>
 
 <script setup>
-import { VaIcon, VaSelect, VaChip, VaButton } from 'vuestic-ui'
+import { VaIcon, VaSelect, VaChip, VaButton, VaAlert } from 'vuestic-ui'
 import { storeToRefs } from 'pinia'
 import { useConfigPlanStore } from '../../stores/configPlan'
 
 const store = useConfigPlanStore()
 const {
   selectedCpu,
-  selectedMotherboard, compatibleMotherboards, selectedMotherboardDetail
+  selectedMotherboard, compatibleMotherboards, selectedMotherboardDetail,
+  formattedSocket
 } = storeToRefs(store)
 
 const { splitItems } = store
@@ -160,6 +180,11 @@ const { splitItems } = store
   border-radius: var(--radius-lg);
   color: var(--color-text-secondary);
   text-align: center;
+}
+
+.warning-border {
+  border-color: var(--va-warning);
+  background: rgba(var(--va-warning-rgb), 0.05);
 }
 
 .empty-placeholder p {

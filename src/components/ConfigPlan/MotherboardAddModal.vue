@@ -3,11 +3,9 @@
   <VaModal
     v-model="show"
     :title="isEdit ? '修改主板信息' : '新增主板信息'"
-    :ok-text="isEdit ? '保存修改' : '确认添加'"
-    cancel-text="取消"
+    hide-default-actions
     size="large"
     fixed-layout
-    @ok.prevent="handleSave"
   >
     <VaForm ref="formRef" class="mb-add-form p-2">
       <div class="grid grid-cols-2 gap-4">
@@ -76,7 +74,7 @@
             v-model="form.pcie_list"
             label="PCIe 分布（每行一条）"
             placeholder="例如:&#10;4 PCI-E 3.0 x16&#10;2 PCI-E 3.0 x8"
-            auto-grow
+            autosize
             :min-rows="2"
             :max-rows="6"
             class="pcie-list-textarea"
@@ -88,7 +86,7 @@
           v-model="form.m2"
           label="M.2 接口（每行一条）"
           placeholder="例如:&#10;1 M.2 PCIe 4.0 x4&#10;1 M.2 SATA"
-          auto-grow
+          autosize
           :min-rows="2"
           :max-rows="6"
           class="col-span-2"
@@ -99,7 +97,7 @@
           v-model="form.input"
           label="其他接口（每行一条）"
           placeholder="例如:&#10;8x SATA 3.0&#10;2x USB 3.2 Gen2"
-          auto-grow
+          autosize
           :min-rows="2"
           :max-rows="6"
           class="col-span-2"
@@ -107,12 +105,21 @@
 
       </div>
     </VaForm>
+
+    <template #footer>
+      <div class="flex gap-2 justify-end">
+        <VaButton preset="secondary" color="secondary" @click="show = false">取消</VaButton>
+        <VaButton :loading="saving" @click="handleSave">
+          {{ isEdit ? '保存修改' : '确认添加' }}
+        </VaButton>
+      </div>
+    </template>
   </VaModal>
 </template>
 
 <script setup>
 import { ref, reactive, watch, computed } from 'vue'
-import { VaModal, VaForm, VaInput, VaTextarea } from 'vuestic-ui'
+import { VaModal, VaForm, VaInput, VaTextarea, VaButton } from 'vuestic-ui'
 import { addMotherboard, updateMotherboard } from '../../api/configPlan'
 
 const props = defineProps({
@@ -126,9 +133,10 @@ const emit = defineEmits(['update:model-value', 'saved'])
 
 const show = ref(false)
 const formRef = ref(null)
+const saving = ref(false)
 const isEdit = computed(() => !!(props.initData && (props.initData.id || props.initData.hashId)))
 
-// 多行字段列表（存取时需转换）
+// 多行字段列表
 const MULTILINE_FIELDS = ['pcie_list', 'm2', 'input']
 
 // DB 存取转换：换行 <-> 中文分号
@@ -156,6 +164,7 @@ const form = reactive({ ...initialForm })
 watch(() => props.modelValue, (val) => {
   show.value = val
   if (val && props.initData) {
+    console.log('[MbAddModal] Loading initData:', props.initData)
     Object.assign(form, initialForm)
     Object.keys(initialForm).forEach(key => {
       if (props.initData[key] !== undefined) {
@@ -171,10 +180,15 @@ watch(() => props.modelValue, (val) => {
 watch(show, (val) => { emit('update:model-value', val) })
 
 const handleSave = async () => {
+  console.log('[MbAddModal] handleSave triggered')
   const isValid = await formRef.value.validate()
-  if (!isValid) return
+  if (!isValid) {
+    console.warn('[MbAddModal] Form validation failed')
+    return
+  }
 
-  // 构造提交数据，多行字段转换为分号分隔
+  saving.value = true
+  // 构造提交数据
   const payload = { ...form }
   MULTILINE_FIELDS.forEach(key => {
     payload[key] = toDb(form[key])
@@ -184,15 +198,19 @@ const handleSave = async () => {
     let response
     if (isEdit.value) {
       const id = props.initData.id || props.initData.hashId
+      console.log('[MbAddModal] Calling updateMotherboard API for ID:', id)
       response = await updateMotherboard(id, payload)
     } else {
+      console.log('[MbAddModal] Calling addMotherboard API')
       response = await addMotherboard(payload)
     }
     emit('saved', response)
     show.value = false
     resetForm()
   } catch (err) {
-    console.error('Failed to save motherboard:', err)
+    console.error('[MbAddModal] Save failed:', err)
+  } finally {
+    saving.value = false
   }
 }
 
@@ -207,7 +225,6 @@ const resetForm = () => {
   overflow-y: auto;
 }
 
-/* 布局工具类 */
 .grid         { display: grid; }
 .grid-cols-2  { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .gap-4        { gap: 1rem; }
@@ -215,7 +232,6 @@ const resetForm = () => {
 .mt-4         { margin-top: 1rem; }
 .p-2          { padding: 0.5rem; }
 
-/* PCIe 同行布局：数量窄 + 分布宽 */
 .pcie-row {
   display: flex;
   gap: 0.75rem;

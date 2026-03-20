@@ -88,7 +88,6 @@
           <VaButton preset="plain" icon="mdi-close" size="small" color="danger" @click="clearCpu" />
         </div>
       </div>
-    ...
 
       <div class="item-details-grid">
         <div class="detail-tile">
@@ -97,7 +96,7 @@
         </div>
         <div class="detail-tile">
           <span class="tile-label">主频 (Base/Turbo)</span>
-          <span class="tile-value">{{ selectedCpu.base_freq }} / {{ selectedCpu.turbo_freq }}</span>
+          <span class="tile-value">{{ selectedCpu.base_freq }} / {{ selectedCpu.max_turbo }}</span>
         </div>
         <div class="detail-tile">
           <span class="tile-label">封装接口 (Socket)</span>
@@ -109,7 +108,7 @@
         </div>
         <div class="detail-tile full-width">
           <span class="tile-label">内存支持</span>
-          <span class="tile-value">{{ selectedCpu.memory_speed }} {{ selectedCpu.max_memory_speed }} ; {{ selectedCpu.memory_channels }} 通道</span>
+          <span class="tile-value">{{ selectedCpu.memory_speed }}（最高 {{ selectedCpu.max_memory_speed }}）· {{ selectedCpu.memory_channels }} 通道</span>
         </div>
       </div>
 
@@ -178,6 +177,10 @@ onUnmounted(() => document.removeEventListener('click', handleClickOutside))
 </script>
 
 <style scoped>
+.relative {
+  position: relative;
+}
+
 .add-hw-btn {
   height: 36px;
   white-space: nowrap;
