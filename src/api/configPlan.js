@@ -107,6 +107,16 @@ export function searchMotherboard(keyword) {
 }
 
 /**
+ * 获取主板详细信息
+ * 
+ * @param {string|number} mbId - 主板 ID 或 HashID
+ * @returns {Promise<Object>} 主板详情
+ */
+export function getMotherboardDetail(mbId) {
+  return request.get(`/hw/mb/${mbId}`)
+}
+
+/**
  * 保存配置方案
  * 
  * @param {Object} config - 配置数据

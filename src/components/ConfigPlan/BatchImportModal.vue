@@ -45,7 +45,7 @@
                 <span class="label">输入内容:</span>
                 <span class="value font-mono">{{ item.rawLine }}</span>
               </div>
-              <VaCounter v-model="item.quantity" :min="1" size="small" label="数量" />
+              <VaCounter v-model="item.quantity" :min="1" label="数量" class="counter-sm" />
             </div>
 
             <div class="match-section">
@@ -380,54 +380,8 @@ const handleConfirm = () => {
   width: 120px;
 }
 
-.suggestions {
-  margin-top: 4px;
-}
-</style>
-
-<style scoped>
-.batch-import-container {
-  min-height: 200px;
-}
-
-.batch-textarea {
-  min-height: 200px;
-}
-
-.help-text {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-  line-height: 1.6;
-}
-
-.parsed-list {
-  max-height: 50vh;
-  overflow-y: auto;
-  padding-right: 8px;
-}
-
-.parsed-item {
-  background-color: var(--color-bg-subtle);
-}
-
-.item-input-info {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-}
-
-.label {
-  font-size: var(--text-xs);
-  color: var(--color-text-secondary);
-}
-
-.value {
-  font-size: var(--text-sm);
-  font-weight: 500;
-}
-
-.type-select {
-  width: 120px;
+.counter-sm {
+  width: 110px;
 }
 
 .suggestions {

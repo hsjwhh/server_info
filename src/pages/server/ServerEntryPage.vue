@@ -18,18 +18,17 @@
             <VaCardTitle>标识与归属</VaCardTitle>
             <VaCardContent>
               <div class="vertical-form mt-2">
-                <VaDateInput v-model="entryDate" label="入库日期 *" required class="w-full mb-3" />
+                <VaDateInput v-model="entryDate" label="入库日期 *" :rules="requiredRule" class="w-full mb-3" />
                 <VaInput
                   v-model="form.sn"
                   label="序列号 (SN) *"
                   placeholder="唯一序列号"
-                  required
                   :rules="snRules"
                   :loading="checkingSn"
                   class="w-full mb-3"
                 />
                 <VaCounter v-model="form.number" label="入库数量 *" :min="1" class="mb-3" />
-                <VaInput v-model="form.customer" label="客户名称 *" required class="w-full mb-3" />
+                <VaInput v-model="form.customer" label="客户名称 *" :rules="requiredRule" class="w-full mb-3" />
                 <VaInput v-model="form.owner" label="所属者" class="w-full mb-3" />
                 <VaInput v-model="form.agent" label="代理商" class="w-full" />
               </div>
@@ -47,7 +46,6 @@
                     <VaInput
                       v-model="cpuKeyword"
                       placeholder="输入型号搜索..."
-                      required
                       clearable
                       :loading="searchingCpu"
                       class="f-grow"
@@ -58,6 +56,13 @@
                         <VaIcon name="mdi-magnify" size="small" />
                       </template>
                     </VaInput>
+                    <!-- 方案 1：隐藏校验字段，绑定真正的业务约束 (form.cpu_id) -->
+                    <VaInput
+                      :model-value="form.cpu_id ? 'selected' : ''"
+                      :rules="[(v) => !!v || '请从搜索结果中选择 CPU 型号']"
+                      style="display: none"
+                      aria-hidden="true"
+                    />
                     <div class="flex gap-1">
                       <VaButton
                         v-if="form.cpu_id"
@@ -103,7 +108,6 @@
                     <VaInput
                       v-model="mbKeyword"
                       placeholder="输入主板型号搜索..."
-                      required
                       clearable
                       :loading="loadingMbs"
                       class="f-grow"
@@ -114,6 +118,13 @@
                         <VaIcon name="mdi-magnify" size="small" />
                       </template>
                     </VaInput>
+                    <!-- 方案 1：隐藏校验字段，绑定真正的业务约束 (form.mb_id) -->
+                    <VaInput
+                      :model-value="form.mb_id ? 'selected' : ''"
+                      :rules="[(v) => !!v || '请从搜索结果中选择主板型号']"
+                      style="display: none"
+                      aria-hidden="true"
+                    />
                     <div class="flex gap-1">
                       <VaButton
                         v-if="form.mb_id"
@@ -317,7 +328,9 @@ import {
   VaDateInput, VaCounter, VaIcon, VaTextarea, VaSelect, useToast 
 } from 'vuestic-ui'
 import { createServer, checkSnUnique } from '../../api/server'
-import { searchCpu, getCpuDetail, searchMotherboard } from '../../api/configPlan'
+import { 
+  searchCpu, getCpuDetail, searchMotherboard, getMotherboardDetail 
+} from '../../api/configPlan'
 import CpuAddModal from '../../components/ConfigPlan/CpuAddModal.vue'
 import MotherboardAddModal from '../../components/ConfigPlan/MotherboardAddModal.vue'
 import BatchImportModal from '../../components/ConfigPlan/BatchImportModal.vue'
@@ -346,24 +359,14 @@ const selectedMbRaw = ref(null)
 
 const DRAFT_KEY = 'server_entry_draft'
 
+const requiredRule = [(v) => !!v || '此项必填']
+
 /**
- * SN 异步校验规则
+ * SN 同步校验规则（唯一性检查移至 handleSubmit 手动 await）
  */
 const snRules = [
   (v) => !!v || '序列号必填',
   (v) => v.length >= 4 || '序列号至少4位',
-  async (v) => {
-    if (!v || v.length < 4) return true
-    checkingSn.value = true
-    try {
-      const res = await checkSnUnique(v)
-      return res.unique || '该序列号已在库中，请核对'
-    } catch (err) {
-      return '校验失败'
-    } finally {
-      checkingSn.value = false
-    }
-  }
 ]
 
 const hwLists = reactive({
@@ -583,9 +586,10 @@ const handleAddNewMb = () => {
 
 const handleEditMb = async () => {
   if (!form.mb_id) return
-  if (selectedMbRaw.value && selectedMbRaw.value.id === form.mb_id && selectedMbRaw.value.sockets) {
-    currentEditMb.value = selectedMbRaw.value
-  } else {
+  // 统一通过详情接口获取最新数据，确保规格完整
+  try {
+    currentEditMb.value = await getMotherboardDetail(form.mb_id)
+  } catch (e) {
     currentEditMb.value = selectedMbRaw.value
   }
   showMbAddModal.value = true
@@ -620,37 +624,99 @@ const resetForm = () => {
 }
 
 const handleSubmit = async () => {
-  const isValid = await formRef.value.validate()
-  if (!isValid) return
+  console.log('[Entry] handleSubmit triggered');
+  
+  // 方案 2：前置同步校验，不依赖 Vuestic async rule 竞态
+  const missing = []
+  if (!entryDate.value)                 missing.push('入库日期')
+  if (!form.sn || form.sn.length < 4)  missing.push('序列号（至少4位）')
+  if (!form.customer)                   missing.push('客户名称')
+  if (!form.cpu_id)                     missing.push('CPU 型号（需从搜索结果选中）')
+  if (!form.mb_id)                      missing.push('主板型号（需从搜索结果选中）')
 
-  loading.value = true
+  if (missing.length > 0) {
+    notify({ message: `必填项未完善：${missing.join('、')}`, color: 'warning' })
+    return
+  }
+
   try {
-    form.y = entryDate.value.getFullYear()
-    form.m = entryDate.value.getMonth() + 1
-    form.d = entryDate.value.getDate()
-
-    Object.keys(hwLists).forEach(key => {
-      const validItems = hwLists[key].filter(i => i.model && i.model.trim())
-      if (validItems.length === 0) {
-        form[key] = ''
-        form[key + 'n'] = ''
-      } else if (validItems.length === 1) {
-        form[key] = validItems[0].model.trim()
-        form[key + 'n'] = validItems[0].count
-      } else {
-        form[key] = validItems.map(i => `${i.model.trim()} * ${i.count}`).join(';')
-        form[key + 'n'] = 0
+    // 1. 手动 await SN 唯一性（不走 Vuestic rules，避免竞态）
+    loading.value = true
+    checkingSn.value = true
+    try {
+      const res = await checkSnUnique(form.sn)
+      if (res && res.unique === false) {
+        notify({ message: '该序列号已在库中，请核对', color: 'warning' })
+        return
       }
-    })
+    } catch (snErr) {
+      console.error('SN check failed:', snErr)
+      notify({ message: '序列号唯一性校验服务暂不可用，请稍后重试', color: 'danger' })
+      return
+    } finally {
+      checkingSn.value = false
+    }
 
-    await createServer(form)
-    notify({ message: '服务器入库成功！', color: 'success' })
-    localStorage.removeItem(DRAFT_KEY)
-    resetForm()
+    // 2. Vuestic 校验剩余同步规则
+    console.log('[Debug] Starting form validation...');
+    const isValid = await formRef.value.validate();
+    console.log('[Debug] Validation result:', isValid);
+
+    if (!isValid) {
+      notify({ message: '表单校验未通过，请检查红色标注项', color: 'warning' });
+      return;
+    }
+
+    console.log('[Debug] Proceeding to data transformation...');
+
+    // 2. 日期转换
+    if (entryDate.value instanceof Date && !isNaN(entryDate.value)) {
+      form.y = entryDate.value.getFullYear();
+      form.m = entryDate.value.getMonth() + 1;
+      form.d = entryDate.value.getDate();
+    } else {
+      throw new Error('入库日期无效');
+    }
+
+    // 3. 硬件清单转换
+    Object.keys(hwLists).forEach(key => {
+      const list = hwLists[key];
+      if (!Array.isArray(list)) return; // 防护逻辑
+
+      const validItems = list.filter(i => i && i.model && i.model.trim());
+      if (validItems.length === 0) {
+        form[key] = '';
+        form[key + 'n'] = '';
+      } else if (validItems.length === 1) {
+        form[key] = validItems[0].model.trim();
+        form[key + 'n'] = validItems[0].count;
+      } else {
+        // 多型号合并协议
+        form[key] = validItems.map(i => `${i.model.trim()} * ${i.count}`).join(';');
+        form[key + 'n'] = 0; // 强制设为 0 作为多项标记
+      }
+    });
+
+    // 4. 发送写库请求
+    console.log('[Debug] Calling createServer API with payload:', JSON.parse(JSON.stringify(form)));
+    const response = await createServer(form);
+    console.log('[Debug] Server response:', response);
+
+    notify({ message: '服务器入库成功！', color: 'success' });
+    
+    // 成功后清理
+    localStorage.removeItem(DRAFT_KEY);
+    resetForm();
+    
   } catch (err) {
-    console.error('保存失败:', err)
+    console.error('[Error] Critical failure in handleSubmit:', err);
+    notify({ 
+      message: `保存失败: ${err.response?.data?.message || err.message || '未知错误'}`, 
+      color: 'danger' 
+    });
   } finally {
-    loading.value = false
+    loading.value = false;
+    console.log('[End] handleSubmit finished');
   }
 }
 </script>
