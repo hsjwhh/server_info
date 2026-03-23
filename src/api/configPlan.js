@@ -113,7 +113,7 @@ export function searchMotherboard(keyword) {
  * @returns {Promise<Object>} 主板详情
  */
 export function getMotherboardDetail(mbId) {
-  return request.get(`/hw/mb/${mbId}`)
+  return request.get(`/hw/mb/detail/${mbId}`)
 }
 
 /**
