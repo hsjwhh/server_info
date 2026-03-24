@@ -52,6 +52,7 @@
               placeholder="请输入用户名"
               clearable
               :rules="[required('用户名')]"
+              @keydown.tab.prevent="passwordRef?.focus()"
             >
               <template #prepend>
                 <VaIcon name="mdi-account" color="secondary" tabindex="-1" />
@@ -59,12 +60,14 @@
             </VaInput>
 
             <VaInput
+              ref="passwordRef"
               v-model="form.password"
               type="password"
               label="密码"
               placeholder="请输入密码"
               clearable
               :rules="[required('密码')]"
+              @keydown.tab.prevent="loginBtnRef?.focus()"
             >
               <template #prepend>
                 <VaIcon name="mdi-lock" color="secondary" tabindex="-1" />
@@ -79,6 +82,7 @@
             </div>
 
             <VaButton
+              ref="loginBtnRef"
               class="login-button"
               :loading="loading"
               @click="handleLogin"
@@ -148,6 +152,8 @@ const form = reactive({
 const loading = ref(false)
 const rememberMe = ref(false)
 const formRef = ref()
+const passwordRef = ref(null)
+const loginBtnRef = ref(null)
 
 const required = (fieldName) => (value) => {
   return !!value || `${fieldName}不能为空`
