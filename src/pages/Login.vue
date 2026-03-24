@@ -54,7 +54,7 @@
               :rules="[required('用户名')]"
             >
               <template #prepend>
-                <VaIcon name="mdi-account" color="secondary" />
+                <VaIcon name="mdi-account" color="secondary" tabindex="-1" />
               </template>
             </VaInput>
 
@@ -67,7 +67,7 @@
               :rules="[required('密码')]"
             >
               <template #prepend>
-                <VaIcon name="mdi-lock" color="secondary" />
+                <VaIcon name="mdi-lock" color="secondary" tabindex="-1" />
               </template>
             </VaInput>
 

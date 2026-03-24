@@ -420,13 +420,21 @@ const restoreDraft = () => {
 
   try {
     const data = JSON.parse(draft)
+    
+    // 检查草稿是否有实质性内容 (客户名、已选型号或任意硬件列表不为空)
+    const hasContent = 
+      (data.form && (data.form.customer || data.form.cpu_id || data.form.mb_id || data.form.owner || data.form.agent)) ||
+      (data.hwLists && Object.values(data.hwLists).some(list => list && list.length > 0))
+
     Object.assign(form, data.form)
     Object.assign(hwLists, data.hwLists)
     if (data.entryDate) entryDate.value = new Date(data.entryDate)
     if (data.cpuKeyword) cpuKeyword.value = data.cpuKeyword
     if (data.mbKeyword) mbKeyword.value = data.mbKeyword
     
-    notify({ message: '已自动恢复上次填写的草稿', color: 'info', duration: 4000 })
+    if (hasContent) {
+      notify({ message: '已自动恢复上次填写的草稿', color: 'info', duration: 4000 })
+    }
   } catch (e) {
     console.error('恢复草稿失败:', e)
   }
