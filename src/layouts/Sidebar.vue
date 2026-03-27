@@ -23,6 +23,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { usePermission } from '../composables/usePermission'
 
 defineProps<{ 
   collapsed: boolean 
@@ -30,6 +31,7 @@ defineProps<{
 
 const router = useRouter()
 const route = useRoute()
+const { isAdmin } = usePermission()
 
 /**
  * 从路由配置自动生成菜单
@@ -44,7 +46,11 @@ const menu = computed(() => {
 
   // 过滤出需要显示在菜单中的路由
   return rootRoute.children
-    .filter(route => route.meta?.showInMenu)
+    .filter(route => {
+      if (!route.meta?.showInMenu) return false
+      if (route.meta?.requireAdmin && !isAdmin.value) return false
+      return true
+    })
     .map(route => ({
       name: route.name as string,
       label: route.meta?.title || route.name as string,
