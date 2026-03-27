@@ -43,6 +43,7 @@
           <div class="flex flex-col">
             <div style="height: 20px;"></div> <!-- Label 占位 -->
             <VaButton
+              v-if="isAdmin"
               preset="secondary"
               icon="mdi-plus"
               class="add-hw-btn"
@@ -153,12 +154,15 @@ import { ref, onMounted, onUnmounted } from 'vue'
 import { VaInput, VaIcon, VaButton, VaChip, VaSelect } from 'vuestic-ui'
 import { storeToRefs } from 'pinia'
 import { useConfigPlanStore } from '../../stores/configPlan'
+import { usePermission } from '../../composables/usePermission'
 
 const store = useConfigPlanStore()
 const {
   cpuKeyword, cpuCoresFilter, cpuSuggestions, showSuggestions, selectedCpu, cpuCount, loadingCpuDetail,
   cpuScalability, cpuCountLabel, formattedSocket
 } = storeToRefs(store)
+
+const { isAdmin } = usePermission()
 
 const {
   handleCpuSearch, handleCoresChange, closeSuggestions, selectCpu, clearCpu, validateCpuCount

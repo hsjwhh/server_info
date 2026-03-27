@@ -334,6 +334,15 @@ import {
 import CpuAddModal from '../../components/ConfigPlan/CpuAddModal.vue'
 import MotherboardAddModal from '../../components/ConfigPlan/MotherboardAddModal.vue'
 import BatchImportModal from '../../components/ConfigPlan/BatchImportModal.vue'
+import { usePermission } from '../../composables/usePermission'
+import { useRouter } from 'vue-router'
+
+const { isAdmin } = usePermission()
+const router = useRouter()
+
+if (!isAdmin.value) {
+  router.replace('/')
+}
 
 const { init: notify } = useToast()
 const formRef = ref(null)

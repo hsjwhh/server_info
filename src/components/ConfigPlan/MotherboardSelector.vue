@@ -42,6 +42,7 @@
         <div class="flex flex-col">
           <div style="height: 20px;"></div> <!-- Label 占位 -->
           <VaButton
+            v-if="isAdmin"
             preset="secondary"
             icon="mdi-plus"
             class="add-hw-btn"
@@ -141,6 +142,7 @@
 import { VaIcon, VaSelect, VaChip, VaButton, VaAlert } from 'vuestic-ui'
 import { storeToRefs } from 'pinia'
 import { useConfigPlanStore } from '../../stores/configPlan'
+import { usePermission } from '../../composables/usePermission'
 
 const store = useConfigPlanStore()
 const {
@@ -148,6 +150,8 @@ const {
   selectedMotherboard, compatibleMotherboards, selectedMotherboardDetail,
   formattedSocket
 } = storeToRefs(store)
+
+const { isAdmin } = usePermission()
 
 const { splitItems } = store
 </script>
