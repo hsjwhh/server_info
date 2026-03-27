@@ -354,7 +354,9 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
     // 核心解构器：从 CPU 的 memory_speed 字段中，挖掘支持哪些类型的内存条
     const extractMemoryTypes = (memorySpeed) => {
         if (!memorySpeed) return []
-        const matches = memorySpeed.match(/DDR\d+/gi)
+        // 确保是字符串再 match，防止 numeric crash
+        const str = String(memorySpeed)
+        const matches = str.match(/DDR\d+/gi)
         if (!matches) return []
         return Array.from(new Set(matches.map(m => m.toUpperCase())))
     }
@@ -374,8 +376,16 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
 
     // ── 内存 衍生 ──
     const memoryOptions = computed(() => {
+        // 1. CPU
         const types = extractMemoryTypes(selectedCpu.value?.memory_speed)
-        return types.length ? types : ['DDR4'] // 兜底返回 DDR4
+        if (types.length) return types
+
+        // 2. Motherboard
+        if (selectedMotherboardDetail.value?.memory_type) {
+            return [selectedMotherboardDetail.value.memory_type]
+        }
+        
+        return ['DDR4'] // 兜底返回 DDR4
     })
 
     // 直接求出总共的 GB 数量用于展示及效验
@@ -407,7 +417,18 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
         return p
     })
 
-    const cpuPower = computed(() => (selectedCpu.value?.tdp || 0) * cpuCount.value)
+    /**
+     * 解析 TDP 字符串，处理 "100W/130W" 或 "100W" 格式，取基础功耗 (第一个值)
+     */
+    const parseTdp = (tdp) => {
+        if (!tdp) return 0
+        if (typeof tdp === 'number') return tdp
+        // 提取第一个数字
+        const match = String(tdp).match(/(\d+)/)
+        return match ? parseInt(match[1], 10) : 0
+    }
+
+    const cpuPower = computed(() => parseTdp(selectedCpu.value?.tdp) * cpuCount.value)
     const motherboardPower = computed(() => selectedMotherboardDetail.value?.power || CONFIG.POWER.MOTHERBOARD_DEFAULT)
 
     // System Total Power

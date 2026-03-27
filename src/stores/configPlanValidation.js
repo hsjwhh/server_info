@@ -10,13 +10,13 @@ const parsePositiveInt = (value) => {
  * 标准化 Socket 名称，统一两端格式后再比较：
  *   FCLGA4677  → LGA4677
  *   LGA-4677   → LGA4677
- * 只处理已知的 Intel FCLGA 前缀，避免 /^FC/ 误伤其他封装（如 FC-BGA）
+ * [优化]：不再使用严格的数字匹配正则，以便支持 FCLGA2011-3 等带后缀的型号。
  */
 const normalizeSocket = (value) => {
   return String(value || '')
     .toUpperCase()
-    .replace(/^FCLGA(\d+)$/, 'LGA$1')  // 仅处理 FCLGA → LGA，精确匹配
-    .replace(/[^A-Z0-9]/g, '')
+    .replace(/^FCLGA/, 'LGA')  // 处理 FCLGA → LGA 转换
+    .replace(/[^A-Z0-9]/g, '') // 移除非字母数字字符（如空格、短横线）
 }
 
 /**

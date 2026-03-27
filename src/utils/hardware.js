@@ -25,8 +25,9 @@
  */
 export function formatSocket(socket) {
   if (!socket) return socket
+  // [优化]：使用更通用的替换规则，支持 FCLGA2011-3 等带后缀的情况
   if (socket.startsWith('FCLGA')) {
-    return socket.replace(/^FCLGA(\d+)$/, 'LGA-$1')
+    return socket.replace(/^FCLGA\s*/, 'LGA-')
   }
   return socket
 }
