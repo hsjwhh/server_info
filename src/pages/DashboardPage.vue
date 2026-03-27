@@ -90,10 +90,10 @@
           <VaCard>
             <VaCardTitle>快速操作</VaCardTitle>
             <VaCardContent class="quick-actions">
-              <VaButton block icon="mdi-database-plus" @click="$router.push('/server/entry')">
+              <VaButton v-if="isAdmin" block icon="mdi-database-plus" @click="$router.push('/server/entry')">
                 新服务器入库
               </VaButton>
-              <VaButton block preset="secondary" icon="mdi-clipboard-text-search" @click="$router.push('/config-plan')">
+              <VaButton v-if="isAdmin" block preset="secondary" icon="mdi-clipboard-text-search" @click="$router.push('/config-plan')">
                 制定配置方案
               </VaButton>
             </VaCardContent>
@@ -130,8 +130,10 @@ import {
   VaInnerLoading, VaDataTable, VaProgressBar, useToast 
 } from 'vuestic-ui'
 import { getDashboardStats } from '../api/stats'
+import { usePermission } from '../composables/usePermission'
 
 const { init: notify } = useToast()
+const { isAdmin } = usePermission()
 const loading = ref(true)
 
 // 响应式数据
