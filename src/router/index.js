@@ -83,7 +83,7 @@ const routes = [
           title: '配置方案',
           icon: 'mdi-clipboard-text-outline',
           showInMenu: true,
-          // allowDirectAccess: false,
+          requireAdmin: true,
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '配置方案', to: '/config-plan' }
@@ -99,7 +99,6 @@ const routes = [
           icon: 'mdi-database-plus', 
           showInMenu: true,
           requireAdmin: true,
-          // allowDirectAccess: false,
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '服务器录入', to: '/server/entry' }
