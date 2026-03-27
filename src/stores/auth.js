@@ -26,6 +26,7 @@ export const useAuthStore = defineStore('auth', () => {
     const accessToken = computed(() => _accessToken.value)
     const isLoggedIn = computed(() => !!_accessToken.value)
     const user = computed(() => _user.value)
+    const isAdmin = computed(() => _user.value?.role === 'admin')
 
     // ============================================================
     // Actions
@@ -61,8 +62,9 @@ export const useAuthStore = defineStore('auth', () => {
                 { withCredentials: true }    // 必须携带 Cookie
             )
             const newToken = res.data?.accessToken || res.data?.data?.accessToken
+            const userInfo = res.data?.user || null
             if (newToken) {
-                setToken(newToken)
+                setToken(newToken, userInfo)
                 return true
             }
             return false
@@ -76,6 +78,7 @@ export const useAuthStore = defineStore('auth', () => {
         accessToken,
         isLoggedIn,
         user,
+        isAdmin,
         setToken,
         clearToken,
         silentRefresh
