@@ -98,6 +98,7 @@ const routes = [
           title: '服务器录入', 
           icon: 'mdi-database-plus', 
           showInMenu: true,
+          requireAdmin: true,
           // allowDirectAccess: false,
           breadcrumbs: [
             { label: '首页', to: '/' },
@@ -158,6 +159,11 @@ router.beforeEach(async (to, from, next) => {
   // 3. 访问限制 (Authorization)
   // 走到这里说明用户一定已登录，再判断页面级别的特定限制
   if (to.meta.allowDirectAccess === false) {
+    return next({ name: 'Dashboard' })
+  }
+
+  // requireAdmin 页面：仅 admin 角色可访问
+  if (to.meta.requireAdmin && !authStore.isAdmin) {
     return next({ name: 'Dashboard' })
   }
 
