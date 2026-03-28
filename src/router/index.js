@@ -106,6 +106,21 @@ const routes = [
         }
       },
       {
+        path: 'users',
+        name: 'UserManagement',
+        component: () => import('../pages/UsersPage.vue'),
+        meta: {
+          title: '用户管理',
+          icon: 'mdi-account-group',
+          showInMenu: true,
+          requireAdmin: true,
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '用户管理', to: '/users' }
+          ]
+        }
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('../pages/SettingsPage.vue'),

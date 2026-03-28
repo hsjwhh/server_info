@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### ✨ 新特性
+- **用户管理模块**：为 Admin 角色新增了完整的用户管理功能。支持查看用户列表、创建新用户、修改用户角色/状态以及删除用户。通过路由守卫 `requireAdmin` 确保了模块的安全性。
 - **动态内存类型联动**：重构了 `ConfigPlan` 内存选择逻辑。内存类型（DDR4/DDR5）现支持基于 CPU 规格的自动推导，并在 CPU 信息缺失时智能回退至主板支持类型，确保硬件选配的专业性与准确性。
 - **全链路权限 UI 控制**：
     - **写操作入口隐藏**：基于 `usePermission` 组合式函数，对非 Admin 用户隐藏 CPU 及主板的录入/编辑按钮。
