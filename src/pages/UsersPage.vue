@@ -38,23 +38,23 @@
           </template>
 
           <template #cell(status)="{ value }">
-            <VaBadge :text="value === 1 ? '启用' : '禁用'" :color="value === 1 ? 'success' : 'secondary'" />
+            <VaBadge :text="Number(value) === 1 ? '启用' : '禁用'" :color="Number(value) === 1 ? 'success' : 'secondary'" />
           </template>
 
-          <template #cell(actions)="{ row }">
+          <template #cell(actions)="{ rowData }">
             <div class="flex gap-2">
               <VaButton
                 preset="plain"
                 icon="mdi-pencil"
                 size="small"
-                @click="openEditModal(row.item)"
+                @click="openEditModal(rowData)"
               />
               <VaButton
                 preset="plain"
                 icon="mdi-delete"
                 size="small"
                 color="danger"
-                @click="confirmDelete(row.item)"
+                @click="confirmDelete(rowData)"
               />
             </div>
           </template>
@@ -94,6 +94,7 @@
           :options="roleOptions"
           value-by="value"
           text-by="text"
+          :disabled="isEdit && currentUserId === authStore.user?.id"
         />
 
         <VaSelect
@@ -113,9 +114,11 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useToast, useModal } from 'vuestic-ui'
 import { getUsers, createUser, updateUser, deleteUser } from '../api/users'
+import { useAuthStore } from '../stores/auth'
 
 const { init: notify } = useToast()
 const { confirm } = useModal()
+const authStore = useAuthStore()
 
 const users = ref([])
 const loading = ref(false)
@@ -205,6 +208,11 @@ const handleSubmit = async () => {
 }
 
 const confirmDelete = async (user) => {
+  if (user.id === authStore.user?.id) {
+    notify({ message: '不能删除自己的账号', color: 'warning' })
+    return
+  }
+
   const result = await confirm({
     title: '确认删除',
     message: `确定要删除用户 "${user.username}" 吗？此操作不可撤销。`,
