@@ -32,3 +32,11 @@ export function updateUser(userId, data) {
 export function deleteUser(userId) {
   return request.delete(`/users/${userId}`)
 }
+
+/**
+ * 修改个人密码
+ * @param {Object} data - { oldPassword, newPassword }
+ */
+export function changePassword(data) {
+  return request.post('/auth/change-password', data)
+}

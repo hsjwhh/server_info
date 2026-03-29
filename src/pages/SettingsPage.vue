@@ -55,6 +55,43 @@
     </VaCard>
 
     <VaCard class="mt-4">
+      <VaCardTitle>账号安全</VaCardTitle>
+      <VaCardContent>
+        <div class="settings-section">
+          <VaInput
+            v-model="passwordForm.oldPassword"
+            type="password"
+            label="当前密码"
+            placeholder="请输入当前密码"
+            class="w-full"
+          />
+          <VaInput
+            v-model="passwordForm.newPassword"
+            type="password"
+            label="新密码"
+            placeholder="请输入新密码（不少于 6 位）"
+            class="w-full"
+          />
+          <VaInput
+            v-model="passwordForm.confirmPassword"
+            type="password"
+            label="确认新密码"
+            placeholder="请再次输入新密码"
+            class="w-full"
+          />
+          <div>
+            <VaButton
+              :loading="passwordLoading"
+              @click="handleChangePassword"
+            >
+              修改密码
+            </VaButton>
+          </div>
+        </div>
+      </VaCardContent>
+    </VaCard>
+
+    <VaCard class="mt-4">
       <VaCardTitle>关于</VaCardTitle>
       <VaCardContent>
         <div class="about-section">
@@ -78,7 +115,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, reactive, watch } from 'vue'
 import {
   VaCard,
   VaCardTitle,
@@ -89,6 +126,7 @@ import {
   VaButton,
   useToast
 } from 'vuestic-ui'
+import { changePassword } from '../api/users'
 
 const SETTINGS_STORAGE_KEY = 'appSettings'
 
@@ -120,6 +158,47 @@ const readSettings = () => {
 }
 
 const settings = ref(readSettings())
+
+// 修改密码表单
+const passwordForm = reactive({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+const passwordLoading = ref(false)
+
+const handleChangePassword = async () => {
+  // 前端基础校验
+  if (!passwordForm.oldPassword || !passwordForm.newPassword || !passwordForm.confirmPassword) {
+    notify({ message: '请填写所有密码字段', color: 'warning' })
+    return
+  }
+  if (passwordForm.newPassword.length < 6) {
+    notify({ message: '新密码长度不能少于 6 位', color: 'warning' })
+    return
+  }
+  if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+    notify({ message: '两次输入的新密码不一致', color: 'warning' })
+    return
+  }
+
+  passwordLoading.value = true
+  try {
+    await changePassword({
+      oldPassword: passwordForm.oldPassword,
+      newPassword: passwordForm.newPassword
+    })
+    notify({ message: '密码修改成功', color: 'success' })
+    // 清空表单
+    Object.assign(passwordForm, { oldPassword: '', newPassword: '', confirmPassword: '' })
+  } catch (err) {
+    // 错误提示由 axios 拦截器处理，这里只做兜底
+    const msg = err.response?.data?.message || '密码修改失败'
+    notify({ message: msg, color: 'danger' })
+  } finally {
+    passwordLoading.value = false
+  }
+}
 
 watch(
   () => settings.value.autoRefresh,
