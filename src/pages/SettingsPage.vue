@@ -127,6 +127,7 @@ import {
   useToast
 } from 'vuestic-ui'
 import { changePassword } from '../api/users'
+import { performLogout } from '../utils/logout'
 
 const SETTINGS_STORAGE_KEY = 'appSettings'
 
@@ -188,9 +189,11 @@ const handleChangePassword = async () => {
       oldPassword: passwordForm.oldPassword,
       newPassword: passwordForm.newPassword
     })
-    notify({ message: '密码修改成功', color: 'success' })
-    // 清空表单
-    Object.assign(passwordForm, { oldPassword: '', newPassword: '', confirmPassword: '' })
+    // 密码修改成功后吊销所有 token，主动登出强制重新登录
+    performLogout({
+      notify,
+      message: '密码已修改，请重新登录'
+    })
   } catch (err) {
     // 错误提示由 axios 拦截器处理，这里只做兜底
     const msg = err.response?.data?.message || '密码修改失败'
