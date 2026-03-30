@@ -134,6 +134,20 @@ const routes = [
           ]
         }
       },
+      {
+        path: 'about',
+        name: 'About',
+        component: () => import('../pages/AboutPage.vue'),
+        meta: {
+          title: '关于',
+          icon: 'mdi-information-outline',
+          showInMenu: true,
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '关于', to: '/about' }
+          ]
+        }
+      },
     ]
   }
 ]

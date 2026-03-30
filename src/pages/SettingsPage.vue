@@ -91,22 +91,6 @@
       </VaCardContent>
     </VaCard>
 
-    <VaCard class="mt-4">
-      <VaCardTitle>关于</VaCardTitle>
-      <VaCardContent>
-        <div class="about-section">
-          <div class="about-item">
-            <span class="about-label">系统版本</span>
-            <span class="about-value">v1.0.0</span>
-          </div>
-          <div class="about-item">
-            <span class="about-label">技术栈</span>
-            <span class="about-value">Vue 3 + Vuestic UI</span>
-          </div>
-        </div>
-      </VaCardContent>
-    </VaCard>
-
     <div class="action-buttons mt-4">
       <VaButton @click="saveSettings">保存设置</VaButton>
       <VaButton preset="secondary" @click="resetSettings">重置为默认</VaButton>
@@ -294,28 +278,6 @@ const resetSettings = () => {
 
 .interval-input {
   width: 120px;
-}
-
-.about-section {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.about-item {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-}
-
-.about-label {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-}
-
-.about-value {
-  font-weight: 600;
-  color: var(--color-text-primary);
 }
 
 .action-buttons {
