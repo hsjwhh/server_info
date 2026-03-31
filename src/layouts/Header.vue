@@ -63,8 +63,9 @@ const userInitial = computed(() => {
 })
 
 const menuOptions = [
-  { label: '个人设置', icon: 'mdi-account-cog', value: 'settings' },
-  { label: '退出登录',  icon: 'mdi-logout',       value: 'logout'  },
+  { label: '个人设置', icon: 'mdi-account-cog',        value: 'settings' },
+  { label: '关于',     icon: 'mdi-information-outline', value: 'about'    },
+  { label: '退出登录', icon: 'mdi-logout',              value: 'logout'   },
 ]
 
 const handleMenuSelect = async (value, option) => {
@@ -76,6 +77,8 @@ const handleMenuSelect = async (value, option) => {
 
   if (selectedOption.value === 'settings') {
     router.push('/settings')
+  } else if (selectedOption.value === 'about') {
+    router.push('/about')
   } else if (selectedOption.value === 'logout') {
     try {
       // 调用后端登出接口，并清除服务器端 HttpOnly Cookie

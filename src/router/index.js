@@ -141,7 +141,7 @@ const routes = [
         meta: {
           title: '关于',
           icon: 'mdi-information-outline',
-          showInMenu: true,
+          showInMenu: false,
           breadcrumbs: [
             { label: '首页', to: '/' },
             { label: '关于', to: '/about' }
