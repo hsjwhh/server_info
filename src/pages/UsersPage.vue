@@ -47,13 +47,22 @@
                 preset="plain"
                 icon="mdi-pencil"
                 size="small"
+                title="编辑用户"
                 @click="openEditModal(rowData)"
+              />
+              <VaButton
+                preset="plain"
+                icon="mdi-devices"
+                size="small"
+                title="查看登录设备"
+                @click="openSessionModal(rowData)"
               />
               <VaButton
                 preset="plain"
                 icon="mdi-delete"
                 size="small"
                 color="danger"
+                title="删除用户"
                 @click="confirmDelete(rowData)"
               />
             </div>
@@ -107,13 +116,54 @@
         />
       </div>
     </VaModal>
+
+    <!-- Session 查看弹窗 -->
+    <VaModal
+      v-model="showSessionModal"
+      title="登录设备"
+      hide-default-actions
+      fixed-layout
+    >
+      <div style="min-width: 360px; min-height: 100px;">
+        <div v-if="sessionLoading" class="text-center py-6">
+          <VaProgressCircle indeterminate size="small" />
+        </div>
+
+        <div v-else-if="userSessions.length === 0" class="text-secondary text-sm py-4 text-center">
+          该用户当前无活跃 session
+        </div>
+
+        <div v-else>
+          <div
+            v-for="s in userSessions"
+            :key="s.id"
+            class="flex justify-between items-center py-2 border-b last:border-b-0"
+          >
+            <div>
+              <div class="font-medium text-sm">{{ s.deviceName || '未知设备' }}</div>
+              <div class="text-xs text-secondary mt-0.5">
+                {{ s.ipAddress || '未知 IP' }} · {{ formatDate(s.createdAt) }}
+              </div>
+            </div>
+            <VaButton
+              preset="plain"
+              color="danger"
+              size="small"
+              icon="mdi-logout"
+              title="强制下线"
+              @click="revokeUserSessionItem(currentSessionUserId, s.id)"
+            />
+          </div>
+        </div>
+      </div>
+    </VaModal>
   </div>
 </template>
 
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useToast, useModal } from 'vuestic-ui'
-import { getUsers, createUser, updateUser, deleteUser } from '../api/users'
+import { getUsers, createUser, updateUser, deleteUser, getUserSessions, revokeUserSession } from '../api/users'
 import { useAuthStore } from '../stores/auth'
 
 const { init: notify } = useToast()
@@ -126,6 +176,12 @@ const filter = ref('')
 const showModal = ref(false)
 const isEdit = ref(false)
 const currentUserId = ref(null)
+
+// Session 弹窗
+const showSessionModal = ref(false)
+const sessionLoading = ref(false)
+const userSessions = ref([])
+const currentSessionUserId = ref(null)
 
 const columns = [
   { key: 'username', label: '用户名', sortable: true },
@@ -150,6 +206,14 @@ const form = reactive({
   role: 'user',
   status: 1
 })
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleString('zh-CN', {
+    month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit'
+  })
+}
 
 const fetchUsers = async () => {
   loading.value = true
@@ -229,6 +293,29 @@ const confirmDelete = async (user) => {
     } catch (err) {
       notify({ message: '删除失败', color: 'danger' })
     }
+  }
+}
+
+const openSessionModal = async (user) => {
+  currentSessionUserId.value = user.id
+  showSessionModal.value = true
+  sessionLoading.value = true
+  try {
+    userSessions.value = await getUserSessions(user.id)
+  } catch {
+    notify({ message: '获取 session 列表失败', color: 'danger' })
+  } finally {
+    sessionLoading.value = false
+  }
+}
+
+const revokeUserSessionItem = async (userId, sessionId) => {
+  try {
+    await revokeUserSession(userId, sessionId)
+    notify({ message: '已踢下线', color: 'success' })
+    userSessions.value = await getUserSessions(userId)
+  } catch {
+    notify({ message: '操作失败', color: 'danger' })
   }
 }
 

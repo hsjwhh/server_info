@@ -2,6 +2,7 @@
   <div class="settings-page">
     <h1 class="page-title">个人设置</h1>
 
+    <!-- 1. 系统设置 -->
     <VaCard>
       <VaCardTitle>系统设置</VaCardTitle>
       <VaCardContent>
@@ -54,6 +55,7 @@
       </VaCardContent>
     </VaCard>
 
+    <!-- 2. 账号安全 -->
     <VaCard class="mt-4">
       <VaCardTitle>账号安全</VaCardTitle>
       <VaCardContent>
@@ -91,6 +93,71 @@
       </VaCardContent>
     </VaCard>
 
+    <!-- 3. 登录设备 -->
+    <VaCard class="mt-4">
+      <VaCardTitle>
+        <div class="flex items-center justify-between w-full">
+          <span>登录设备</span>
+          <VaButton
+            preset="plain"
+            size="small"
+            icon="mdi-refresh"
+            :loading="sessionsLoading"
+            @click="fetchSessions"
+          />
+        </div>
+      </VaCardTitle>
+      <VaCardContent>
+        <div v-if="sessionsLoading" class="text-center py-4">
+          <VaProgressCircle indeterminate size="small" />
+        </div>
+
+        <div v-else-if="sessions.length === 0" class="text-secondary text-sm py-2">
+          暂无活跃 session
+        </div>
+
+        <div v-else class="sessions-list">
+          <div
+            v-for="s in sessions"
+            :key="s.id"
+            class="session-item"
+          >
+            <div class="session-info">
+              <div class="session-device">
+                <VaIcon name="mdi-monitor" size="small" class="mr-2" />
+                <span class="font-medium">{{ s.deviceName || '未知设备' }}</span>
+                <VaBadge v-if="s.isCurrent" text="当前设备" color="success" class="ml-2" />
+              </div>
+              <div class="session-meta text-sm text-secondary mt-1">
+                {{ s.ipAddress || '未知 IP' }} · 登录于 {{ formatDate(s.createdAt) }}
+              </div>
+            </div>
+            <VaButton
+              v-if="!s.isCurrent"
+              preset="plain"
+              color="danger"
+              size="small"
+              icon="mdi-logout"
+              title="踢掉此设备"
+              @click="revokeSession(s.id)"
+            />
+          </div>
+        </div>
+
+        <VaDivider v-if="sessions.length > 1" class="my-3" />
+
+        <VaButton
+          v-if="sessions.length > 1"
+          preset="secondary"
+          size="small"
+          color="danger"
+          @click="revokeOthers"
+        >
+          踢掉其他所有设备
+        </VaButton>
+      </VaCardContent>
+    </VaCard>
+
     <div class="action-buttons mt-4">
       <VaButton @click="saveSettings">保存设置</VaButton>
       <VaButton preset="secondary" @click="resetSettings">重置为默认</VaButton>
@@ -99,7 +166,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, watch } from 'vue'
+import { ref, reactive, watch, onMounted } from 'vue'
 import {
   VaCard,
   VaCardTitle,
@@ -108,9 +175,12 @@ import {
   VaInput,
   VaDivider,
   VaButton,
+  VaIcon,
+  VaBadge,
+  VaProgressCircle,
   useToast
 } from 'vuestic-ui'
-import { changePassword } from '../api/users'
+import { changePassword, getMySessions, revokeMySession, revokeOtherSessions } from '../api/users'
 import { performLogout } from '../utils/logout'
 
 const SETTINGS_STORAGE_KEY = 'appSettings'
@@ -187,6 +257,49 @@ const handleChangePassword = async () => {
   }
 }
 
+// 登录设备
+const sessions = ref([])
+const sessionsLoading = ref(false)
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleString('zh-CN', {
+    month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit'
+  })
+}
+
+const fetchSessions = async () => {
+  sessionsLoading.value = true
+  try {
+    sessions.value = await getMySessions()
+  } catch {
+    notify({ message: '获取设备列表失败', color: 'danger' })
+  } finally {
+    sessionsLoading.value = false
+  }
+}
+
+const revokeSession = async (sessionId) => {
+  try {
+    await revokeMySession(sessionId)
+    notify({ message: '设备已下线', color: 'success' })
+    fetchSessions()
+  } catch {
+    notify({ message: '操作失败', color: 'danger' })
+  }
+}
+
+const revokeOthers = async () => {
+  try {
+    await revokeOtherSessions()
+    notify({ message: '其他设备已全部下线', color: 'success' })
+    fetchSessions()
+  } catch {
+    notify({ message: '操作失败', color: 'danger' })
+  }
+}
+
 watch(
   () => settings.value.autoRefresh,
   (enabled) => {
@@ -233,6 +346,10 @@ const resetSettings = () => {
     color: 'info'
   })
 }
+
+onMounted(() => {
+  fetchSessions()
+})
 </script>
 
 <style scoped>
@@ -283,6 +400,38 @@ const resetSettings = () => {
 .action-buttons {
   display: flex;
   gap: var(--space-3);
+}
+
+.sessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.session-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.session-item:last-child {
+  border-bottom: none;
+}
+
+.session-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.session-device {
+  display: flex;
+  align-items: center;
+}
+
+.session-meta {
+  padding-left: calc(20px + var(--space-2));
 }
 
 @media (max-width: 768px) {

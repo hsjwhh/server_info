@@ -40,3 +40,44 @@ export function deleteUser(userId) {
 export function changePassword(data) {
   return request.post('/auth/change-password', data)
 }
+
+// ==================== Session 管理 ====================
+
+/**
+ * 获取自己的活跃 session 列表
+ */
+export function getMySessions() {
+  return request.get('/auth/sessions')
+}
+
+/**
+ * 踢掉自己的指定 session
+ * @param {string} sessionId - HashID
+ */
+export function revokeMySession(sessionId) {
+  return request.delete(`/auth/sessions/${sessionId}`)
+}
+
+/**
+ * 踢掉自己所有其他 session（保留当前）
+ */
+export function revokeOtherSessions() {
+  return request.delete('/auth/sessions')
+}
+
+/**
+ * Admin 查看指定用户的 session 列表
+ * @param {string} userId - HashID
+ */
+export function getUserSessions(userId) {
+  return request.get(`/users/${userId}/sessions`)
+}
+
+/**
+ * Admin 踢掉指定用户的某个 session
+ * @param {string} userId - HashID
+ * @param {string} sessionId - HashID
+ */
+export function revokeUserSession(userId, sessionId) {
+  return request.delete(`/users/${userId}/sessions/${sessionId}`)
+}
