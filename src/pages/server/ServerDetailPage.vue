@@ -17,60 +17,59 @@
           <ServerHardwareGrid :server="server" />
 
           <!-- 工单记录 (折叠面板) -->
-          <VaCollapse
-            class="bg-white shadow-sm rounded"
-            solid
-          >
-            <template #header="{ value }">
-              <div class="flex items-center justify-between w-full p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-                <div class="font-bold flex items-center gap-2">
-                  <VaIcon :name="value ? 'mdi-chevron-down' : 'mdi-chevron-right'" color="secondary" />
-                  关联工单记录 (共 {{ cases.length }} 条)
+          <VaCard>
+            <VaCollapse class="w-full">
+              <template #header="{ value }">
+                <div class="flex items-center justify-between w-full p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                  <div class="font-bold flex items-center gap-2">
+                    <VaIcon :name="value ? 'mdi-chevron-down' : 'mdi-chevron-right'" color="secondary" />
+                    关联工单记录 (共 {{ cases.length }} 条)
+                  </div>
+                  <VaButton
+                    size="small"
+                    preset="secondary"
+                    border-color="primary"
+                    icon="mdi-plus"
+                    @click.stop="openCreateCaseModal"
+                  >
+                    新建工单
+                  </VaButton>
                 </div>
-                <VaButton
-                  size="small"
-                  preset="secondary"
-                  border-color="primary"
-                  icon="mdi-plus"
-                  @click.stop="openCreateCaseModal"
-                >
-                  新建工单
-                </VaButton>
-              </div>
-            </template>
-            <VaCardContent class="pt-0 border-t">
-              <div v-if="casesLoading" class="text-center py-6">
-                <VaProgressCircle indeterminate size="small" />
-              </div>
+              </template>
+              <VaCardContent class="pt-0 border-t">
+                <div v-if="casesLoading" class="text-center py-6">
+                  <VaProgressCircle indeterminate size="small" />
+                </div>
 
-              <div v-else-if="cases.length === 0" class="text-secondary text-sm py-4 text-center">
-                暂无工单记录
-              </div>
+                <div v-else-if="cases.length === 0" class="text-secondary text-sm py-4 text-center">
+                  暂无工单记录
+                </div>
 
-              <div v-else class="cases-timeline mt-4">
-                <div
-                  v-for="c in cases"
-                  :key="c.id"
-                  class="case-item"
-                >
-                  <div class="case-dot" :class="`case-dot--${c.status}`"></div>
-                  <div class="case-content">
-                    <div class="case-header">
-                      <span class="case-no font-mono text-sm">{{ c.case_no }}</span>
-                      <VaChip :color="statusColor(c.status)" size="small" class="ml-2">
-                        {{ statusLabel(c.status) }}
-                      </VaChip>
-                      <span class="text-xs text-secondary ml-auto">{{ formatDate(c.created_at) }}</span>
-                    </div>
-                    <div class="case-issue mt-1 text-sm">{{ c.issue_type || '未分类' }} — {{ c.description }}</div>
-                    <div v-if="c.solution" class="case-solution text-sm text-secondary mt-1">
-                      ✓ {{ c.solution }}
+                <div v-else class="cases-timeline mt-4">
+                  <div
+                    v-for="c in cases"
+                    :key="c.id"
+                    class="case-item"
+                  >
+                    <div class="case-dot" :class="`case-dot--${c.status}`"></div>
+                    <div class="case-content">
+                      <div class="case-header">
+                        <span class="case-no font-mono text-sm">{{ c.case_no }}</span>
+                        <VaChip :color="statusColor(c.status)" size="small" class="ml-2">
+                          {{ statusLabel(c.status) }}
+                        </VaChip>
+                        <span class="text-xs text-secondary ml-auto">{{ formatDate(c.created_at) }}</span>
+                      </div>
+                      <div class="case-issue mt-1 text-sm">{{ c.issue_type || '未分类' }} — {{ c.description }}</div>
+                      <div v-if="c.solution" class="case-solution text-sm text-secondary mt-1">
+                        ✓ {{ c.solution }}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </VaCardContent>
-          </VaCollapse>
+              </VaCardContent>
+            </VaCollapse>
+          </VaCard>
 
           <!-- 操作按钮 -->
           <ServerActionsPanel />
