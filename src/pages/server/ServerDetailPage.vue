@@ -16,24 +16,29 @@
           <!-- 硬件配置 -->
           <ServerHardwareGrid :server="server" />
 
-          <!-- 操作按钮 -->
-          <ServerActionsPanel />
-
-          <!-- 工单记录 -->
-          <VaCard>
-            <VaCardTitle>
-              <div class="flex items-center justify-between w-full">
-                <span>工单记录</span>
+          <!-- 工单记录 (折叠面板) -->
+          <VaCollapse
+            class="bg-white shadow-sm rounded"
+            solid
+          >
+            <template #header="{ value }">
+              <div class="flex items-center justify-between w-full p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                <div class="font-bold flex items-center gap-2">
+                  <VaIcon :name="value ? 'mdi-chevron-down' : 'mdi-chevron-right'" color="secondary" />
+                  关联工单记录 (共 {{ cases.length }} 条)
+                </div>
                 <VaButton
                   size="small"
+                  preset="secondary"
+                  border-color="primary"
                   icon="mdi-plus"
-                  @click="openCreateCaseModal"
+                  @click.stop="openCreateCaseModal"
                 >
                   新建工单
                 </VaButton>
               </div>
-            </VaCardTitle>
-            <VaCardContent>
+            </template>
+            <VaCardContent class="pt-0 border-t">
               <div v-if="casesLoading" class="text-center py-6">
                 <VaProgressCircle indeterminate size="small" />
               </div>
@@ -42,7 +47,7 @@
                 暂无工单记录
               </div>
 
-              <div v-else class="cases-timeline">
+              <div v-else class="cases-timeline mt-4">
                 <div
                   v-for="c in cases"
                   :key="c.id"
@@ -65,7 +70,10 @@
                 </div>
               </div>
             </VaCardContent>
-          </VaCard>
+          </VaCollapse>
+
+          <!-- 操作按钮 -->
+          <ServerActionsPanel />
         </div>
 
         <!-- 未找到 -->
@@ -153,6 +161,7 @@ import {
   VaDivider,
   VaModal,
   VaInput,
+  VaCollapse,
   useToast
 } from 'vuestic-ui'
 
