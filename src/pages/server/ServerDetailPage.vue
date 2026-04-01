@@ -36,7 +36,7 @@
                   </VaButton>
                 </div>
               </template>
-              <VaCardContent class="pt-0 border-t">
+              <div class="cases-collapse-body border-t" style="padding: 16px 20px;">
                 <div v-if="casesLoading" class="text-center py-6">
                   <VaProgressCircle indeterminate size="small" />
                 </div>
@@ -67,7 +67,7 @@
                     </div>
                   </div>
                 </div>
-              </VaCardContent>
+              </div>
             </VaCollapse>
           </VaCard>
 
