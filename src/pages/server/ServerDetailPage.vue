@@ -18,6 +18,54 @@
 
           <!-- 操作按钮 -->
           <ServerActionsPanel />
+
+          <!-- 工单记录 -->
+          <VaCard>
+            <VaCardTitle>
+              <div class="flex items-center justify-between w-full">
+                <span>工单记录</span>
+                <VaButton
+                  size="small"
+                  icon="mdi-plus"
+                  @click="openCreateCaseModal"
+                >
+                  新建工单
+                </VaButton>
+              </div>
+            </VaCardTitle>
+            <VaCardContent>
+              <div v-if="casesLoading" class="text-center py-6">
+                <VaProgressCircle indeterminate size="small" />
+              </div>
+
+              <div v-else-if="cases.length === 0" class="text-secondary text-sm py-4 text-center">
+                暂无工单记录
+              </div>
+
+              <div v-else class="cases-timeline">
+                <div
+                  v-for="c in cases"
+                  :key="c.id"
+                  class="case-item"
+                >
+                  <div class="case-dot" :class="`case-dot--${c.status}`"></div>
+                  <div class="case-content">
+                    <div class="case-header">
+                      <span class="case-no font-mono text-sm">{{ c.case_no }}</span>
+                      <VaChip :color="statusColor(c.status)" size="small" class="ml-2">
+                        {{ statusLabel(c.status) }}
+                      </VaChip>
+                      <span class="text-xs text-secondary ml-auto">{{ formatDate(c.created_at) }}</span>
+                    </div>
+                    <div class="case-issue mt-1 text-sm">{{ c.issue_type || '未分类' }} — {{ c.description }}</div>
+                    <div v-if="c.solution" class="case-solution text-sm text-secondary mt-1">
+                      ✓ {{ c.solution }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </VaCardContent>
+          </VaCard>
         </div>
 
         <!-- 未找到 -->
@@ -51,19 +99,60 @@
         </VaCard>
       </template>
     </VaInnerLoading>
+
+    <!-- 新建工单弹窗 -->
+    <VaModal
+      v-model="showCreateCaseModal"
+      title="新建工单"
+      @ok="handleCreateCase"
+      ok-text="提交"
+      cancel-text="取消"
+    >
+      <div class="flex flex-col gap-4 py-2" style="min-width: 360px;">
+        <VaInput
+          :model-value="server?.sn"
+          label="服务器 SN"
+          readonly
+        />
+        <VaInput
+          v-model="caseForm.reporter_contact"
+          label="报修人/联系方式（选填）"
+          placeholder="如：张三 / 138xxxx"
+        />
+        <VaInput
+          v-model="caseForm.issue_type"
+          label="问题类型（选填）"
+          placeholder="如：硬件故障、系统报错"
+        />
+        <VaTextarea
+          v-model="caseForm.description"
+          label="故障描述 *"
+          placeholder="请详细描述问题..."
+          :min-rows="3"
+        />
+      </div>
+    </VaModal>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getSnDetail } from '../../api/sn'
+import { getCases, createCase } from '../../api/cases'
 import {
   VaCard,
   VaCardContent,
+  VaCardTitle,
   VaButton,
   VaIcon,
   VaInnerLoading,
+  VaProgressCircle,
+  VaChip,
+  VaTextarea,
+  VaDivider,
+  VaModal,
+  VaInput,
   useToast
 } from 'vuestic-ui'
 
@@ -80,6 +169,75 @@ const server = ref(null)
 const searched = ref(false)
 const loading = ref(false)
 
+// 工单
+const cases = ref([])
+const casesLoading = ref(false)
+const showCreateCaseModal = ref(false)
+const caseForm = reactive({
+  reporter_contact: '',
+  issue_type: '',
+  description: ''
+})
+
+const STATUS_COLOR = {
+  open: 'warning',
+  processing: 'info',
+  resolved: 'success',
+  closed: 'secondary'
+}
+const STATUS_LABEL = {
+  open: '待处理',
+  processing: '处理中',
+  resolved: '已解决',
+  closed: '已关闭'
+}
+const statusColor = (s) => STATUS_COLOR[s] || 'secondary'
+const statusLabel = (s) => STATUS_LABEL[s] || s
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return '-'
+  return new Date(dateStr).toLocaleString('zh-CN', {
+    month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit'
+  })
+}
+
+const fetchCases = async (sn) => {
+  if (!sn) return
+  casesLoading.value = true
+  try {
+    const result = await getCases({ sn, limit: 50 })
+    cases.value = result.items || []
+  } catch {
+    // 静默失败，不影响主页面
+  } finally {
+    casesLoading.value = false
+  }
+}
+
+const openCreateCaseModal = () => {
+  Object.assign(caseForm, { reporter_contact: '', issue_type: '', description: '' })
+  showCreateCaseModal.value = true
+}
+
+const handleCreateCase = async () => {
+  if (!caseForm.description) {
+    notify({ message: '故障描述不能为空', color: 'warning' })
+    return
+  }
+  try {
+    await createCase({
+      server_id: server.value?.id,
+      reporter_contact: caseForm.reporter_contact || undefined,
+      issue_type: caseForm.issue_type || undefined,
+      description: caseForm.description
+    })
+    notify({ message: '工单已创建', color: 'success' })
+    fetchCases(server.value?.sn)
+  } catch {
+    notify({ message: '创建工单失败', color: 'danger' })
+  }
+}
 
 /**
  * 查询服务器详情 - 从 SnQuery.vue 的 handleSearch 移植
@@ -105,6 +263,9 @@ const handleSearch = async () => {
     searched.value = true
 
     if (res) {
+      // 加载工单
+      fetchCases(server.value.sn)
+
       // 更新 URL 参数
       if (route.params.sn !== res.sn) {
         router.replace({ name: 'ServerDetail', params: { sn: res.sn } })
@@ -164,5 +325,61 @@ watch(() => route.params.sn, (newSn) => {
     align-items: flex-start;
     gap: var(--space-4);
   }
+}
+
+.cases-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.case-item {
+  display: flex;
+  gap: var(--space-3);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--color-border-light);
+  position: relative;
+}
+
+.case-item:last-child {
+  border-bottom: none;
+}
+
+.case-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.case-dot--open       { background: var(--va-warning); }
+.case-dot--processing { background: var(--va-info); }
+.case-dot--resolved   { background: var(--va-success); }
+.case-dot--closed     { background: var(--va-secondary); }
+
+.case-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.case-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+
+.case-no {
+  color: var(--color-text-primary);
+}
+
+.case-issue {
+  color: var(--color-text-primary);
+  line-height: 1.4;
+}
+
+.case-solution {
+  color: var(--color-text-secondary);
 }
 </style>
