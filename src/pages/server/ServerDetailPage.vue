@@ -207,7 +207,7 @@ const fetchCases = async (sn) => {
   casesLoading.value = true
   try {
     const result = await getCases({ sn, limit: 50 })
-    cases.value = result.items || []
+    cases.value = result.list || []
   } catch {
     // 静默失败，不影响主页面
   } finally {

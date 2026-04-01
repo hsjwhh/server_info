@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **权限响应性加固**：重构 `usePermission` 组合式函数，引入 `storeToRefs` 保持 `isAdmin` 状态的实时响应性，确保异步身份刷新完成后 UI 能即时同步权限状态。
 
 ### 🐛 修复
+- **工单列表显示修复**：修正了 `CasesPage.vue` 和 `ServerDetailPage.vue` 中对后端返回字段的解析逻辑，由 `items` 改为 `list`，解决了工单数据无法正常加载渲染的问题。
 - **Silent Refresh 数据重建**：修复了静默刷新接口仅返回 Token 而丢失用户信息的问题。现在 `silentRefresh` 会同步从响应中重建 `user` 对象，确保刷新页面后用户的角色权限（`role`）不再丢失。
 - **Store 闭合异常修复**：修正了 `configPlan` store 文件末尾因误编辑导致的重复闭合与代码片段截断问题，恢复了文件语法的完整性。
 

@@ -203,7 +203,7 @@ const fetchData = async () => {
       status: statusFilter.value || undefined
     }
     const res = await getCases(params)
-    cases.value = res.items || []
+    cases.value = res.list || []
     totalPages.value = Math.ceil((res.total || 0) / pageSize) || 1
   } catch (err) {
     notify({ message: '获取工单列表失败', color: 'danger' })
