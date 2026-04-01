@@ -18,7 +18,7 @@
 
           <!-- 工单记录 (折叠面板) -->
           <VaCard>
-            <VaCollapse class="w-full">
+            <VaCollapse class="w-full" style="padding: var(--va-card-padding)">
               <template #header="{ value }">
                 <div class="flex items-center justify-between w-full p-4 cursor-pointer hover:bg-gray-50 transition-colors">
                   <div class="font-bold flex items-center gap-2">
@@ -36,7 +36,7 @@
                   </VaButton>
                 </div>
               </template>
-              <div class="cases-collapse-body border-t" style="padding: 16px 20px;">
+              <div class="cases-collapse-body border-t">
                 <div v-if="casesLoading" class="text-center py-6">
                   <VaProgressCircle indeterminate size="small" />
                 </div>
