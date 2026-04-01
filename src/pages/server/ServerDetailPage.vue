@@ -344,7 +344,7 @@ watch(() => route.params.sn, (newSn) => {
 .case-item {
   display: flex;
   gap: var(--space-3);
-  padding: var(--space-3) 0;
+  padding: var(--space-3) var(--space-2);
   border-bottom: 1px solid var(--color-border-light);
   position: relative;
 }
