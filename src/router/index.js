@@ -121,6 +121,20 @@ const routes = [
         }
       },
       {
+        path: 'cases',
+        name: 'Cases',
+        component: () => import('../pages/CasesPage.vue'),
+        meta: {
+          title: '工单管理',
+          icon: 'mdi-ticket-outline',
+          showInMenu: true,
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '工单管理', to: '/cases' }
+          ]
+        }
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('../pages/SettingsPage.vue'),

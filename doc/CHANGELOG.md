@@ -4,10 +4,10 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-
 ## [Unreleased]
 
 ### ✨ 新特性
+- **工单管理模块**：新增售后工单列表页。支持按状态筛选、分页浏览以及工单详情查看。管理员可实时更新工单状态并填写解决方案，提升售后处理效率。
 - **登录设备管理 (Session 管理)**：
     - **个人设备查看**：用户可在个人设置页查看所有活跃登录设备及其地理/设备信息。
     - **主动踢出功能**：支持踢掉指定活跃 session 或一键下线所有其他设备，提升账号安全性。
@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **全链路权限 UI 控制**：
     - **写操作入口隐藏**：基于 `usePermission` 组合式函数，对非 Admin 用户隐藏 CPU 及主板的录入/编辑按钮。
     - **受限菜单过滤**：侧边栏组件现支持 `requireAdmin` 路由标记校验。非 Admin 用户登录后，受限菜单项（如服务器录入、配置方案）将自动从菜单中移除。
+...
     - **组件级访问保护**：实现了基于路由守卫 (`beforeEach`) 的 Admin 权限校验。有效解决了页面刷新时因静默刷新异步性导致的 Admin 用户被误踢回首页的问题。
 
 ### 🚀 优化与重构
