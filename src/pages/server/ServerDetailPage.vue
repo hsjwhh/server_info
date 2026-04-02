@@ -71,6 +71,48 @@
             </VaCollapse>
           </VaCard>
 
+          <!-- 附件图片 -->
+          <VaCard>
+            <VaCardTitle>
+              <div class="flex items-center justify-between w-full">
+                <span>附件图片</span>
+                <AttachmentUploader
+                  v-if="server"
+                  entity-type="server"
+                  :entity-id="server.id"
+                  @uploaded="fetchAttachments"
+                />
+              </div>
+            </VaCardTitle>
+            <VaCardContent>
+              <div v-if="attachmentsLoading" class="text-center py-4">
+                <VaProgressCircle indeterminate size="small" />
+              </div>
+
+              <div v-else-if="attachments.length === 0" class="text-secondary text-sm py-2 text-center">
+                暂无附件
+              </div>
+
+              <div v-else class="attachments-grid">
+                <div
+                  v-for="a in attachments"
+                  :key="a.id"
+                  class="attachment-item"
+                  @click="openImage(a.imgPath)"
+                >
+                  <img
+                    :src="a.imgPath"
+                    :alt="a.originalName"
+                    class="attachment-img"
+                  />
+                  <div class="attachment-name text-xs text-secondary mt-1 text-center">
+                    {{ a.originalName || '图片' }}
+                  </div>
+                </div>
+              </div>
+            </VaCardContent>
+          </VaCard>
+
           <!-- 操作按钮 -->
           <ServerActionsPanel />
         </div>
@@ -147,6 +189,8 @@ import { ref, reactive, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getSnDetail } from '../../api/sn'
 import { getCases, createCase } from '../../api/cases'
+import AttachmentUploader from '../../components/AttachmentUploader.vue'
+import { getAttachments } from '../../api/attachments'
 import {
   VaCard,
   VaCardContent,
@@ -247,6 +291,26 @@ const handleCreateCase = async () => {
   }
 }
 
+// 附件
+const attachments = ref([])
+const attachmentsLoading = ref(false)
+
+const fetchAttachments = async () => {
+  if (!server.value?.id) return
+  attachmentsLoading.value = true
+  try {
+    attachments.value = await getAttachments('server', server.value.id)
+  } catch {
+    // 静默失败，不影响主页面
+  } finally {
+    attachmentsLoading.value = false
+  }
+}
+
+const openImage = (imgPath) => {
+  window.open(imgPath, '_blank')
+}
+
 /**
  * 查询服务器详情 - 从 SnQuery.vue 的 handleSearch 移植
  */
@@ -271,8 +335,9 @@ const handleSearch = async () => {
     searched.value = true
 
     if (res) {
-      // 加载工单
+      // 加载关联数据
       fetchCases(server.value.sn)
+      fetchAttachments()
 
       // 更新 URL 参数
       if (route.params.sn !== res.sn) {
@@ -389,5 +454,35 @@ watch(() => route.params.sn, (newSn) => {
 
 .case-solution {
   color: var(--color-text-secondary);
+}
+
+.attachments-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.attachment-item {
+  width: 96px;
+  cursor: pointer;
+}
+
+.attachment-img {
+  width: 96px;
+  height: 96px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border-light);
+  transition: opacity 0.15s;
+}
+
+.attachment-img:hover {
+  opacity: 0.85;
+}
+
+.attachment-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>
