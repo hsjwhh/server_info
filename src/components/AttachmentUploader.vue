@@ -28,21 +28,39 @@
         <div class="preview-size text-xs text-secondary">{{ formatSize(selectedFile.size) }}</div>
       </div>
       <div class="preview-actions">
-        <VaButton
-          size="small"
-          :loading="uploading"
-          @click="handleUpload"
-        >
-          上传
-        </VaButton>
-        <VaButton
-          size="small"
-          preset="plain"
-          color="secondary"
-          icon="mdi-close"
-          :disabled="uploading"
-          @click="clearSelection"
-        />
+        <!-- 上传中：显示进度条或处理中提示 -->
+        <div v-if="uploading" class="upload-progress">
+          <div v-if="!processing" class="progress-bar-wrap">
+            <VaProgressBar
+              :model-value="uploadProgress"
+              size="small"
+              color="primary"
+              class="progress-bar"
+            />
+            <span class="progress-text text-xs">{{ uploadProgress }}%</span>
+          </div>
+          <div v-else class="processing-wrap">
+            <VaProgressCircle indeterminate size="16px" />
+            <span class="text-xs text-secondary ml-1">处理中...</span>
+          </div>
+        </div>
+
+        <!-- 未上传：显示上传和取消按钮 -->
+        <template v-else>
+          <VaButton
+            size="small"
+            @click="handleUpload"
+          >
+            上传
+          </VaButton>
+          <VaButton
+            size="small"
+            preset="plain"
+            color="secondary"
+            icon="mdi-close"
+            @click="clearSelection"
+          />
+        </template>
       </div>
     </div>
   </div>
@@ -65,6 +83,8 @@ const fileInputRef = ref(null)
 const selectedFile = ref(null)
 const previewUrl = ref(null)
 const uploading = ref(false)
+const uploadProgress = ref(0)   // 0-100，文件传输进度
+const processing = ref(false)   // true = 文件已传完，后端处理中
 
 // 前端利用 Canvas 转换为 WebP
 const convertToWebpBrowser = (file, quality = 0.85) => {
@@ -145,8 +165,22 @@ const handleUpload = async () => {
   if (!selectedFile.value || uploading.value) return
 
   uploading.value = true
+  uploadProgress.value = 0
+  processing.value = false
+
   try {
-    await uploadAttachment(selectedFile.value, props.entityType, props.entityId)
+    await uploadAttachment(
+      selectedFile.value,
+      props.entityType,
+      props.entityId,
+      (percent) => {
+        uploadProgress.value = percent
+        // 传输完成（100%）后切换为处理中状态
+        if (percent >= 100) {
+          processing.value = true
+        }
+      }
+    )
     notify({ message: '上传成功', color: 'success' })
     clearSelection()
     emit('uploaded')
@@ -155,6 +189,8 @@ const handleUpload = async () => {
     notify({ message: msg, color: 'danger' })
   } finally {
     uploading.value = false
+    uploadProgress.value = 0
+    processing.value = false
   }
 }
 </script>
@@ -199,5 +235,35 @@ const handleUpload = async () => {
   align-items: center;
   gap: var(--space-1);
   flex-shrink: 0;
+}
+
+.upload-progress {
+  display: flex;
+  align-items: center;
+  min-width: 120px;
+}
+
+.progress-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.progress-bar {
+  flex: 1;
+  min-width: 80px;
+}
+
+.progress-text {
+  flex-shrink: 0;
+  color: var(--color-text-secondary);
+  width: 32px;
+  text-align: right;
+}
+
+.processing-wrap {
+  display: flex;
+  align-items: center;
 }
 </style>
