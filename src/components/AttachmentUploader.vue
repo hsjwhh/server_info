@@ -108,13 +108,20 @@ const handleFileSelect = async (e) => {
   if (!file) return
   
   try {
-    // 自动压缩并转换为 WebP
+    // 尝试压缩并转换为 WebP
     const webpFile = await convertToWebpBrowser(file)
-    selectedFile.value = webpFile
-    previewUrl.value = URL.createObjectURL(webpFile)
+    
+    // 择优录取：仅当 WebP 更小时才使用，否则保留原文件
+    if (webpFile.size < file.size) {
+      selectedFile.value = webpFile
+    } else {
+      selectedFile.value = file
+    }
+    
+    previewUrl.value = URL.createObjectURL(selectedFile.value)
   } catch (error) {
-    notify({ message: '图片压缩失败，请重试', color: 'danger' })
-    console.error('WebP conversion error:', error)
+    notify({ message: '图片处理失败，请重试', color: 'danger' })
+    console.error('Image processing error:', error)
   } finally {
     e.target.value = '' // 清除 input 状态以便重复选择同名文件
   }
