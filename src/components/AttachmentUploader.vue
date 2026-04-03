@@ -66,12 +66,58 @@ const selectedFile = ref(null)
 const previewUrl = ref(null)
 const uploading = ref(false)
 
-const handleFileSelect = (e) => {
+// 前端利用 Canvas 转换为 WebP
+const convertToWebpBrowser = (file, quality = 0.85) => {
+  return new Promise((resolve, reject) => {
+    const url = URL.createObjectURL(file)
+    const img = new Image()
+    
+    img.onload = () => {
+      URL.revokeObjectURL(url)
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext('2d')
+      
+      // 绘制图像（对于 GIF 默认只截取第一帧）
+      ctx.drawImage(img, 0, 0)
+      
+      canvas.toBlob((blob) => {
+        if (blob) {
+          // 替换原扩展名为 .webp
+          const newName = file.name.replace(/\.[^/.]+$/, "") + ".webp"
+          const webpFile = new File([blob], newName, { type: 'image/webp' })
+          resolve(webpFile)
+        } else {
+          reject(new Error('Canvas to Blob failed'))
+        }
+      }, 'image/webp', quality)
+    }
+    
+    img.onerror = (err) => {
+      URL.revokeObjectURL(url)
+      reject(err)
+    }
+    
+    img.src = url
+  })
+}
+
+const handleFileSelect = async (e) => {
   const file = e.target.files?.[0]
   if (!file) return
-  selectedFile.value = file
-  previewUrl.value = URL.createObjectURL(file)
-  e.target.value = ''
+  
+  try {
+    // 自动压缩并转换为 WebP
+    const webpFile = await convertToWebpBrowser(file)
+    selectedFile.value = webpFile
+    previewUrl.value = URL.createObjectURL(webpFile)
+  } catch (error) {
+    notify({ message: '图片压缩失败，请重试', color: 'danger' })
+    console.error('WebP conversion error:', error)
+  } finally {
+    e.target.value = '' // 清除 input 状态以便重复选择同名文件
+  }
 }
 
 const clearSelection = () => {

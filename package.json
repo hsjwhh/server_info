@@ -1,7 +1,7 @@
 {
   "name": "server_info",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@mdi/font": "^7.4.47",
-    "axios": "^1.13.6",
+    "axios": "^1.14.0",
     "cookie-parser": "^1.4.7",
     "lodash.debounce": "^4.0.8",
     "pinia": "^3.0.4",
