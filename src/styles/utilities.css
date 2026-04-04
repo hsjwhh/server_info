@@ -106,3 +106,13 @@
     color: var(--color-text-secondary);
     max-width: 500px;
 }
+
+/* 隐藏局部滚动区域的滚动条但保留滚动功能 */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
