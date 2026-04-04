@@ -4,6 +4,7 @@
     <input
       ref="fileInputRef"
       type="file"
+      multiple
       accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
       style="display: none"
       @change="handleFileSelect"
@@ -11,7 +12,7 @@
 
     <!-- 未选择文件 -->
     <VaButton
-      v-if="!selectedFile"
+      v-if="selectedFiles.length === 0"
       preset="secondary"
       icon="mdi-image-plus"
       size="small"
@@ -22,11 +23,20 @@
 
     <!-- 已选择文件：预览 + 操作 -->
     <div v-else class="preview-area">
-      <img :src="previewUrl" class="preview-thumb" alt="预览" />
-      <div class="preview-info">
-        <div class="preview-name text-sm">{{ selectedFile.name }}</div>
-        <div class="preview-size text-xs text-secondary">{{ formatSize(selectedFile.size) }}</div>
+      <!-- 只有一张图时显示缩略图，多张图显示文件数 -->
+      <img v-if="selectedFiles.length === 1" :src="previewUrls[0]" class="preview-thumb" alt="预览" />
+      <div v-else class="preview-multi-icon">
+        <VaIcon name="mdi-image-multiple" color="primary" />
       </div>
+
+      <div class="preview-info">
+        <div v-if="selectedFiles.length === 1" class="preview-name text-sm">{{ selectedFiles[0].name }}</div>
+        <div v-else class="preview-name text-sm">已选择 {{ selectedFiles.length }} 张图片</div>
+        <div class="preview-size text-xs text-secondary">
+          {{ totalSizeDisplay }}
+        </div>
+      </div>
+
       <div class="preview-actions">
         <!-- 上传中：显示进度条或处理中提示 -->
         <div v-if="uploading" class="upload-progress">
@@ -41,7 +51,9 @@
           </div>
           <div v-else class="processing-wrap">
             <VaProgressCircle indeterminate size="16px" />
-            <span class="text-xs text-secondary ml-1">处理中...</span>
+            <span class="text-xs text-secondary ml-1">
+              {{ currentFileIndex + 1 }}/{{ selectedFiles.length }} 处理中...
+            </span>
           </div>
         </div>
 
@@ -67,7 +79,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useToast } from 'vuestic-ui'
 import { uploadAttachment } from '../api/attachments'
 import Pica from 'pica'
@@ -81,11 +93,20 @@ const emit = defineEmits(['uploaded'])
 
 const { init: notify } = useToast()
 const fileInputRef = ref(null)
-const selectedFile = ref(null)
-const previewUrl = ref(null)
+const selectedFiles = ref([])
+const previewUrls = ref([])
 const uploading = ref(false)
-const uploadProgress = ref(0)   // 0-100，文件传输进度
-const processing = ref(false)   // true = 文件已传完，后端处理中
+const uploadProgress = ref(0)   // 0-100，当前文件传输进度
+const processing = ref(false)   // true = 当前文件已传完，后端处理中
+const currentFileIndex = ref(0) // 当前正在上传的文件索引
+
+const totalSizeDisplay = computed(() => {
+  if (selectedFiles.value.length === 1) {
+    return formatSize(selectedFiles.value[0].size)
+  }
+  const total = selectedFiles.value.reduce((acc, f) => acc + f.size, 0)
+  return `总计 ${formatSize(total)}`
+})
 
 // 上传前的图片处理逻辑：
 // 1. HEIF/HEIC 等苹果特定格式直接透传
@@ -164,13 +185,22 @@ const processImageBeforeUpload = (file) => {
 }
 
 const handleFileSelect = async (e) => {
-  const file = e.target.files?.[0]
-  if (!file) return
+  const files = Array.from(e.target.files || [])
+  if (files.length === 0) return
   
   try {
-    // 执行预处理：超大图缩放，普通图透传
-    selectedFile.value = await processImageBeforeUpload(file)
-    previewUrl.value = URL.createObjectURL(selectedFile.value)
+    const processedFiles = []
+    const newPreviewUrls = []
+    
+    for (const file of files) {
+      // 执行预处理：超大图缩放，普通图透传
+      const processed = await processImageBeforeUpload(file)
+      processedFiles.push(processed)
+      newPreviewUrls.push(URL.createObjectURL(processed))
+    }
+    
+    selectedFiles.value = [...selectedFiles.value, ...processedFiles]
+    previewUrls.value = [...previewUrls.value, ...newPreviewUrls]
   } catch (error) {
     notify({ message: '图片处理失败，请重试', color: 'danger' })
     console.error('Image processing error:', error)
@@ -180,11 +210,9 @@ const handleFileSelect = async (e) => {
 }
 
 const clearSelection = () => {
-  selectedFile.value = null
-  if (previewUrl.value) {
-    URL.revokeObjectURL(previewUrl.value)
-    previewUrl.value = null
-  }
+  previewUrls.value.forEach(url => URL.revokeObjectURL(url))
+  selectedFiles.value = []
+  previewUrls.value = []
 }
 
 const formatSize = (bytes) => {
@@ -194,36 +222,49 @@ const formatSize = (bytes) => {
 }
 
 const handleUpload = async () => {
-  if (!selectedFile.value || uploading.value) return
+  if (selectedFiles.value.length === 0 || uploading.value) return
 
   uploading.value = true
-  uploadProgress.value = 0
-  processing.value = false
+  
+  let successCount = 0
+  let failCount = 0
 
-  try {
-    await uploadAttachment(
-      selectedFile.value,
-      props.entityType,
-      props.entityId,
-      (percent) => {
-        uploadProgress.value = percent
-        // 传输完成（100%）后切换为处理中状态
-        if (percent >= 100) {
-          processing.value = true
-        }
-      }
-    )
-    notify({ message: '上传成功', color: 'success' })
-    clearSelection()
-    emit('uploaded')
-  } catch (err) {
-    const msg = err.response?.data?.message || '上传失败，请重试'
-    notify({ message: msg, color: 'danger' })
-  } finally {
-    uploading.value = false
+  for (let i = 0; i < selectedFiles.value.length; i++) {
+    currentFileIndex.value = i
     uploadProgress.value = 0
     processing.value = false
+    
+    try {
+      await uploadAttachment(
+        selectedFiles.value[i],
+        props.entityType,
+        props.entityId,
+        (percent) => {
+          uploadProgress.value = percent
+          if (percent >= 100) {
+            processing.value = true
+          }
+        }
+      )
+      successCount++
+    } catch (err) {
+      failCount++
+      console.error(`Upload failed for file ${i}:`, err)
+    }
   }
+
+  if (successCount > 0) {
+    notify({ message: `成功上传 ${successCount} 张图片${failCount > 0 ? `，${failCount} 张失败` : ''}`, color: 'success' })
+    clearSelection()
+    emit('uploaded')
+  } else if (failCount > 0) {
+    notify({ message: '所有图片上传失败，请重试', color: 'danger' })
+  }
+
+  uploading.value = false
+  uploadProgress.value = 0
+  processing.value = false
+  currentFileIndex.value = 0
 }
 </script>
 
@@ -250,6 +291,17 @@ const handleUpload = async () => {
   flex-shrink: 0;
 }
 
+.preview-multi-icon {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-bg-hover);
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
 .preview-info {
   flex: 1;
   min-width: 0;
@@ -272,7 +324,7 @@ const handleUpload = async () => {
 .upload-progress {
   display: flex;
   align-items: center;
-  min-width: 120px;
+  min-width: 140px;
 }
 
 .progress-bar-wrap {

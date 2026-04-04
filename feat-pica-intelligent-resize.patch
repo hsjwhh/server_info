@@ -1,0 +1,242 @@
+From bc844a5bf5d1502126be48e9cc8e12123f09e903 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=F0=9F=92=BB=20-=20AI?= <ai@u5.com>
+Date: Sat, 4 Apr 2026 06:15:38 +0000
+Subject: [PATCH] feat: implement pica intelligent resizing for frontend image
+ uploads [Gemini]
+
+---
+ package.json                          |  5 ++-
+ pnpm-lock.yaml                        | 37 ++++++++++++++++++
+ src/components/AttachmentUploader.vue | 54 +++++++++++++++++----------
+ 3 files changed, 75 insertions(+), 21 deletions(-)
+
+diff --git a/package.json b/package.json
+index 2b50bf9..ab2f580 100644
+--- a/package.json
++++ b/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "server_info",
+   "private": true,
+-  "version": "0.0.6",
++  "version": "0.0.7",
+   "type": "module",
+   "scripts": {
+     "dev": "vite",
+@@ -16,7 +16,8 @@
+     "pinia": "^3.0.4",
+     "vue": "^3.5.31",
+     "vue-router": "^4.6.4",
+-    "vuestic-ui": "^1.10.3"
++    "vuestic-ui": "^1.10.3",
++    "pica": "^9.0.1"
+   },
+   "devDependencies": {
+     "@vitejs/plugin-vue": "^6.0.5",
+diff --git a/pnpm-lock.yaml b/pnpm-lock.yaml
+index e20590f..b91a1d5 100644
+--- a/pnpm-lock.yaml
++++ b/pnpm-lock.yaml
+@@ -20,6 +20,9 @@ importers:
+       lodash.debounce:
+         specifier: ^4.0.8
+         version: 4.0.8
++      pica:
++        specifier: ^9.0.1
++        version: 9.0.1
+       pinia:
+         specifier: ^3.0.4
+         version: 3.0.4(vue@3.5.31)
+@@ -540,6 +543,9 @@ packages:
+     resolution: {integrity: sha512-sTSfBjoXBp89JvIKIefqw7U2CCebsc74kiY6awiGogKtoSGbgjYE/G/+l9sF3MWFPNc9IcoOC4ODfKHfxFmp0g==}
+     engines: {node: '>= 0.4'}
+ 
++  glur@1.1.2:
++    resolution: {integrity: sha512-l+8esYHTKOx2G/Aao4lEQ0bnHWg4fWtJbVoZZT9Knxi01pB8C80BR85nONLFwkkQoFRCmXY+BUcGZN3yZ2QsRA==}
++
+   gopd@1.2.0:
+     resolution: {integrity: sha512-ZUKRh6/kUFoAiTAtTYPZJ3hw9wNxx+BIBOijnlG9PnrJsCcSjs1wyyD6vJpaYtgnzDrKYRSqf3OO6Rfa93xsRg==}
+     engines: {node: '>= 0.4'}
+@@ -587,14 +593,24 @@ packages:
+   mitt@3.0.1:
+     resolution: {integrity: sha512-vKivATfr97l2/QBCYAkXYDbrIWPM2IIKEl7YPhjCvKlG3kE2gm+uBo6nEXK3M5/Ffh/FLpKExzOQ3JJoJGFKBw==}
+ 
++  multimath@2.0.0:
++    resolution: {integrity: sha512-toRx66cAMJ+Ccz7pMIg38xSIrtnbozk0dchXezwQDMgQmbGpfxjtv68H+L00iFL8hxDaVjrmwAFSb3I6bg8Q2g==}
++
+   nanoid@3.3.11:
+     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
+     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+     hasBin: true
+ 
++  object-assign@4.1.1:
++    resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
++    engines: {node: '>=0.10.0'}
++
+   perfect-debounce@1.0.0:
+     resolution: {integrity: sha512-xCy9V055GLEqoFaHoC1SoLIaLmWctgCUaBaWxDZ7/Zx4CTyX7cJQLJOok/orfjZAh9kEYpjJa4d0KcJmCbctZA==}
+ 
++  pica@9.0.1:
++    resolution: {integrity: sha512-v0U4vY6Z3ztz9b4jBIhCD3WYoecGXCQeCsYep+sXRefViL+mVVoTL+wqzdPeE+GpBFsRUtQZb6dltvAt2UkMtQ==}
++
+   picocolors@1.1.1:
+     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
+ 
+@@ -712,6 +728,9 @@ packages:
+     peerDependencies:
+       vue: ^3.0.4
+ 
++  webworkify@1.5.0:
++    resolution: {integrity: sha512-AMcUeyXAhbACL8S2hqqdqOLqvJ8ylmIbNwUIqQujRSouf4+eUFaXbG6F1Rbu+srlJMmxQWsiU7mOJi0nMBfM1g==}
++
+ snapshots:
+ 
+   '@babel/helper-string-parser@7.27.1': {}
+@@ -1121,6 +1140,8 @@ snapshots:
+       dunder-proto: 1.0.1
+       es-object-atoms: 1.1.1
+ 
++  glur@1.1.2: {}
++
+   gopd@1.2.0: {}
+ 
+   has-symbols@1.1.0: {}
+@@ -1155,10 +1176,24 @@ snapshots:
+ 
+   mitt@3.0.1: {}
+ 
++  multimath@2.0.0:
++    dependencies:
++      glur: 1.1.2
++      object-assign: 4.1.1
++
+   nanoid@3.3.11: {}
+ 
++  object-assign@4.1.1: {}
++
+   perfect-debounce@1.0.0: {}
+ 
++  pica@9.0.1:
++    dependencies:
++      glur: 1.1.2
++      multimath: 2.0.0
++      object-assign: 4.1.1
++      webworkify: 1.5.0
++
+   picocolors@1.1.1: {}
+ 
+   picomatch@4.0.4: {}
+@@ -1259,3 +1294,5 @@ snapshots:
+       vue: 3.5.31
+     transitivePeerDependencies:
+       - '@vue/composition-api'
++
++  webworkify@1.5.0: {}
+diff --git a/src/components/AttachmentUploader.vue b/src/components/AttachmentUploader.vue
+index c82ea45..2ed27ea 100644
+--- a/src/components/AttachmentUploader.vue
++++ b/src/components/AttachmentUploader.vue
+@@ -4,7 +4,7 @@
+     <input
+       ref="fileInputRef"
+       type="file"
+-      accept="image/jpeg,image/png,image/webp,image/gif"
++      accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
+       style="display: none"
+       @change="handleFileSelect"
+     />
+@@ -70,6 +70,7 @@
+ import { ref } from 'vue'
+ import { useToast } from 'vuestic-ui'
+ import { uploadAttachment } from '../api/attachments'
++import Pica from 'pica'
+ 
+ const props = defineProps({
+   entityType: { type: String, required: true },
+@@ -86,26 +87,34 @@ const uploading = ref(false)
+ const uploadProgress = ref(0)   // 0-100，文件传输进度
+ const processing = ref(false)   // true = 文件已传完，后端处理中
+ 
+-// 上传前的图片处理：仅当长或宽超过 1920px 时进行等比例缩放，否则透传原文件
++// 上传前的图片处理逻辑：
++// 1. HEIF/HEIC 等苹果特定格式直接透传
++// 2. 其他格式长宽均未超过 1920px 直接透传
++// 3. 超过 1920px 的格式，使用 pica 缩放为最大 1920px 并转为 JPEG (0.85质量)
+ const processImageBeforeUpload = (file) => {
+   return new Promise((resolve, reject) => {
++    // 1. 苹果特定格式（HEIF/HEIC）透传
++    const isAppleFormat = ['image/heic', 'image/heic-sequence', 'image/heif', 'image/heif-sequence'].includes(file.type.toLowerCase())
++    if (isAppleFormat) {
++      return resolve(file)
++    }
++
+     const url = URL.createObjectURL(file)
+     const img = new Image()
+     
+-    img.onload = () => {
++    img.onload = async () => {
+       URL.revokeObjectURL(url)
+       
+       const width = img.width
+       const height = img.height
+       const MAX_SIZE = 1920
+       
+-      // 如果长或宽都没有超过 1920，直接返回原文件
++      // 2. 长宽未超过 1920px 时直接透传原文件
+       if (width <= MAX_SIZE && height <= MAX_SIZE) {
+-        resolve(file)
+-        return
++        return resolve(file)
+       }
+       
+-      // 计算缩放比例
++      // 3. 超过限制，计算缩放比例
+       let targetWidth = width
+       let targetHeight = height
+       if (width > height) {
+@@ -119,23 +128,30 @@ const processImageBeforeUpload = (file) => {
+       const canvas = document.createElement('canvas')
+       canvas.width = targetWidth
+       canvas.height = targetHeight
+-      const ctx = canvas.getContext('2d')
+       
+-      // 绘制缩放后的图像
+-      ctx.drawImage(img, 0, 0, targetWidth, targetHeight)
+-      
+-      // 导出处理后的图像
+-      // 质量设为 1.0 以尽可能保留细节，交由后端进行最终压缩
+-      canvas.toBlob((blob) => {
++      try {
++        const pica = new Pica()
++        // 使用 pica 进行高质量缩放 (附加锐化参数以补充由于缩减像素引起的细节丢失)
++        await pica.resize(img, canvas, {
++          unsharpAmount: 80,
++          unsharpRadius: 0.6,
++          unsharpThreshold: 2
++        })
++        
++        // 导出格式固定为 image/jpeg，质量选取 0.85 黄金标准
++        const blob = await pica.toBlob(canvas, 'image/jpeg', 0.85)
++        
+         if (blob) {
+-          // 如果浏览器不支持原格式导出，blob.type 会自动降级（如降级为 image/png）
+-          // 我们使用实际导出的 blob.type 来创建新文件，确保后端识别正确
+-          const resizedFile = new File([blob], file.name, { type: blob.type })
++          // 修改文件扩展名为 .jpg 以匹配真实格式
++          const newName = file.name.replace(/\.[^/.]+$/, "") + ".jpg"
++          const resizedFile = new File([blob], newName, { type: 'image/jpeg' })
+           resolve(resizedFile)
+         } else {
+-          reject(new Error('Canvas to Blob failed'))
++          reject(new Error('Pica to Blob failed'))
+         }
+-      }, file.type, 1.0) 
++      } catch (err) {
++        reject(err)
++      }
+     }
+     
+     img.onerror = (err) => {
+-- 
+2.34.1
+
