@@ -6,6 +6,7 @@ import request from '../utils/request'
  * @param {File} file - 文件对象
  * @param {string} entityType - 关联业务类型，如 'server'
  * @param {string} entityId - 关联业务 ID（混淆值）
+ * @param {Function} onProgress - 进度回调
  */
 export function uploadAttachment(file, entityType, entityId, onProgress) {
   const formData = new FormData()

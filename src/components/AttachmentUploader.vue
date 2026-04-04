@@ -86,32 +86,56 @@ const uploading = ref(false)
 const uploadProgress = ref(0)   // 0-100，文件传输进度
 const processing = ref(false)   // true = 文件已传完，后端处理中
 
-// 前端利用 Canvas 转换为 WebP
-const convertToWebpBrowser = (file, quality = 0.85) => {
+// 上传前的图片处理：仅当长或宽超过 1920px 时进行等比例缩放，否则透传原文件
+const processImageBeforeUpload = (file) => {
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file)
     const img = new Image()
     
     img.onload = () => {
       URL.revokeObjectURL(url)
+      
+      const width = img.width
+      const height = img.height
+      const MAX_SIZE = 1920
+      
+      // 如果长或宽都没有超过 1920，直接返回原文件
+      if (width <= MAX_SIZE && height <= MAX_SIZE) {
+        resolve(file)
+        return
+      }
+      
+      // 计算缩放比例
+      let targetWidth = width
+      let targetHeight = height
+      if (width > height) {
+        targetWidth = MAX_SIZE
+        targetHeight = Math.round((height * MAX_SIZE) / width)
+      } else {
+        targetHeight = MAX_SIZE
+        targetWidth = Math.round((width * MAX_SIZE) / height)
+      }
+      
       const canvas = document.createElement('canvas')
-      canvas.width = img.width
-      canvas.height = img.height
+      canvas.width = targetWidth
+      canvas.height = targetHeight
       const ctx = canvas.getContext('2d')
       
-      // 绘制图像（对于 GIF 默认只截取第一帧）
-      ctx.drawImage(img, 0, 0)
+      // 绘制缩放后的图像
+      ctx.drawImage(img, 0, 0, targetWidth, targetHeight)
       
+      // 导出处理后的图像
+      // 质量设为 1.0 以尽可能保留细节，交由后端进行最终压缩
       canvas.toBlob((blob) => {
         if (blob) {
-          // 替换原扩展名为 .webp
-          const newName = file.name.replace(/\.[^/.]+$/, "") + ".webp"
-          const webpFile = new File([blob], newName, { type: 'image/webp' })
-          resolve(webpFile)
+          // 如果浏览器不支持原格式导出，blob.type 会自动降级（如降级为 image/png）
+          // 我们使用实际导出的 blob.type 来创建新文件，确保后端识别正确
+          const resizedFile = new File([blob], file.name, { type: blob.type })
+          resolve(resizedFile)
         } else {
           reject(new Error('Canvas to Blob failed'))
         }
-      }, 'image/webp', quality)
+      }, file.type, 1.0) 
     }
     
     img.onerror = (err) => {
@@ -128,16 +152,8 @@ const handleFileSelect = async (e) => {
   if (!file) return
   
   try {
-    // 尝试压缩并转换为 WebP
-    const webpFile = await convertToWebpBrowser(file)
-    
-    // 择优录取：仅当 WebP 更小时才使用，否则保留原文件
-    if (webpFile.size < file.size) {
-      selectedFile.value = webpFile
-    } else {
-      selectedFile.value = file
-    }
-    
+    // 执行预处理：超大图缩放，普通图透传
+    selectedFile.value = await processImageBeforeUpload(file)
     previewUrl.value = URL.createObjectURL(selectedFile.value)
   } catch (error) {
     notify({ message: '图片处理失败，请重试', color: 'danger' })
