@@ -1,0 +1,193 @@
+From f3d683c5635b6a4a68c6f4661ef59a74d111a35a Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?=F0=9F=92=BB=20-=20AI?= <ai@u5.com>
+Date: Sat, 4 Apr 2026 13:13:27 +0000
+Subject: [PATCH] style: refactor server detail case timeline and collapse UI
+ [Gemini]
+
+---
+ package.json                          |   2 +-
+ src/pages/server/ServerDetailPage.vue | 104 +++++++++++++++-----------
+ src/styles/utilities.css              |  10 +++
+ 3 files changed, 72 insertions(+), 44 deletions(-)
+
+diff --git a/package.json b/package.json
+index d4ca14d..19b2fb5 100644
+--- a/package.json
++++ b/package.json
+@@ -1,7 +1,7 @@
+ {
+   "name": "server_info",
+   "private": true,
+-  "version": "0.0.8",
++  "version": "0.0.9",
+   "type": "module",
+   "scripts": {
+     "dev": "vite",
+diff --git a/src/pages/server/ServerDetailPage.vue b/src/pages/server/ServerDetailPage.vue
+index 59ac14a..311044a 100644
+--- a/src/pages/server/ServerDetailPage.vue
++++ b/src/pages/server/ServerDetailPage.vue
+@@ -18,7 +18,7 @@
+ 
+           <!-- 工单记录 (折叠面板) -->
+           <VaCard>
+-            <VaCollapse class="w-full" style="padding: var(--va-card-padding)">
++            <VaCollapse class="w-full">
+               <template #header="{ value }">
+                 <div class="flex items-center justify-between w-full p-4 cursor-pointer hover:bg-gray-50 transition-colors">
+                   <div class="font-bold flex items-center gap-2">
+@@ -37,32 +37,34 @@
+                 </div>
+               </template>
+               <div class="cases-collapse-body border-t">
+-                <div v-if="casesLoading" class="text-center py-6">
+-                  <VaProgressCircle indeterminate size="small" />
+-                </div>
++                <div class="p-4 pt-2">
++                  <div v-if="casesLoading" class="text-center py-6">
++                    <VaProgressCircle indeterminate size="small" />
++                  </div>
+ 
+-                <div v-else-if="cases.length === 0" class="text-secondary text-sm py-4 text-center">
+-                  暂无工单记录
+-                </div>
++                  <div v-else-if="cases.length === 0" class="text-secondary text-sm py-4 text-center">
++                    暂无工单记录
++                  </div>
+ 
+-                <div v-else class="cases-timeline mt-4">
+-                  <div
+-                    v-for="c in cases"
+-                    :key="c.id"
+-                    class="case-item"
+-                  >
+-                    <div class="case-dot" :class="`case-dot--${c.status}`"></div>
+-                    <div class="case-content">
+-                      <div class="case-header">
+-                        <span class="case-no font-mono text-sm">{{ c.case_no }}</span>
+-                        <VaChip :color="statusColor(c.status)" size="small" class="ml-2">
+-                          {{ statusLabel(c.status) }}
+-                        </VaChip>
+-                        <span class="text-xs text-secondary ml-auto">{{ formatDate(c.created_at) }}</span>
+-                      </div>
+-                      <div class="case-issue mt-1 text-sm">{{ c.issue_type || '未分类' }} — {{ c.description }}</div>
+-                      <div v-if="c.solution" class="case-solution text-sm text-secondary mt-1">
+-                        ✓ {{ c.solution }}
++                  <div v-else class="cases-timeline">
++                    <div
++                      v-for="c in cases"
++                      :key="c.id"
++                      class="case-item"
++                    >
++                      <div class="case-dot" :class="`case-dot--${c.status}`"></div>
++                      <div class="case-content">
++                        <div class="case-header">
++                          <span class="case-no font-mono text-sm">{{ c.case_no }}</span>
++                          <VaChip :color="statusColor(c.status)" size="small" class="ml-2">
++                            {{ statusLabel(c.status) }}
++                          </VaChip>
++                          <span class="text-xs text-secondary ml-auto">{{ formatDate(c.created_at) }}</span>
++                        </div>
++                        <div class="case-issue mt-1 text-sm">{{ c.issue_type || '未分类' }} — {{ c.description }}</div>
++                        <div v-if="c.solution" class="case-solution text-sm text-secondary mt-1">
++                          ✓ {{ c.solution }}
++                        </div>
+                       </div>
+                     </div>
+                   </div>
+@@ -400,40 +402,56 @@ watch(() => route.params.sn, (newSn) => {
+   }
+ }
+ 
++/* 为贯穿线提供定位上下文，并留出左侧空间 */
+ .cases-timeline {
+-  display: flex;
+-  flex-direction: column;
+-  gap: 0;
++  position: relative;
++  padding-left: 28px; 
++}
++
++/* 使用伪元素绘制完美对齐的垂直贯穿线，使用 Vuestic 边框变量适配明暗主题 */
++.cases-timeline::before {
++  content: '';
++  position: absolute;
++  top: 8px; /* 距离顶部的合理下移，防止顶出 */
++  bottom: 0;
++  left: 9px; /* 极其精确的中轴对齐 (28px的合适比例) */
++  width: 2px;
++  background-color: var(--va-background-border);
+ }
+ 
+ .case-item {
+-  display: flex;
+-  gap: var(--space-3);
+-  padding: var(--space-3) var(--space-2);
+-  border-bottom: 1px solid var(--color-border-light);
+   position: relative;
++  margin-bottom: 1.5rem;
++  display: flex;
++  flex-direction: column;
+ }
+ 
+ .case-item:last-child {
+-  border-bottom: none;
++  margin-bottom: 0;
+ }
+ 
++/* 精密重构的圆点：利用绝对定位拉回左侧中轴线，利用边框切断背后的贯穿线 */
+ .case-dot {
+-  width: 10px;
+-  height: 10px;
++  position: absolute;
++  left: -28px; /* 拉回到 .cases-timeline 留出的 padding 区域 */
++  top: 4px; /* 基于 14px/16px 基础字号的视觉重心微调 */
++  width: 14px;
++  height: 14px;
+   border-radius: 50%;
+-  margin-top: 4px;
+-  flex-shrink: 0;
++  background-color: var(--va-primary);
++  /* 核心技巧：用与卡片底色相同的粗边框，在视觉上"切断"贯穿线，显得非常干净 */
++  border: 3px solid var(--va-background-primary); 
++  box-sizing: content-box;
++  z-index: 1;
+ }
+ 
+-.case-dot--open       { background: var(--va-warning); }
+-.case-dot--processing { background: var(--va-info); }
+-.case-dot--resolved   { background: var(--va-success); }
+-.case-dot--closed     { background: var(--va-secondary); }
++.case-dot--open       { background-color: var(--va-warning); }
++.case-dot--processing { background-color: var(--va-info); }
++.case-dot--resolved   { background-color: var(--va-success); }
++.case-dot--closed     { background-color: var(--va-secondary); }
+ 
+ .case-content {
+-  flex: 1;
+-  min-width: 0;
++  width: 100%;
+ }
+ 
+ .case-header {
+diff --git a/src/styles/utilities.css b/src/styles/utilities.css
+index f6c80b0..3939672 100644
+--- a/src/styles/utilities.css
++++ b/src/styles/utilities.css
+@@ -106,3 +106,13 @@
+     color: var(--color-text-secondary);
+     max-width: 500px;
+ }
++
++/* 隐藏局部滚动区域的滚动条但保留滚动功能 */
++.no-scrollbar::-webkit-scrollbar {
++  display: none;
++}
++.no-scrollbar {
++  -ms-overflow-style: none;  /* IE and Edge */
++  scrollbar-width: none;  /* Firefox */
++}
++
+-- 
+2.34.1
+

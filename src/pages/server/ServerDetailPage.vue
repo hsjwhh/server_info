@@ -37,7 +37,7 @@
                 </div>
               </template>
               <div class="cases-collapse-body border-t">
-                <div class="p-4 pt-2">
+                <div class="p-4 pt-2 no-scrollbar">
                   <div v-if="casesLoading" class="text-center py-6">
                     <VaProgressCircle indeterminate size="small" />
                   </div>
