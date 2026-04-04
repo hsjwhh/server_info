@@ -4,7 +4,7 @@
     <input
       ref="fileInputRef"
       type="file"
-      accept="image/jpeg,image/png,image/webp,image/gif"
+      accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif"
       style="display: none"
       @change="handleFileSelect"
     />
@@ -70,6 +70,7 @@
 import { ref } from 'vue'
 import { useToast } from 'vuestic-ui'
 import { uploadAttachment } from '../api/attachments'
+import Pica from 'pica'
 
 const props = defineProps({
   entityType: { type: String, required: true },
@@ -86,26 +87,34 @@ const uploading = ref(false)
 const uploadProgress = ref(0)   // 0-100，文件传输进度
 const processing = ref(false)   // true = 文件已传完，后端处理中
 
-// 上传前的图片处理：仅当长或宽超过 1920px 时进行等比例缩放，否则透传原文件
+// 上传前的图片处理逻辑：
+// 1. HEIF/HEIC 等苹果特定格式直接透传
+// 2. 其他格式长宽均未超过 1920px 直接透传
+// 3. 超过 1920px 的格式，使用 pica 缩放为最大 1920px 并转为 JPEG (0.85质量)
 const processImageBeforeUpload = (file) => {
   return new Promise((resolve, reject) => {
+    // 1. 苹果特定格式（HEIF/HEIC）透传
+    const isAppleFormat = ['image/heic', 'image/heic-sequence', 'image/heif', 'image/heif-sequence'].includes(file.type.toLowerCase())
+    if (isAppleFormat) {
+      return resolve(file)
+    }
+
     const url = URL.createObjectURL(file)
     const img = new Image()
     
-    img.onload = () => {
+    img.onload = async () => {
       URL.revokeObjectURL(url)
       
       const width = img.width
       const height = img.height
       const MAX_SIZE = 1920
       
-      // 如果长或宽都没有超过 1920，直接返回原文件
+      // 2. 长宽未超过 1920px 时直接透传原文件
       if (width <= MAX_SIZE && height <= MAX_SIZE) {
-        resolve(file)
-        return
+        return resolve(file)
       }
       
-      // 计算缩放比例
+      // 3. 超过限制，计算缩放比例
       let targetWidth = width
       let targetHeight = height
       if (width > height) {
@@ -119,23 +128,30 @@ const processImageBeforeUpload = (file) => {
       const canvas = document.createElement('canvas')
       canvas.width = targetWidth
       canvas.height = targetHeight
-      const ctx = canvas.getContext('2d')
       
-      // 绘制缩放后的图像
-      ctx.drawImage(img, 0, 0, targetWidth, targetHeight)
-      
-      // 导出处理后的图像
-      // 质量设为 1.0 以尽可能保留细节，交由后端进行最终压缩
-      canvas.toBlob((blob) => {
+      try {
+        const pica = new Pica()
+        // 使用 pica 进行高质量缩放 (附加锐化参数以补充由于缩减像素引起的细节丢失)
+        await pica.resize(img, canvas, {
+          unsharpAmount: 80,
+          unsharpRadius: 0.6,
+          unsharpThreshold: 2
+        })
+        
+        // 导出格式固定为 image/jpeg，质量选取 0.85 黄金标准
+        const blob = await pica.toBlob(canvas, 'image/jpeg', 0.85)
+        
         if (blob) {
-          // 如果浏览器不支持原格式导出，blob.type 会自动降级（如降级为 image/png）
-          // 我们使用实际导出的 blob.type 来创建新文件，确保后端识别正确
-          const resizedFile = new File([blob], file.name, { type: blob.type })
+          // 修改文件扩展名为 .jpg 以匹配真实格式
+          const newName = file.name.replace(/\.[^/.]+$/, "") + ".jpg"
+          const resizedFile = new File([blob], newName, { type: 'image/jpeg' })
           resolve(resizedFile)
         } else {
-          reject(new Error('Canvas to Blob failed'))
+          reject(new Error('Pica to Blob failed'))
         }
-      }, file.type, 1.0) 
+      } catch (err) {
+        reject(err)
+      }
     }
     
     img.onerror = (err) => {

@@ -1,7 +1,7 @@
 {
   "name": "server_info",
   "private": true,
-  "version": "0.0.6",
+  "version": "0.0.7",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -16,7 +16,8 @@
     "pinia": "^3.0.4",
     "vue": "^3.5.31",
     "vue-router": "^4.6.4",
-    "vuestic-ui": "^1.10.3"
+    "vuestic-ui": "^1.10.3",
+    "pica": "^9.0.1"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.5",
