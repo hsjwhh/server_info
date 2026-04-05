@@ -18,7 +18,7 @@
 
           <!-- 工单记录 (折叠面板) -->
           <VaCard>
-            <VaCollapse class="w-full">
+            <VaCollapse class="w-full" style="padding: var(--va-card-padding)"></VaCollapse>
               <template #header="{ value }">
                 <div class="flex items-center justify-between w-full p-4 cursor-pointer hover:bg-gray-50 transition-colors">
                   <div class="font-bold flex items-center gap-2">
@@ -103,7 +103,7 @@
                   @click="openImage(a.imgPath)"
                 >
                   <img
-                    :src="a.imgPath"
+                    :src="`${a.imgPath}?w=200`"
                     :alt="a.originalName"
                     class="attachment-img"
                   />
