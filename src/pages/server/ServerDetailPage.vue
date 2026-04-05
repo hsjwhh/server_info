@@ -20,12 +20,16 @@
           <VaCard>
             <VaCollapse class="w-full">
               <template #header="{ value }">
-                <div class="flex items-center justify-between w-full p-4 cursor-pointer hover:bg-gray-50 transition-colors">
-                  <div class="font-bold flex items-center gap-2">
+                <div class="cases-header w-full cursor-pointer transition-colors">
+                  <div class="cases-header__main">
                     <VaIcon :name="value ? 'mdi-chevron-down' : 'mdi-chevron-right'" color="secondary" />
-                    关联工单记录 (共 {{ cases.length }} 条)
+                    <div class="cases-header__text">
+                      <div class="cases-header__title">工单记录</div>
+                      <div class="cases-header__meta">共 {{ cases.length }} 条关联记录</div>
+                    </div>
                   </div>
                   <VaButton
+                    class="cases-header__action"
                     size="small"
                     preset="secondary"
                     border-color="primary"
@@ -52,18 +56,28 @@
                       :key="c.id"
                       class="case-item"
                     >
-                      <div class="case-dot" :class="`case-dot--${c.status}`"></div>
+                      <div class="case-track">
+                        <div class="case-dot" :class="`case-dot--${c.status}`"></div>
+                      </div>
                       <div class="case-content">
                         <div class="case-header">
-                          <span class="case-no font-mono text-sm">{{ c.case_no }}</span>
-                          <VaChip :color="statusColor(c.status)" size="small" class="ml-2">
-                            {{ statusLabel(c.status) }}
-                          </VaChip>
-                          <span class="text-xs text-secondary ml-auto">{{ formatDate(c.created_at) }}</span>
+                          <div class="case-header__primary">
+                            <span class="case-no font-mono text-sm">{{ c.case_no }}</span>
+                            <VaChip :color="statusColor(c.status)" size="small">
+                              {{ statusLabel(c.status) }}
+                            </VaChip>
+                          </div>
+                          <span class="case-time text-xs text-secondary">{{ formatDate(c.created_at) }}</span>
                         </div>
-                        <div class="case-issue mt-1 text-sm">{{ c.issue_type || '未分类' }} — {{ c.description }}</div>
-                        <div v-if="c.solution" class="case-solution text-sm text-secondary mt-1">
-                          ✓ {{ c.solution }}
+                        <div class="case-section">
+                          <div class="case-label">问题描述</div>
+                          <div class="case-issue text-sm">{{ c.issue_type || '未分类' }} — {{ c.description }}</div>
+                        </div>
+                        <div v-if="c.solution" class="case-section">
+                          <div class="case-label">处理结果</div>
+                          <div class="case-solution text-sm text-secondary">
+                            ✓ {{ c.solution }}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -402,47 +416,94 @@ watch(() => route.params.sn, (newSn) => {
   }
 }
 
+.cases-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.cases-header__main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.cases-header__text {
+  min-width: 0;
+}
+
+.cases-header__title {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--va-text-primary);
+}
+
+.cases-header__meta {
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.3;
+  color: var(--va-text-secondary);
+}
+
+.cases-header__action {
+  flex-shrink: 0;
+}
+
 /* 为贯穿线提供定位上下文，并留出左侧空间 */
 .cases-timeline {
   position: relative;
-  padding-left: 28px; 
-}
-
-/* 使用伪元素绘制完美对齐的垂直贯穿线，使用 Vuestic 边框变量适配明暗主题 */
-.cases-timeline::before {
-  content: '';
-  position: absolute;
-  top: 8px; /* 距离顶部的合理下移，防止顶出 */
-  bottom: 0;
-  left: 9px; /* 极其精确的中轴对齐 (28px的合适比例) */
-  width: 2px;
-  background-color: var(--va-background-border);
+  padding: 4px 4px 0;
 }
 
 .case-item {
-  position: relative;
-  margin-bottom: 1.5rem;
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
 .case-item:last-child {
   margin-bottom: 0;
 }
 
-/* 精密重构的圆点：利用绝对定位拉回左侧中轴线，利用边框切断背后的贯穿线 */
-.case-dot {
+.case-track {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 18px;
+  flex: 0 0 18px;
+  align-self: stretch;
+}
+
+.case-track::after {
+  content: '';
   position: absolute;
-  left: -28px; /* 拉回到 .cases-timeline 留出的 padding 区域 */
-  top: 4px; /* 基于 14px/16px 基础字号的视觉重心微调 */
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  background-color: var(--va-primary);
-  /* 核心技巧：用与卡片底色相同的粗边框，在视觉上"切断"贯穿线，显得非常干净 */
-  border: 3px solid var(--va-background-primary); 
-  box-sizing: content-box;
+  top: 14px;
+  bottom: -18px;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: rgba(148, 163, 184, 0.28);
+}
+
+.case-item:last-child .case-track::after {
+  display: none;
+}
+
+.case-dot {
+  position: relative;
   z-index: 1;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  margin-top: 10px;
+  background-color: var(--va-primary);
+  box-shadow: 0 0 0 4px var(--va-background-primary);
 }
 
 .case-dot--open       { background-color: var(--va-warning); }
@@ -452,26 +513,89 @@ watch(() => route.params.sn, (newSn) => {
 
 .case-content {
   width: 100%;
+  min-width: 0;
+  padding: 16px 18px;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.95), rgba(255, 255, 255, 1));
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
 }
 
 .case-header {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.case-header__primary {
+  display: flex;
+  align-items: center;
   flex-wrap: wrap;
-  gap: var(--space-1);
+  gap: 10px;
+  min-width: 0;
+}
+
+.case-time {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.case-section {
+  margin-top: 12px;
+}
+
+.case-label {
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--va-text-secondary);
 }
 
 .case-no {
   color: var(--color-text-primary);
+  font-weight: 700;
 }
 
 .case-issue {
   color: var(--color-text-primary);
-  line-height: 1.4;
+  line-height: 1.6;
+  word-break: break-word;
 }
 
 .case-solution {
   color: var(--color-text-secondary);
+  line-height: 1.6;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .cases-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .cases-header__action {
+    width: 100%;
+  }
+
+  .case-item {
+    gap: 12px;
+  }
+
+  .case-content {
+    padding: 14px;
+  }
+
+  .case-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .case-time {
+    white-space: normal;
+  }
 }
 
 .attachments-grid {

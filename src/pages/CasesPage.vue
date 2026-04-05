@@ -7,9 +7,9 @@
 
     <VaCard class="mb-6">
       <VaCardContent>
-        <div class="flex flex-wrap gap-4 items-end">
-          <div class="w-48">
-            <div class="text-xs text-secondary mb-1">状态筛选</div>
+        <div class="filters-toolbar">
+          <div class="filter-field">
+            <div class="filter-label">状态筛选</div>
             <VaSelect
               v-model="statusFilter"
               :options="STATUS_OPTIONS"
@@ -18,8 +18,23 @@
               placeholder="选择状态"
             />
           </div>
-          <VaButton icon="mdi-magnify" @click="handleSearch">搜索</VaButton>
-          <VaButton preset="secondary" @click="resetFilters">重置</VaButton>
+          <div class="filter-actions">
+            <VaButton
+              class="filter-button filter-button--search"
+              icon="mdi-magnify"
+              @click="handleSearch"
+            >
+              搜索
+            </VaButton>
+            <VaButton
+              class="filter-button"
+              preset="secondary"
+              border-color="primary"
+              @click="resetFilters"
+            >
+              重置
+            </VaButton>
+          </div>
         </div>
       </VaCardContent>
     </VaCard>
@@ -249,7 +264,62 @@ onMounted(fetchData)
 </script>
 
 <style scoped>
+.filters-toolbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.filter-field {
+  width: 220px;
+  max-width: 100%;
+}
+
+.filter-label {
+  margin-bottom: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--va-text-secondary);
+}
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.filter-button {
+  min-width: 96px;
+}
+
+.filter-button--search {
+  box-shadow: none;
+}
+
 .cases-table :deep(.va-data-table__table) {
   font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+  .filters-toolbar {
+    align-items: stretch;
+  }
+
+  .filter-field {
+    width: 100%;
+  }
+
+  .filter-actions {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .filter-button {
+    flex: 1;
+  }
 }
 </style>
