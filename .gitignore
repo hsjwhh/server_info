@@ -41,3 +41,6 @@ Thumbs.db
 
 # Task list
 task/
+
+# Local Codex state
+.codex
