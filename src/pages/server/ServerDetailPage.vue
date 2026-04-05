@@ -18,7 +18,7 @@
 
           <!-- 工单记录 (折叠面板) -->
           <VaCard>
-            <VaCollapse class="w-full" style="padding: var(--va-card-padding)"></VaCollapse>
+            <VaCollapse class="w-full">
               <template #header="{ value }">
                 <div class="flex items-center justify-between w-full p-4 cursor-pointer hover:bg-gray-50 transition-colors">
                   <div class="font-bold flex items-center gap-2">
