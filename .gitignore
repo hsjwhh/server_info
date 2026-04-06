@@ -44,3 +44,6 @@ task/
 
 # Local Codex state
 .codex
+
+# Local deploy helper
+build.sh

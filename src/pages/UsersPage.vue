@@ -3,28 +3,47 @@
   <div class="users-page">
     <div class="page-header mb-6 flex items-center justify-between">
       <h1 class="page-title">用户管理</h1>
-      <VaButton icon="mdi-account-plus" @click="openAddModal">
-        新增用户
-      </VaButton>
     </div>
 
     <VaCard>
       <VaCardContent>
-        <div class="flex justify-between items-center mb-4">
-          <VaInput
-            v-model="filter"
-            placeholder="搜索用户名..."
-            clearable
-            class="w-64"
-          >
-            <template #prependInner>
-              <VaIcon name="mdi-magnify" size="small" />
-            </template>
-          </VaInput>
+        <div class="users-toolbar mb-4">
+          <div class="users-toolbar__left">
+            <div class="status-toggle" role="tablist" aria-label="用户状态筛选">
+              <button
+                type="button"
+                class="status-toggle__item"
+                :class="{ 'status-toggle__item--active': statusTab === 'active' }"
+                @click="statusTab = 'active'"
+              >
+                Active
+              </button>
+              <button
+                type="button"
+                class="status-toggle__item"
+                :class="{ 'status-toggle__item--active': statusTab === 'inactive' }"
+                @click="statusTab = 'inactive'"
+              >
+                Inactive
+              </button>
+            </div>
+
+            <VaInput
+              v-model="filter"
+              placeholder="Search"
+              clearable
+              class="toolbar-search"
+            >
+            </VaInput>
+          </div>
+
+          <VaButton class="users-toolbar__action" @click="openAddModal">
+            Add User
+          </VaButton>
         </div>
 
         <VaDataTable
-          :items="users"
+          :items="filteredUsers"
           :columns="columns"
           :filter="filter"
           :loading="loading"
@@ -42,8 +61,9 @@
           </template>
 
           <template #cell(actions)="{ rowData }">
-            <div class="flex gap-2">
+            <div class="action-buttons">
               <VaButton
+                class="action-button"
                 preset="plain"
                 icon="mdi-pencil"
                 size="small"
@@ -51,6 +71,7 @@
                 @click="openEditModal(rowData)"
               />
               <VaButton
+                class="action-button"
                 preset="plain"
                 icon="mdi-devices"
                 size="small"
@@ -58,6 +79,7 @@
                 @click="openSessionModal(rowData)"
               />
               <VaButton
+                class="action-button"
                 preset="plain"
                 icon="mdi-delete"
                 size="small"
@@ -161,7 +183,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, onMounted, computed } from 'vue'
 import { useToast, useModal } from 'vuestic-ui'
 import { getUsers, createUser, updateUser, deleteUser, getUserSessions, revokeUserSession } from '../api/users'
 import { useAuthStore } from '../stores/auth'
@@ -173,6 +195,7 @@ const authStore = useAuthStore()
 const users = ref([])
 const loading = ref(false)
 const filter = ref('')
+const statusTab = ref('active')
 const showModal = ref(false)
 const isEdit = ref(false)
 const currentUserId = ref(null)
@@ -187,7 +210,7 @@ const columns = [
   { key: 'username', label: '用户名', sortable: true },
   { key: 'role', label: '角色' },
   { key: 'status', label: '状态' },
-  { key: 'actions', label: '操作', align: 'center' },
+  { key: 'actions', label: '操作', align: 'right' },
 ]
 
 const roleOptions = [
@@ -199,6 +222,11 @@ const statusOptions = [
   { text: '启用', value: 1 },
   { text: '禁用', value: 0 },
 ]
+
+const filteredUsers = computed(() => {
+  const targetStatus = statusTab.value === 'active' ? 1 : 0
+  return users.value.filter((user) => Number(user.status) === targetStatus)
+})
 
 const form = reactive({
   username: '',
@@ -323,7 +351,135 @@ onMounted(fetchUsers)
 </script>
 
 <style scoped>
+.users-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.users-toolbar__left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status-toggle {
+  display: inline-flex;
+  align-items: center;
+  height: 42px;
+  border-radius: 8px;
+  background: #f3f6f8;
+  border: 1px solid #e6edf5;
+  overflow: hidden;
+}
+
+.status-toggle__item {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: #2f3a45;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  height: 100%;
+  padding: 0 26px;
+  cursor: pointer;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.status-toggle__item--active {
+  background: #dde4ea;
+}
+
+.toolbar-search {
+  width: 300px;
+  max-width: 100%;
+}
+
+.users-toolbar__action {
+  flex-shrink: 0;
+  height: 42px;
+}
+
+.toolbar-search :deep(.va-input-wrapper),
+.toolbar-search :deep(.va-input__container) {
+  min-height: 42px;
+}
+
+.toolbar-search :deep(.va-input-wrapper) {
+  border-radius: 8px;
+}
+
+.users-toolbar__action :deep(.va-button__container) {
+  height: 42px;
+  min-height: 42px;
+  border-radius: 8px;
+}
+
+.users-toolbar__action :deep(.va-button__content) {
+  min-height: 42px;
+  padding-inline: 18px;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.action-button {
+  flex: 0 0 auto;
+}
+
+.action-button :deep(.va-button__container) {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  min-height: 32px;
+}
+
+.action-button :deep(.va-button__content) {
+  min-height: 32px;
+  padding: 0;
+}
+
 .users-table :deep(.va-data-table__table) {
   font-size: 0.9rem;
+}
+
+.users-table :deep(th:last-child),
+.users-table :deep(.va-data-table__table-th:last-child),
+.users-table :deep(.va-data-table__table-tr th:last-child) {
+  text-align: right;
+}
+
+.users-table :deep(th:last-child .va-data-table__table-th-content),
+.users-table :deep(.va-data-table__table-th:last-child .va-data-table__table-th-content) {
+  justify-content: flex-end;
+  text-align: right;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .users-toolbar {
+    align-items: stretch;
+  }
+
+  .users-toolbar__left {
+    width: 100%;
+  }
+
+  .toolbar-search {
+    width: 100%;
+  }
+
+  .users-toolbar__action {
+    width: 100%;
+  }
 }
 </style>
