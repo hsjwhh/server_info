@@ -11,68 +11,89 @@
     />
 
     <!-- 未选择文件 -->
-    <VaButton
+    <button
       v-if="selectedFiles.length === 0"
-      preset="secondary"
-      icon="mdi-image-plus"
-      size="small"
+      type="button"
+      class="dropzone"
+      :class="{ 'dropzone--dragging': isDragging }"
       @click="fileInputRef.click()"
+      @dragover.prevent="isDragging = true"
+      @dragleave.prevent="isDragging = false"
+      @drop.prevent="handleDrop"
     >
-      选择图片
-    </VaButton>
+      <div class="dropzone__icon">
+        <VaIcon name="mdi-tray-arrow-up" />
+      </div>
+      <div class="dropzone__title">拖拽图片到这里，或点击选择</div>
+      <div class="dropzone__meta">支持批量上传，选择后立即预览</div>
+    </button>
 
     <!-- 已选择文件：预览 + 操作 -->
     <div v-else class="preview-area">
-      <!-- 只有一张图时显示缩略图，多张图显示文件数 -->
-      <img v-if="selectedFiles.length === 1" :src="previewUrls[0]" class="preview-thumb" alt="预览" />
-      <div v-else class="preview-multi-icon">
-        <VaIcon name="mdi-image-multiple" color="primary" />
-      </div>
-
-      <div class="preview-info">
-        <div v-if="selectedFiles.length === 1" class="preview-name text-sm">{{ selectedFiles[0].name }}</div>
-        <div v-else class="preview-name text-sm">已选择 {{ selectedFiles.length }} 张图片</div>
-        <div class="preview-size text-xs text-secondary">
-          {{ totalSizeDisplay }}
+      <div class="preview-summary">
+        <div class="preview-summary__main">
+          <div class="preview-name text-sm">
+            {{ selectedFiles.length === 1 ? selectedFiles[0].name : `已选择 ${selectedFiles.length} 张图片` }}
+          </div>
+          <div class="preview-size text-xs text-secondary">
+            {{ totalSizeDisplay }}
+          </div>
         </div>
-      </div>
-
-      <div class="preview-actions">
-        <!-- 上传中：显示进度条或处理中提示 -->
-        <div v-if="uploading" class="upload-progress">
-          <div v-if="!processing" class="progress-bar-wrap">
-            <VaProgressBar
-              :model-value="uploadProgress"
+        <div class="preview-actions">
+          <div v-if="uploading" class="upload-progress">
+            <div v-if="!processing" class="progress-bar-wrap">
+              <VaProgressBar
+                :model-value="uploadProgress"
+                size="small"
+                color="primary"
+                class="progress-bar"
+              />
+              <span class="progress-text text-xs">{{ uploadProgress }}%</span>
+            </div>
+            <div v-else class="processing-wrap">
+              <VaProgressCircle indeterminate size="16px" />
+              <span class="text-xs text-secondary ml-1">
+                {{ currentFileIndex + 1 }}/{{ selectedFiles.length }} 处理中...
+              </span>
+            </div>
+          </div>
+          <template v-else>
+            <VaButton
               size="small"
-              color="primary"
-              class="progress-bar"
+              preset="secondary"
+              icon="mdi-plus"
+              @click="fileInputRef.click()"
+            >
+              继续添加
+            </VaButton>
+            <VaButton
+              size="small"
+              @click="handleUpload"
+            >
+              上传
+            </VaButton>
+            <VaButton
+              size="small"
+              preset="plain"
+              color="secondary"
+              icon="mdi-close"
+              @click="clearSelection"
             />
-            <span class="progress-text text-xs">{{ uploadProgress }}%</span>
-          </div>
-          <div v-else class="processing-wrap">
-            <VaProgressCircle indeterminate size="16px" />
-            <span class="text-xs text-secondary ml-1">
-              {{ currentFileIndex + 1 }}/{{ selectedFiles.length }} 处理中...
-            </span>
+          </template>
+        </div>
+      </div>
+
+      <div class="preview-grid">
+        <div
+          v-for="(url, index) in previewUrls"
+          :key="`${selectedFiles[index]?.name || 'file'}-${index}`"
+          class="preview-grid__item"
+        >
+          <img :src="url" class="preview-grid__img" :alt="selectedFiles[index]?.name || '预览'" />
+          <div class="preview-grid__name text-xs text-secondary">
+            {{ selectedFiles[index]?.name || '图片' }}
           </div>
         </div>
-
-        <!-- 未上传：显示上传和取消按钮 -->
-        <template v-else>
-          <VaButton
-            size="small"
-            @click="handleUpload"
-          >
-            上传
-          </VaButton>
-          <VaButton
-            size="small"
-            preset="plain"
-            color="secondary"
-            icon="mdi-close"
-            @click="clearSelection"
-          />
-        </template>
       </div>
     </div>
   </div>
@@ -99,6 +120,7 @@ const uploading = ref(false)
 const uploadProgress = ref(0)   // 0-100，当前文件传输进度
 const processing = ref(false)   // true = 当前文件已传完，后端处理中
 const currentFileIndex = ref(0) // 当前正在上传的文件索引
+const isDragging = ref(false)
 
 const totalSizeDisplay = computed(() => {
   if (selectedFiles.value.length === 1) {
@@ -184,29 +206,27 @@ const processImageBeforeUpload = (file) => {
   })
 }
 
+const appendSelectedFiles = (files) => {
+  if (files.length === 0) return
+
+  const imageFiles = files.filter((file) => file.type.startsWith('image/'))
+  if (imageFiles.length === 0) return
+
+  const newPreviewUrls = imageFiles.map((file) => URL.createObjectURL(file))
+  selectedFiles.value = [...selectedFiles.value, ...imageFiles]
+  previewUrls.value = [...previewUrls.value, ...newPreviewUrls]
+}
+
 const handleFileSelect = async (e) => {
   const files = Array.from(e.target.files || [])
-  if (files.length === 0) return
-  
-  try {
-    const processedFiles = []
-    const newPreviewUrls = []
-    
-    for (const file of files) {
-      // 执行预处理：超大图缩放，普通图透传
-      const processed = await processImageBeforeUpload(file)
-      processedFiles.push(processed)
-      newPreviewUrls.push(URL.createObjectURL(processed))
-    }
-    
-    selectedFiles.value = [...selectedFiles.value, ...processedFiles]
-    previewUrls.value = [...previewUrls.value, ...newPreviewUrls]
-  } catch (error) {
-    notify({ message: '图片处理失败，请重试', color: 'danger' })
-    console.error('Image processing error:', error)
-  } finally {
-    e.target.value = '' // 清除 input 状态以便重复选择同名文件
-  }
+  appendSelectedFiles(files)
+  e.target.value = '' // 清除 input 状态以便重复选择同名文件
+}
+
+const handleDrop = (event) => {
+  isDragging.value = false
+  const files = Array.from(event.dataTransfer?.files || [])
+  appendSelectedFiles(files)
 }
 
 const clearSelection = () => {
@@ -235,8 +255,9 @@ const handleUpload = async () => {
     processing.value = false
     
     try {
+      const processedFile = await processImageBeforeUpload(selectedFiles.value[i])
       await uploadAttachment(
-        selectedFiles.value[i],
+        processedFile,
         props.entityType,
         props.entityId,
         (percent) => {
@@ -270,12 +291,54 @@ const handleUpload = async () => {
 
 <style scoped>
 .attachment-uploader {
-  display: inline-block;
+  width: 100%;
+}
+
+.dropzone {
+  width: 100%;
+  padding: 18px;
+  border: 1px dashed rgba(148, 163, 184, 0.45);
+  border-radius: var(--radius-md);
+  background: rgba(248, 250, 252, 0.8);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, transform 0.15s;
+}
+
+.dropzone:hover,
+.dropzone--dragging {
+  border-color: var(--va-primary);
+  background: rgba(239, 246, 255, 0.92);
+  transform: translateY(-1px);
+}
+
+.dropzone__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  margin-bottom: 10px;
+  border-radius: 12px;
+  background: rgba(19, 127, 236, 0.12);
+  color: var(--va-primary);
+}
+
+.dropzone__title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.dropzone__meta {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--color-text-secondary);
 }
 
 .preview-area {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: var(--space-3);
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
@@ -283,29 +346,17 @@ const handleUpload = async () => {
   background: var(--color-bg-element);
 }
 
-.preview-thumb {
-  width: 48px;
-  height: 48px;
-  object-fit: cover;
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
-}
-
-.preview-multi-icon {
-  width: 48px;
-  height: 48px;
+.preview-summary {
   display: flex;
   align-items: center;
-  justify-content: center;
-  background: var(--color-bg-hover);
-  border-radius: var(--radius-sm);
-  flex-shrink: 0;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
 }
 
-.preview-info {
+.preview-summary__main {
   flex: 1;
   min-width: 0;
-  overflow: hidden;
 }
 
 .preview-name {
@@ -319,6 +370,8 @@ const handleUpload = async () => {
   align-items: center;
   gap: var(--space-1);
   flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
 }
 
 .upload-progress {
@@ -349,5 +402,44 @@ const handleUpload = async () => {
 .processing-wrap {
   display: flex;
   align-items: center;
+}
+
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: var(--space-2);
+  width: 100%;
+}
+
+.preview-grid__item {
+  min-width: 0;
+}
+
+.preview-grid__img {
+  width: 100%;
+  display: block;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-border-light);
+}
+
+.preview-grid__name {
+  margin-top: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 640px) {
+  .preview-summary {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .preview-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
 }
 </style>
