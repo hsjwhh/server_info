@@ -18,10 +18,8 @@
           <div class="upload-stage__icon">
             <VaIcon name="mdi-image-multiple-outline" size="28px" />
           </div>
-          <div class="upload-stage__title">上传图片到服务器附件区</div>
-          <div class="upload-stage__desc">
-            支持拖拽或点击选择，多图预览后再上传。
-          </div>
+          <div class="upload-stage__title">{{ uploadTitle }}</div>
+          <div class="upload-stage__desc">{{ uploadDescription }}</div>
           <div class="upload-stage__actions">
             <AttachmentUploader
               :entity-type="entityType"
@@ -101,6 +99,8 @@ import AttachmentUploader from '../AttachmentUploader.vue'
 
 const props = defineProps({
   title: { type: String, default: '附件图片' },
+  uploadTitle: { type: String, default: '上传图片到附件区' },
+  uploadDescription: { type: String, default: '支持拖拽或点击选择，多图预览后再上传。' },
   attachments: { type: Array, default: () => [] },
   attachmentsLoading: { type: Boolean, default: false },
   entityType: { type: String, required: true },

@@ -54,71 +54,17 @@
     </div>
 
     <div v-else class="cases-board">
-      <article
+      <CaseRecordCard
         v-for="caseItem in cases"
         :key="caseItem.id"
-        class="case-record"
-      >
-        <div class="case-record__rail">
-          <div class="case-record__dot" :class="`case-record__dot--${caseItem.status}`"></div>
-        </div>
-
-        <div class="case-record__body">
-          <div class="case-record__header">
-            <div class="case-record__header-main">
-              <div class="case-record__title-row">
-                <div class="case-record__case-no">{{ caseItem.case_no }}</div>
-                <VaChip :color="getStatusColor(caseItem.status)" size="small" class="case-record__status-chip">
-                  {{ getStatusLabel(caseItem.status) }}
-                </VaChip>
-                <span class="case-record__time">{{ formatDate(caseItem.created_at) }}</span>
-              </div>
-              <div class="case-record__meta-row">
-                <span class="case-record__creator-label">创建人</span>
-                <span class="case-record__creator-name">{{ caseItem.created_by_name || '-' }}</span>
-              </div>
-            </div>
-            <VaButton
-              preset="plain"
-              icon="mdi-pencil-outline"
-              size="small"
-              class="case-record__detail-button"
-              @click="openEditModal(caseItem)"
-            >
-              Details
-            </VaButton>
-          </div>
-
-          <div class="case-record__grid">
-            <div class="case-info">
-              <div class="case-info__label">Server SN</div>
-              <div class="case-info__value">{{ caseItem.sn || '-' }}</div>
-            </div>
-            <div class="case-info">
-              <div class="case-info__label">Customer</div>
-              <div class="case-info__value">{{ caseItem.customer || '-' }}</div>
-            </div>
-            <div class="case-info">
-              <div class="case-info__label">Issue Type</div>
-              <div class="case-info__value">{{ caseItem.issue_type || '未分类' }}</div>
-            </div>
-            <div class="case-info">
-              <div class="case-info__label">Status</div>
-              <div class="case-info__value">{{ getStatusLabel(caseItem.status) }}</div>
-            </div>
-          </div>
-
-          <div class="case-section">
-            <div class="case-section__label">Problem Description</div>
-            <div class="case-section__content">{{ caseItem.description || '-' }}</div>
-          </div>
-
-          <div v-if="caseItem.solution" class="case-section">
-            <div class="case-section__label">Resolution Steps</div>
-            <div class="case-section__content case-section__content--secondary">{{ caseItem.solution }}</div>
-          </div>
-        </div>
-      </article>
+        :case-item="caseItem"
+        :format-date="formatDate"
+        action-label="Details"
+        description-label="Problem Description"
+        solution-label="Resolution Steps"
+        :fields="getCaseFields(caseItem)"
+        @action="openEditModal"
+      />
     </div>
 
     <div class="cases-pagination">
@@ -141,94 +87,78 @@
       class="case-edit-modal"
       fixed-layout
     >
-      <div v-if="editingCase" class="case-edit">
-        <div class="case-edit__header">
-          <div>
-            <div class="case-edit__eyebrow">Edit Work Order</div>
-            <h2 class="case-edit__title">
-              编辑工单：<span>{{ editingCase.case_no }}</span>
-            </h2>
-            <p class="case-edit__subtitle">
-              最后更新时间 {{ formatDate(editingCase.updated_at || editingCase.created_at) }}
-            </p>
-          </div>
-          <div class="case-edit__header-actions">
-            <VaButton preset="secondary" @click="showEditModal = false">
-              {{ isAdmin ? '取消' : '关闭' }}
-            </VaButton>
-            <VaButton v-if="isAdmin" @click="handleUpdate">
-              保存修改
-            </VaButton>
-          </div>
-        </div>
+      <CaseFormPanel
+        v-if="editingCase"
+        eyebrow="Edit Work Order"
+        title="编辑工单"
+        :title-accent="editingCase.case_no"
+        :subtitle="`最后更新时间 ${formatDate(editingCase.updated_at || editingCase.created_at)}`"
+        :cancel-text="isAdmin ? '取消' : '关闭'"
+        submit-text="保存修改"
+        :show-submit="isAdmin"
+        :general-fields="editGeneralFields"
+        :description-model="descriptionModel"
+        description-label="问题描述"
+        :description-readonly="true"
+        :description-rows="4"
+        :resolution-model="resolutionModel"
+        resolution-label="解决方案"
+        resolution-placeholder="请填写解决方案..."
+        :resolution-readonly="!isAdmin"
+        :resolution-rows="5"
+        :readonly-tip="!isAdmin ? '注：仅管理员可更新工单状态及方案。' : ''"
+        @cancel="showEditModal = false"
+        @submit="handleUpdate"
+      />
 
-        <section class="case-edit__card case-edit__card--main">
-          <div class="case-edit__grid">
-            <div class="case-edit__card-title">
-              <span class="case-edit__accent"></span>
-              <span>General Information</span>
+      <VaCard v-if="editingCase" class="case-attachments-panel">
+        <VaCollapse v-model="attachmentsExpanded" class="w-full">
+          <template #header="{ value }">
+            <div class="case-attachments-panel__header">
+              <div class="case-attachments-panel__title-wrap">
+                <VaIcon :name="value ? 'mdi-chevron-down' : 'mdi-chevron-right'" color="secondary" />
+                <div>
+                  <div class="case-attachments-panel__title">工单附件</div>
+                  <div class="case-attachments-panel__meta">
+                    {{ attachmentsLoading ? '附件加载中...' : `共 ${caseAttachments.length} 张图片，可上传故障截图和维修凭证` }}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="case-edit__form-grid">
-              <VaInput label="工单号" v-model="editingCase.case_no" readonly />
-              <VaInput label="创建时间" :model-value="formatDate(editingCase.created_at)" readonly />
-              <VaInput label="服务器 SN" v-model="editingCase.sn" readonly />
-              <VaInput label="创建人" :model-value="editingCase.created_by_name || '-'" readonly />
-              <VaInput label="客户" :model-value="editingCase.customer || '-'" readonly />
-              <VaInput label="问题类型" :model-value="editingCase.issue_type || '未分类'" readonly />
-              <VaSelect
-                v-model="editForm.status"
-                label="状态"
-                :options="STATUS_OPTIONS.filter(o => o.value !== '')"
-                value-by="value"
-                text-by="text"
-                :readonly="!isAdmin"
-              />
-            </div>
-          </div>
-        </section>
+          </template>
 
-        <section class="case-edit__card">
-          <div class="case-edit__card-title">
-            <span class="case-edit__accent case-edit__accent--warm"></span>
-            <span>Problem Details</span>
+          <div class="case-attachments-panel__body">
+            <ServerImageGalleryPanel
+              title="工单附件"
+              upload-title="上传图片到工单附件区"
+              upload-description="支持拖拽或点击选择，上传故障截图、维修照片和处理凭证。"
+              entity-type="case"
+              :entity-id="editingCase.id"
+              :attachments="caseAttachments"
+              :attachments-loading="attachmentsLoading"
+              @uploaded="fetchCaseAttachments"
+            />
           </div>
-          <VaTextarea
-            label="问题描述"
-            v-model="editingCase.description"
-            readonly
-            autosize
-            :min-rows="4"
-          />
-        </section>
-
-        <section class="case-edit__card">
-          <div class="case-edit__card-title">
-            <span class="case-edit__accent case-edit__accent--soft"></span>
-            <span>Resolution Strategy</span>
-          </div>
-          <VaTextarea
-            label="解决方案"
-            v-model="editForm.solution"
-            placeholder="请填写解决方案..."
-            :readonly="!isAdmin"
-            autosize
-            :min-rows="5"
-          />
-          <div v-if="!isAdmin" class="case-edit__readonly-tip">
-            注：仅管理员可更新工单状态及方案。
-          </div>
-        </section>
-      </div>
+        </VaCollapse>
+      </VaCard>
     </VaModal>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { computed, reactive, ref, onMounted, toRef } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useToast } from 'vuestic-ui'
-import { getCases, updateCase } from '../api/cases'
+import { getCaseDetail, getCases, updateCase } from '../api/cases'
+import { getAttachments } from '../api/attachments'
+import CaseFormPanel from '../components/CaseFormPanel.vue'
+import CaseRecordCard from '../components/CaseRecordCard.vue'
+import ServerImageGalleryPanel from '../components/ServerDetail/ServerImageGalleryPanel.vue'
 import { usePermission } from '../composables/usePermission'
+import { CASE_STATUS_OPTIONS, getCaseStatusLabel } from '../utils/caseStatus'
 
+const route = useRoute()
+const router = useRouter()
 const { init: notify } = useToast()
 const { isAdmin } = usePermission()
 
@@ -243,13 +173,7 @@ const pageSize = 20
 const cases = ref([])
 const loading = ref(false)
 
-const STATUS_OPTIONS = [
-  { text: '全部', value: '' },
-  { text: '待处理', value: 'open' },
-  { text: '处理中', value: 'processing' },
-  { text: '已解决', value: 'resolved' },
-  { text: '已关闭', value: 'closed' },
-]
+const STATUS_OPTIONS = CASE_STATUS_OPTIONS
 
 // 详情/编辑相关
 const showEditModal = ref(false)
@@ -258,21 +182,9 @@ const editForm = reactive({
   status: '',
   solution: ''
 })
-
-const getStatusColor = (status) => {
-  const map = {
-    open: 'warning',
-    processing: 'info',
-    resolved: 'success',
-    closed: 'secondary'
-  }
-  return map[status] || 'primary'
-}
-
-const getStatusLabel = (status) => {
-  const option = STATUS_OPTIONS.find(o => o.value === status)
-  return option ? option.text : status
-}
+const caseAttachments = ref([])
+const attachmentsLoading = ref(false)
+const attachmentsExpanded = ref(false)
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
@@ -282,6 +194,77 @@ const formatDate = (dateStr) => {
   const h = String(date.getHours()).padStart(2, '0')
   const min = String(date.getMinutes()).padStart(2, '0')
   return `${m}-${d} ${h}:${min}`
+}
+
+const getCaseFields = (caseItem) => [
+  { label: 'Server SN', value: caseItem.sn || '-' },
+  { label: 'Customer', value: caseItem.customer || '-' },
+  { label: 'Issue Type', value: caseItem.issue_type || '未分类' },
+  { label: 'Status', value: getCaseStatusLabel(caseItem.status) },
+]
+
+const editStatusModel = toRef(editForm, 'status')
+const resolutionModel = toRef(editForm, 'solution')
+const descriptionModel = computed({
+  get: () => editingCase.value?.description || '',
+  set: (value) => {
+    if (editingCase.value) {
+      editingCase.value.description = value
+    }
+  }
+})
+
+const editGeneralFields = computed(() => {
+  if (!editingCase.value) return []
+
+  return [
+    { key: 'case_no', label: '工单号', value: editingCase.value.case_no, readonly: true },
+    { key: 'created_at', label: '创建时间', value: formatDate(editingCase.value.created_at), readonly: true },
+    { key: 'sn', label: '服务器 SN', value: editingCase.value.sn || '-', readonly: true },
+    { key: 'creator', label: '创建人', value: editingCase.value.created_by_name || '-', readonly: true },
+    { key: 'customer', label: '客户', value: editingCase.value.customer || '-', readonly: true },
+    { key: 'issue_type', label: '问题类型', value: editingCase.value.issue_type || '未分类', readonly: true },
+    {
+      key: 'status',
+      type: 'select',
+      label: '状态',
+      model: editStatusModel,
+      options: STATUS_OPTIONS.filter((option) => option.value !== ''),
+      readonly: !isAdmin.value
+    },
+  ]
+})
+
+const clearCaseQuery = async () => {
+  if (!route.query.caseId) return
+  const nextQuery = { ...route.query }
+  delete nextQuery.caseId
+  await router.replace({ query: nextQuery })
+}
+
+const openCaseFromQuery = async () => {
+  const caseId = route.query.caseId
+  if (!caseId || typeof caseId !== 'string') return
+
+  const existingCase = cases.value.find((caseItem) => caseItem.id === caseId)
+  if (existingCase) {
+    openEditModal(existingCase)
+    await clearCaseQuery()
+    return
+  }
+
+  try {
+    const detail = await getCaseDetail(caseId)
+    if (detail?.id) {
+      openEditModal(detail)
+    } else {
+      notify({ message: '未找到对应工单', color: 'warning' })
+    }
+  } catch {
+    notify({ message: '打开工单详情失败', color: 'danger' })
+  } finally {
+    await clearCaseQuery()
+  }
 }
 
 const fetchData = async () => {
@@ -296,6 +279,7 @@ const fetchData = async () => {
     cases.value = res.list || []
     totalCount.value = res.total || 0
     totalPages.value = Math.ceil((res.total || 0) / pageSize) || 1
+    await openCaseFromQuery()
   } catch (err) {
     notify({ message: '获取工单列表失败', color: 'danger' })
   } finally {
@@ -318,11 +302,27 @@ const openEditModal = (rowData) => {
   editingCase.value = { ...rowData }
   editForm.status = rowData.status
   editForm.solution = rowData.solution || ''
+  attachmentsExpanded.value = false
   showEditModal.value = true
+  fetchCaseAttachments()
+}
+
+const fetchCaseAttachments = async () => {
+  if (!editingCase.value?.id) return
+
+  attachmentsLoading.value = true
+  caseAttachments.value = []
+  try {
+    caseAttachments.value = await getAttachments('case', editingCase.value.id)
+  } catch {
+    notify({ message: '获取工单附件失败', color: 'danger' })
+  } finally {
+    attachmentsLoading.value = false
+  }
 }
 
 const handleUpdate = async () => {
-  if (!isAdmin.value) return
+  if (!isAdmin.value || !editingCase.value) return
   
   try {
     await updateCase(editingCase.value.id, {
@@ -330,8 +330,9 @@ const handleUpdate = async () => {
       solution: editForm.solution
     })
     notify({ message: '工单更新成功', color: 'success' })
+    showEditModal.value = false
     fetchData()
-  } catch (err) {
+  } catch {
     notify({ message: '更新失败', color: 'danger' })
   }
 }
@@ -432,263 +433,51 @@ onMounted(fetchData)
   gap: 16px;
 }
 
-.case-record {
-  display: flex;
-  gap: 16px;
-}
-
-.case-record__rail {
-  position: relative;
-  width: 18px;
-  flex: 0 0 18px;
-}
-
-.case-record__rail::after {
-  content: '';
-  position: absolute;
-  top: 16px;
-  bottom: -16px;
-  left: 50%;
-  width: 2px;
-  transform: translateX(-50%);
-  background: rgba(148, 163, 184, 0.26);
-}
-
-.case-record:last-child .case-record__rail::after {
-  display: none;
-}
-
-.case-record__dot {
-  position: relative;
-  z-index: 1;
-  width: 12px;
-  height: 12px;
-  margin-top: 10px;
-  border-radius: 50%;
-  background: var(--va-primary);
-  box-shadow: 0 0 0 4px var(--va-background-primary);
-}
-
-.case-record__dot--open { background: var(--va-warning); }
-.case-record__dot--processing { background: var(--va-info); }
-.case-record__dot--resolved { background: var(--va-success); }
-.case-record__dot--closed { background: var(--va-secondary); }
-
-.case-record__body {
-  flex: 1;
-  min-width: 0;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
-  overflow: hidden;
-}
-
-.case-record__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 24px;
-  background: #f2f4f6;
-}
-
-.case-record__header-main {
-  flex: 1;
-  min-width: 0;
-}
-
-.case-record__title-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-}
-
-.case-record__case-no {
-  font-size: 1rem;
-  font-weight: 700;
-  color: #2356c9;
-  font-family: Manrope, sans-serif;
-  letter-spacing: 0.02em;
-}
-
-.case-record__meta-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 6px;
-  flex-wrap: wrap;
-}
-
-.case-record__time {
-  font-size: 12px;
-  color: #667085;
-  margin-left: auto;
-}
-
-.case-record__status-chip {
-  flex-shrink: 0;
-}
-
-.case-record__creator-label {
-  font-size: 12px;
-  color: #98a2b3;
-}
-
-.case-record__creator-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: #344054;
-}
-
-.case-record__detail-button {
-  color: #2356c9;
-}
-
-.case-record__grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
-  padding: 24px 24px 0;
-}
-
-.case-info {
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(248, 250, 252, 0.92);
-  border: 1px solid rgba(148, 163, 184, 0.14);
-}
-
-.case-info__label,
-.case-section__label {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--va-text-secondary);
-}
-
-.case-info__value {
-  margin-top: 6px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--va-text-primary);
-  word-break: break-word;
-}
-
-.case-section {
-  margin-top: 18px;
-  padding: 0 24px 24px;
-}
-
-.case-section__content {
-  margin-top: 6px;
-  line-height: 1.7;
-  color: var(--va-text-primary);
-  word-break: break-word;
-}
-
-.case-section__content--secondary {
-  color: var(--va-text-secondary);
-}
-
 .cases-pagination {
   display: flex;
   justify-content: center;
 }
 
-.case-edit {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-  min-width: min(960px, 100%);
-  padding: 6px 2px;
+.case-edit-modal :deep(.va-modal__inner) {
+  max-width: 1040px;
 }
 
-.case-edit__header {
+.case-attachments-panel {
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.case-attachments-panel__header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
+  padding: 18px 20px;
+  cursor: pointer;
 }
 
-.case-edit__eyebrow {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: #64748b;
-}
-
-.case-edit__title {
-  margin: 8px 0 0;
-  font-size: 28px;
-  font-weight: 800;
-  line-height: 1.1;
-  color: var(--va-text-primary);
-}
-
-.case-edit__title span {
-  color: #154ec1;
-}
-
-.case-edit__subtitle {
-  margin-top: 8px;
-  font-size: 13px;
-  color: var(--va-text-secondary);
-}
-
-.case-edit__header-actions {
+.case-attachments-panel__title-wrap {
   display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.case-edit__card {
-  padding: 24px;
-  border-radius: 16px;
-  background: #fff;
-  box-shadow: 0 12px 32px -4px rgba(25, 28, 30, 0.06);
-}
-
-.case-edit__card-title {
-  display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 12px;
-  margin-bottom: 18px;
-  font-size: 18px;
+  min-width: 0;
+}
+
+.case-attachments-panel__title {
+  font-size: 16px;
   font-weight: 700;
   color: var(--va-text-primary);
 }
 
-.case-edit__accent {
-  width: 4px;
-  height: 24px;
-  border-radius: 999px;
-  background: #2356c9;
-}
-
-.case-edit__accent--warm {
-  background: #9a3600;
-}
-
-.case-edit__accent--soft {
-  background: #465581;
-}
-
-.case-edit__form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.case-edit__readonly-tip {
-  margin-top: 12px;
+.case-attachments-panel__meta {
+  margin-top: 2px;
   font-size: 12px;
+  line-height: 1.5;
   color: var(--va-text-secondary);
-  font-style: italic;
 }
 
-.case-edit-modal :deep(.va-modal__inner) {
-  max-width: 1040px;
+.case-attachments-panel__body {
+  padding: 0 20px 20px;
 }
 
 @media (max-width: 768px) {
@@ -713,40 +502,5 @@ onMounted(fetchData)
     flex: 1;
   }
 
-  .case-record__header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .case-record__title-row {
-    flex-wrap: wrap;
-  }
-
-  .case-record__time {
-    margin-left: 0;
-  }
-
-  .case-record__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .case-edit {
-    min-width: 0;
-  }
-
-  .case-edit__header {
-    grid-template-columns: 1fr;
-    flex-direction: column;
-  }
-
-  .case-edit__form-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 560px) {
-  .case-record__grid {
-    grid-template-columns: 1fr;
-  }
 }
 </style>
