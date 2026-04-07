@@ -66,7 +66,7 @@
             </VaCollapse>
           </VaCard>
 
-          <ServerImageGalleryPanel
+          <AttachmentGalleryPanel
             v-if="server"
             title="附件图片"
             entity-type="server"
@@ -162,7 +162,7 @@ import CaseRecordCard from '../../components/CaseRecordCard.vue'
 import ServerOverviewCard from '../../components/ServerDetail/ServerOverviewCard.vue'
 import ServerHardwareGrid from '../../components/ServerDetail/ServerHardwareGrid.vue'
 import ServerActionsPanel from '../../components/ServerDetail/ServerActionsPanel.vue'
-import ServerImageGalleryPanel from '../../components/ServerDetail/ServerImageGalleryPanel.vue'
+import AttachmentGalleryPanel from '../../components/AttachmentGalleryPanel.vue'
 
 const route = useRoute()
 const router = useRouter()

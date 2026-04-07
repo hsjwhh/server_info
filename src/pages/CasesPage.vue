@@ -128,7 +128,7 @@
           </template>
 
           <div class="case-attachments-panel__body">
-            <ServerImageGalleryPanel
+            <AttachmentGalleryPanel
               title="工单附件"
               upload-title="上传图片到工单附件区"
               upload-description="支持拖拽或点击选择，上传故障截图、维修照片和处理凭证。"
@@ -153,7 +153,7 @@ import { getCaseDetail, getCases, updateCase } from '../api/cases'
 import { getAttachments } from '../api/attachments'
 import CaseFormPanel from '../components/CaseFormPanel.vue'
 import CaseRecordCard from '../components/CaseRecordCard.vue'
-import ServerImageGalleryPanel from '../components/ServerDetail/ServerImageGalleryPanel.vue'
+import AttachmentGalleryPanel from '../components/AttachmentGalleryPanel.vue'
 import { usePermission } from '../composables/usePermission'
 import { CASE_STATUS_OPTIONS, getCaseStatusLabel } from '../utils/caseStatus'
 

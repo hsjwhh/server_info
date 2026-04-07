@@ -1,10 +1,10 @@
 <template>
-  <VaCard class="server-image-panel">
-    <VaCardTitle class="server-image-panel__title">
-      <div class="server-image-panel__title-row">
+  <VaCard class="attachment-gallery-panel">
+    <VaCardTitle class="attachment-gallery-panel__title">
+      <div class="attachment-gallery-panel__title-row">
         <div>
-          <div class="server-image-panel__eyebrow">Attachment Studio</div>
-          <div class="server-image-panel__heading">{{ title }}</div>
+          <div class="attachment-gallery-panel__eyebrow">Attachment Studio</div>
+          <div class="attachment-gallery-panel__heading">{{ title }}</div>
         </div>
         <VaChip size="small" color="primary" flat>
           {{ attachments.length }} 张
@@ -12,8 +12,8 @@
       </div>
     </VaCardTitle>
 
-    <VaCardContent class="server-image-panel__content">
-      <div class="server-image-panel__hero">
+    <VaCardContent class="attachment-gallery-panel__content">
+      <div class="attachment-gallery-panel__hero">
         <section class="upload-stage">
           <div class="upload-stage__icon">
             <VaIcon name="mdi-image-multiple-outline" size="28px" />
@@ -95,7 +95,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import AttachmentUploader from '../AttachmentUploader.vue'
+import AttachmentUploader from './AttachmentUploader.vue'
 
 const props = defineProps({
   title: { type: String, default: '附件图片' },
@@ -125,19 +125,18 @@ const openLightbox = (attachment) => {
   }
   lightboxVisible.value = true
 }
-
 </script>
 
 <style scoped>
-.server-image-panel {
+.attachment-gallery-panel {
   overflow: hidden;
 }
 
-.server-image-panel__title {
+.attachment-gallery-panel__title {
   padding-bottom: 0;
 }
 
-.server-image-panel__title-row {
+.attachment-gallery-panel__title-row {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -145,7 +144,7 @@ const openLightbox = (attachment) => {
   width: 100%;
 }
 
-.server-image-panel__eyebrow {
+.attachment-gallery-panel__eyebrow {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -153,19 +152,19 @@ const openLightbox = (attachment) => {
   color: var(--va-primary);
 }
 
-.server-image-panel__heading {
+.attachment-gallery-panel__heading {
   margin-top: 4px;
   font-size: 20px;
   font-weight: 700;
   color: var(--va-text-primary);
 }
 
-.server-image-panel__content {
+.attachment-gallery-panel__content {
   display: flex;
   flex-direction: column;
 }
 
-.server-image-panel__hero {
+.attachment-gallery-panel__hero {
   display: grid;
   grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr);
   gap: 20px;
@@ -332,14 +331,14 @@ const openLightbox = (attachment) => {
 }
 
 @media (max-width: 900px) {
-  .server-image-panel__hero {
+  .attachment-gallery-panel__hero {
     grid-template-columns: 1fr;
   }
 
   .selection-panel__header,
   .gallery-stage__summary,
   .image-lightbox__footer,
-  .server-image-panel__title-row {
+  .attachment-gallery-panel__title-row {
     flex-direction: column;
     align-items: flex-start;
   }
