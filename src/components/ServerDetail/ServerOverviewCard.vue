@@ -24,7 +24,7 @@
           </div>
           <div class="info-content">
             <span class="info-label">出机日期</span>
-            <span class="info-value">{{ formatDate(server) }}</span>
+            <span class="info-value" :title="formatDate(server)">{{ formatDate(server) }}</span>
           </div>
         </div>
 
@@ -34,7 +34,7 @@
           </div>
           <div class="info-content">
             <span class="info-label">出机客户</span>
-            <span class="info-value">{{ server.customer }}</span>
+            <span class="info-value" :title="server.customer">{{ server.customer }}</span>
           </div>
         </div>
 
@@ -44,7 +44,7 @@
           </div>
           <div class="info-content">
             <span class="info-label">业务</span>
-            <span class="info-value">{{ server.owner }}</span>
+            <span class="info-value" :title="server.owner">{{ server.owner }}</span>
           </div>
         </div>
 
@@ -54,7 +54,7 @@
           </div>
           <div class="info-content">
             <span class="info-label">SN 编号</span>
-            <span class="info-value">{{ server.sn }}</span>
+            <span class="info-value" :title="server.sn">{{ server.sn }}</span>
           </div>
         </div>
 
@@ -64,7 +64,7 @@
           </div>
           <div class="info-content">
             <span class="info-label">数量</span>
-            <span class="info-value">{{ server.number }}</span>
+            <span class="info-value" :title="server.number">{{ server.number }}</span>
           </div>
         </div>
 
@@ -74,7 +74,7 @@
           </div>
           <div class="info-content">
             <span class="info-label">备注</span>
-            <span class="info-value">{{ server.note || '-' }}</span>
+            <span class="info-value" :title="server.note">{{ server.note || '-' }}</span>
           </div>
         </div>
       </div>
@@ -127,6 +127,10 @@ const formatDate = (serverData) => {
   display: flex;
   align-items: center;
   gap: var(--space-4);
+
+  /* 👇 新增：允许这个区域在 Flex 布局中被压缩，防止挤爆右侧操作区 */
+  min-width: 0; 
+  flex: 1; 
 }
 
 .card-main-title {
@@ -134,6 +138,10 @@ const formatDate = (serverData) => {
   font-size: var(--text-2xl);
   font-weight: 700;
   color: var(--color-text-primary);
+
+  /* 👇 新增：遇到超长 SN 码强制换行 */
+  word-break: break-all;
+  overflow-wrap: anywhere;
 }
 
 .title-actions {
@@ -192,9 +200,13 @@ const formatDate = (serverData) => {
   font-size: var(--text-base);
   color: var(--color-text-primary);
   font-weight: 600;
+
+  /* 👇 修改：单行截断并显示省略号，防止撑高区块 */
+  display: block;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -205,9 +217,8 @@ const formatDate = (serverData) => {
   }
 
   .info-grid-3 {
-    grid-template-columns: 1fr;
-    flex-direction: column;
-    align-items: stretch;
+    /* 👇 核心修复：锁死最大宽度 */
+    grid-template-columns: minmax(0, 1fr); 
   }
 }
 </style>
