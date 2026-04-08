@@ -130,6 +130,7 @@ const openLightbox = (attachment) => {
 <style scoped>
 .attachment-gallery-panel {
   overflow: hidden;
+  max-width: 100%;
 }
 
 .attachment-gallery-panel__title {
@@ -162,16 +163,27 @@ const openLightbox = (attachment) => {
 .attachment-gallery-panel__content {
   display: flex;
   flex-direction: column;
+  min-width: 0; /* 防止被子元素撑开 */
 }
 
 .attachment-gallery-panel__hero {
   display: grid;
-  grid-template-columns: minmax(280px, 1fr) minmax(0, 2fr);
+  grid-template-columns: 1fr 2fr;
   gap: 20px;
+  width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .attachment-gallery-panel__hero {
+    grid-template-columns: 1fr;
+  }
 }
 
 .upload-stage,
 .gallery-stage {
+  min-width: 0;
+  overflow: hidden;
   border: 1px solid rgba(148, 163, 184, 0.22);
   border-radius: 20px;
   background:
@@ -246,8 +258,15 @@ const openLightbox = (attachment) => {
 
 .gallery-stage__mosaic {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 8px;
+  width: 100%;
+}
+
+@media (max-width: 480px) {
+  .gallery-stage__mosaic {
+    grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+  }
 }
 
 .gallery-stage__thumb {

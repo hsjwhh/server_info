@@ -93,21 +93,29 @@ const infoFields = computed(() => {
   position: relative;
   width: 18px;
   flex: 0 0 18px;
+  /* 确保轨道在垂直方向上溢出，以连接上下卡片 */
+  margin-top: -16px;
+  margin-bottom: -16px;
+  display: flex;
+  justify-content: center;
 }
 
 .case-record__rail::after {
   content: '';
   position: absolute;
-  top: 16px;
-  bottom: -16px;
+  top: 0;
+  bottom: 0;
   left: 50%;
   width: 2px;
   transform: translateX(-50%);
   background: rgba(148, 163, 184, 0.26);
+  z-index: 0;
 }
 
-.case-record:last-child .case-record__rail::after {
-  display: none;
+/* 第一个卡片不需要向上伸出的线条 */
+:first-child > .case-record > .case-record__rail::after,
+.case-record:first-of-type .case-record__rail::after {
+  top: 26px; /* 从第一个圆点开始 */
 }
 
 .case-record__dot {
@@ -115,10 +123,9 @@ const infoFields = computed(() => {
   z-index: 1;
   width: 12px;
   height: 12px;
-  margin-top: 10px;
+  margin-top: 26px; /* 对应 header 的中心位置 */
   border-radius: 50%;
   background: var(--va-primary);
-  box-shadow: 0 0 0 4px var(--va-background-primary);
 }
 
 .case-record__dot--open { background: var(--va-warning); }
