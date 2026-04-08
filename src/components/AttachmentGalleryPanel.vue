@@ -261,6 +261,7 @@ const openLightbox = (attachment) => {
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 8px;
   width: 100%;
+  box-sizing: border-box; /* ✅ 新增：防御性属性 */
   min-width: 0; /* 修复 Safari 下 Flex 子元素 Grid 拒绝换行的关键 */
 }
 
@@ -274,6 +275,7 @@ const openLightbox = (attachment) => {
   display: block; /* 覆盖 iOS 按钮默认的 inline-block */
   width: 100%;
   min-width: 0; /* 防止按钮内部图像撑破网格轨道 */
+  aspect-ratio: 1; /* ✅ 新增：让外层容器维持正方形 */
   -webkit-appearance: none; /* 清除 Apple 设备默认的按钮外观干扰 */
   padding: 0;
   border: 1px solid rgba(148, 163, 184, 0.2);
@@ -291,7 +293,7 @@ const openLightbox = (attachment) => {
 
 .gallery-stage__image {
   width: 100%;
-  height: 100px;
+  height: 100%; /* ✅ 修改：从 100px 改为 100% */
   object-fit: cover;
   display: block;
 }
@@ -381,10 +383,6 @@ const openLightbox = (attachment) => {
 
   .selection-strip {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .gallery-stage__image {
-    aspect-ratio: 1;
   }
 }
 </style>

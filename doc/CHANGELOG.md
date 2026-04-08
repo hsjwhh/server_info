@@ -86,7 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **API 路径对齐**：将主板搜索接口路径统一更新为 `/hw/mb`。
 
 ### 🐛 修复
-- **iOS Safari 兼容性修复**：修复了 iPhone 浏览器下附件图库因 Flex/Grid 嵌套及按钮默认样式导致的横向溢出问题，确保缩略图在小屏设备上能正常换行展示。
+- **iOS Safari 兼容性加固 (TICKET-001)**：彻底解决了 iPhone 浏览器下附件图库撑破页面的问题。通过将 `aspect-ratio` 转移至父容器并解除图片的固定高度限制，修复了 WebKit 内核在处理嵌套 Grid 时的宽度计算缺陷。
 - **详情页折叠面板间距修复**：由于 `VaCollapse` 会重置子组件内边距，现将内部容器由 `VaCardContent` 替换为带显式 `padding` 的 `div`，彻底解决了工单记录展开后内容紧贴边框的问题。
 - **请求分流优化**：修正了 CPU 型号录入或导入时误触发主板接口查询的逻辑，现在根据预设类型精准分发 API 请求。
 - **UI 定位纠偏**：修复了主板搜索建议列表因缺少 `relative` 定位上下文而导致的位置偏移 Bug。
