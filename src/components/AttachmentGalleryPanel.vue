@@ -261,6 +261,7 @@ const openLightbox = (attachment) => {
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 8px;
   width: 100%;
+  min-width: 0; /* 修复 Safari 下 Flex 子元素 Grid 拒绝换行的关键 */
 }
 
 @media (max-width: 480px) {
@@ -270,6 +271,10 @@ const openLightbox = (attachment) => {
 }
 
 .gallery-stage__thumb {
+  display: block; /* 覆盖 iOS 按钮默认的 inline-block */
+  width: 100%;
+  min-width: 0; /* 防止按钮内部图像撑破网格轨道 */
+  -webkit-appearance: none; /* 清除 Apple 设备默认的按钮外观干扰 */
   padding: 0;
   border: 1px solid rgba(148, 163, 184, 0.2);
   border-radius: 18px;
