@@ -168,7 +168,7 @@ const openLightbox = (attachment) => {
 
 .attachment-gallery-panel__hero {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   gap: 20px;
   width: 100%;
   min-width: 0;
@@ -176,7 +176,7 @@ const openLightbox = (attachment) => {
 
 @media (max-width: 1024px) {
   .attachment-gallery-panel__hero {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -275,6 +275,7 @@ const openLightbox = (attachment) => {
   display: block; /* 覆盖 iOS 按钮默认的 inline-block */
   width: 100%;
   min-width: 0; /* 防止按钮内部图像撑破网格轨道 */
+  box-sizing: border-box; /* ✅ 新增：控制 1px border 不溢出 */
   aspect-ratio: 1; /* ✅ 新增：让外层容器维持正方形 */
   -webkit-appearance: none; /* 清除 Apple 设备默认的按钮外观干扰 */
   padding: 0;
@@ -358,7 +359,7 @@ const openLightbox = (attachment) => {
 
 @media (max-width: 900px) {
   .attachment-gallery-panel__hero {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .selection-panel__header,
