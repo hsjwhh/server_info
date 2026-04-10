@@ -186,12 +186,19 @@ const caseForm = reactive({
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleString('zh-CN', {
-    month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit'
+    timeZone: 'Asia/Shanghai',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
   })
 }
 
-const createDescriptionModel = toRef(caseForm, 'description')
+const createDescriptionModel = computed(() => ({
+  get value() { return caseForm.description },
+  set value(v) { caseForm.description = v }
+}))
 
 const createGeneralFields = computed(() => [
   { key: 'sn', label: '服务器 SN', value: server.value?.sn || '-', readonly: true },

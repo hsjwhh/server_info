@@ -188,12 +188,14 @@ const attachmentsExpanded = ref(false)
 
 const formatDate = (dateStr) => {
   if (!dateStr) return '-'
-  const date = new Date(dateStr)
-  const m = String(date.getMonth() + 1).padStart(2, '0')
-  const d = String(date.getDate()).padStart(2, '0')
-  const h = String(date.getHours()).padStart(2, '0')
-  const min = String(date.getMinutes()).padStart(2, '0')
-  return `${m}-${d} ${h}:${min}`
+  return new Date(dateStr).toLocaleString('zh-CN', {
+    timeZone: 'Asia/Shanghai',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })
 }
 
 const getCaseFields = (caseItem) => [
@@ -204,15 +206,18 @@ const getCaseFields = (caseItem) => [
 ]
 
 const editStatusModel = toRef(editForm, 'status')
-const resolutionModel = toRef(editForm, 'solution')
-const descriptionModel = computed({
-  get: () => editingCase.value?.description || '',
-  set: (value) => {
+const resolutionModel = computed(() => ({
+  get value() { return editForm.solution },
+  set value(v) { editForm.solution = v }
+}))
+const descriptionModel = computed(() => ({
+  get value() { return editingCase.value?.description || '' },
+  set value(v) {
     if (editingCase.value) {
-      editingCase.value.description = value
+      editingCase.value.description = v
     }
   }
-})
+}))
 
 const editGeneralFields = computed(() => {
   if (!editingCase.value) return []
