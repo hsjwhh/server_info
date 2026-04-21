@@ -202,8 +202,9 @@ const matchItem = async (item) => {
   item.matchStatus = 'loading'
   try {
     // 1. 预处理搜索词
-    // CPU: 建议直接用数字去匹配，提高在混合命名下的命中率
-    const cpuSearchKeyword = (item.rawModel.match(/\d+/) || [item.rawModel])[0]
+    // CPU: 建议优先取型号中最具体的部分（最长的带数字单词），避免 "Ultra 9 285K" 只搜到 "9"
+    const cpuModelParts = item.rawModel.split(/[\s-]+/).filter(p => /\d/.test(p))
+    const cpuSearchKeyword = cpuModelParts.reduce((a, b) => a.length > b.length ? a : b, '') || item.rawModel
     
     // 主板: 去除中文，保留型号核心部分 (如 "华硕 P3SHA" -> "P3SHA")
     const mbSearchKeyword = item.rawModel.replace(/[\u4e00-\u9fa5]/g, '').trim() || item.rawModel
@@ -231,17 +232,17 @@ const matchItem = async (item) => {
     if (results.length === 0) {
       item.matchStatus = 'none'
     } else {
-      // 3. 二次比对逻辑：将后端返回的所有型号也进行归一化，与输入值进行“包含”匹配
+      // 3. 二次比对逻辑：使用深度归一化（去除品牌和系列干扰词）进行匹配
       const inputNorm = normalize(item.rawModel)
       
-      // 优先找完全一致的（归一化后一致）
+      // 优先找完全一致的
       const exactMatch = results.find(r => normalize(r.displayName) === inputNorm)
       
       if (exactMatch) {
         selectMatch(item, exactMatch)
       } else {
-        // 其次找包含关系的（比如输入 4114 命中 Intel Xeon 4114）
-        const fuzzyMatch = results.find(r => normalize(r.displayName).includes(inputNorm))
+        // 其次找包含关系的
+        const fuzzyMatch = results.find(r => normalize(r.displayName).includes(inputNorm) || inputNorm.includes(normalize(r.displayName)))
         if (fuzzyMatch && results.length === 1) {
           // 如果只有一个模糊结果，自动选中
           selectMatch(item, fuzzyMatch)
@@ -258,7 +259,11 @@ const matchItem = async (item) => {
   }
 }
 
-const normalize = (str) => str.toLowerCase().replace(/[^a-z0-9]/g, '')
+const normalize = (str) => {
+  return str.toLowerCase()
+    .replace(/intel|amd|core|xeon|ultra|platinum|gold|silver|bronze|processor/gi, '')
+    .replace(/[^a-z0-9]/g, '')
+}
 
 const selectMatch = (item, match) => {
   item.matchStatus = 'matched'

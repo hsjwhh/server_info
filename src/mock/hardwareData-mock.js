@@ -83,6 +83,25 @@ export const mockCpuList = [
     max_memory: 6144,
     pcie_lanes: 64,
     release_date: "2021-Q2"
+  },
+  {
+    cpu_short_name: "Intel Core Ultra 9 285K",
+    full_name: "Intel Core Ultra 9 285K Processor",
+    manufacturer: "Intel",
+    series: "Core Ultra 200S",
+    socket: "LGA1851",
+    cores: 24,
+    threads: 24,
+    base_freq: 3.2,
+    turbo_freq: 5.7,
+    tdp: 125,
+    cache_l3: 36,
+    memory_type: "DDR5",
+    memory_channels: 2,
+    max_memory_speed: 6400,
+    max_memory: 192,
+    pcie_lanes: 20,
+    release_date: "2024-Q4"
   }
 ]
 
