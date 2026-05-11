@@ -37,10 +37,10 @@
                 <div class="suggestion-info">
                   <p class="suggestion-name">{{ item.model }}</p>
                   <p class="suggestion-meta">
-                    Socket {{ item.sockets || item.socket }} • {{ item.cpu_number }} CPU
+                    Socket {{ displayValue(item.sockets || item.socket) }} • {{ formatCpuNumber(item.cpu_number) }}
                   </p>
                 </div>
-                <div class="suggestion-badge" v-if="item.id">In Stock</div>
+                <div class="suggestion-badge" v-if="getMbId(item)">In Stock</div>
                 <VaIcon name="arrow_forward" class="suggestion-arrow" color="#94a3b8" />
               </div>
             </div>
@@ -54,9 +54,9 @@
           <div class="main-card col-span-8">
             <div class="card-header">
               <div>
-                <span class="category-badge">WORKSTATION / SERVER</span>
-                <h2 class="display-title">{{ mb.model }}</h2>
-                <p class="subtitle">{{ mb.product_collection || 'Enterprise Validated Platform' }}</p>
+                <span class="category-badge">MOTHERBOARD</span>
+                <h2 class="display-title">{{ displayValue(mb.model) }}</h2>
+                <p class="subtitle">{{ displayValue(mb.product_collection) }}</p>
               </div>
               <div class="header-actions">
                 <VaButton 
@@ -65,12 +65,9 @@
                   border-color="#e2e8f0" 
                   class="action-btn" 
                   icon="open_in_new"
-                  @click="window.open(mb.url, '_blank')"
+                  @click="openOfficialPage"
                 >
                   Official Page
-                </VaButton>
-                <VaButton class="action-btn primary-btn" icon="add_shopping_cart">
-                  Order Asset
                 </VaButton>
               </div>
             </div>
@@ -80,30 +77,30 @@
                 <p class="spec-label">Socket Type</p>
                 <div class="spec-content">
                   <VaIcon name="developer_board" color="#154ec1" class="mr-2" />
-                  <span class="spec-value">{{ mb.sockets || mb.socket }}</span>
+                  <span class="spec-value">{{ displayValue(mb.sockets || mb.socket) }}</span>
                 </div>
-                <p class="spec-subtext">{{ mb.cpu_number }}x Processor Support</p>
+                <p class="spec-subtext">{{ formatCpuNumber(mb.cpu_number) }}</p>
               </div>
               <div class="spec-group">
                 <p class="spec-label">Max TDP</p>
                 <div class="spec-content">
                   <VaIcon name="speed" color="#154ec1" class="mr-2" />
-                  <span class="spec-value">{{ formatValue(mb.max_tdp) }}W</span>
+                  <span class="spec-value">{{ formatWithUnit(mb.max_tdp, 'W') }}</span>
                 </div>
               </div>
               <div class="spec-group">
                 <p class="spec-label">Memory Slots</p>
                 <div class="spec-content">
                   <VaIcon name="memory" color="#154ec1" class="mr-2" />
-                  <span class="spec-value">{{ mb.dimm_number || mb.memory_slots }}x DIMM</span>
+                  <span class="spec-value">{{ formatWithUnit(mb.dimm_number || mb.memory_slots, 'x DIMM') }}</span>
                 </div>
-                <p class="spec-subtext">{{ mb.memory_type?.split('MT/s')[0] }} MT/s</p>
+                <p class="spec-subtext">{{ displayValue(mb.memory_type) }}</p>
               </div>
               <div class="spec-group full-width-spec">
-                <p class="spec-label">PCIe Configuration</p>
+                <p class="spec-label">PCIe Configuration{{ mb.pcie_number ? ` (${mb.pcie_number})` : '' }}</p>
                 <div class="spec-tags mt-2">
                   <VaChip 
-                    v-for="(pcie, idx) in splitSpecs(mb.pcie_list)" 
+                    v-for="(pcie, idx) in splitSpecs(mb.pcie_list || mb.pcie_slots)" 
                     :key="idx"
                     size="small" 
                     preset="outline"
@@ -111,11 +108,12 @@
                   >
                     {{ pcie }}
                   </VaChip>
+                  <span v-if="splitSpecs(mb.pcie_list || mb.pcie_slots).length === 0" class="empty-value">-</span>
                 </div>
               </div>
               <div class="spec-group full-width-spec">
                 <p class="spec-label">Memory Capacity</p>
-                <p class="spec-value text-sm mt-1">{{ mb.max_memory }}</p>
+                <p class="spec-value text-sm mt-1">{{ displayValue(mb.max_memory) }}</p>
               </div>
             </div>
           </div>
@@ -141,36 +139,41 @@
                 <div class="info-item-label">
                   <VaIcon name="storage" size="small" class="mr-2" /> M.2 Interface
                 </div>
-                <div class="info-item-value text-xs">{{ mb.m2 }}</div>
+                <div class="info-item-value text-xs">
+                  <div v-for="(item, idx) in splitSpecs(mb.m2)" :key="idx">{{ item }}</div>
+                </div>
               </div>
-              <div class="info-item border-none">
+              <div class="info-item border-none" v-if="mb.input">
                 <div class="info-item-label">
                   <VaIcon name="settings_input_component" size="small" class="mr-2" /> I/O Controller
                 </div>
-                <div class="info-item-value text-xs">{{ formatValue(mb.input) }}</div>
+                <div class="info-item-value text-xs">
+                  <div v-for="(item, idx) in splitSpecs(mb.input)" :key="idx">{{ item }}</div>
+                </div>
               </div>
+              <div v-if="!mb.m2 && !mb.input" class="empty-value">-</div>
             </div>
           </div>
 
-          <!-- Lifecycle Section -->
+          <!-- API Field Summary -->
           <div class="info-section col-span-6">
-            <h4 class="info-title">Lifecycle & Compliance</h4>
+            <h4 class="info-title">Field Summary</h4>
             <div class="lifecycle-grid">
               <div class="lifecycle-box">
-                <p class="box-label">Warranty</p>
-                <p class="box-value text-success">3 Years</p>
+                <p class="box-label">CPU Sockets</p>
+                <p class="box-value">{{ displayValue(mb.cpu_number) }}</p>
               </div>
               <div class="lifecycle-box">
-                <p class="box-label">EOL Status</p>
-                <p class="box-value text-primary">Active</p>
+                <p class="box-label">PCIe Count</p>
+                <p class="box-value">{{ displayValue(mb.pcie_number) }}</p>
               </div>
               <div class="lifecycle-box">
-                <p class="box-label">Compliance</p>
-                <p class="box-value">RoHS, CE</p>
+                <p class="box-label">DIMM Count</p>
+                <p class="box-value">{{ displayValue(mb.dimm_number || mb.memory_slots) }}</p>
               </div>
               <div class="lifecycle-box">
-                <p class="box-label">Firmware</p>
-                <p class="box-value">Validated</p>
+                <p class="box-label">Socket</p>
+                <p class="box-value">{{ displayValue(mb.sockets || mb.socket) }}</p>
               </div>
             </div>
           </div>
@@ -188,7 +191,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getMotherboardDetail, searchMotherboard } from '../../api/configPlan'
 import { VaButton, VaIcon, VaInnerLoading, VaChip } from 'vuestic-ui'
@@ -203,12 +206,24 @@ const suggestions = ref([])
 const showSuggestions = ref(false)
 const searchContainerRef = ref(null)
 
-/**
- * 格式化数值：清理换行符、多余空格和特定单位符号
- */
-const formatValue = (val) => {
+const displayValue = (val) => {
   if (val === undefined || val === null || val === '') return '-'
-  return String(val).replace(/[\r\n]+/g, ' ').replace(/[Ww]$/, '').trim()
+  return String(val).replace(/[\r\n]+/g, ' ').trim() || '-'
+}
+
+const formatWithUnit = (val, unit) => {
+  const value = displayValue(val)
+  if (value === '-') return '-'
+  const normalizedUnit = unit.trim()
+  return value.toLowerCase().endsWith(normalizedUnit.toLowerCase())
+    ? value
+    : `${value}${unit.startsWith(' ') ? '' : ' '}${unit}`
+}
+
+const formatCpuNumber = (val) => {
+  const value = displayValue(val)
+  if (value === '-') return 'Processor Support'
+  return /^\d+$/.test(value) ? `${value}x Processor Support` : `${value} Processor Support`
 }
 
 /**
@@ -216,10 +231,12 @@ const formatValue = (val) => {
  */
 const splitSpecs = (str) => {
   if (!str) return []
-  return str.split(/[;,]+/)
+  return String(str).split(/[;；,\n\r]+/)
     .map(s => s.trim())
     .filter(s => s.length > 0)
 }
+
+const getMbId = (item) => item?.hashId || item?.id
 
 const debouncedSearch = debounce(async (query) => {
   if (!query) {
@@ -238,14 +255,22 @@ const debouncedSearch = debounce(async (query) => {
 }, 300)
 
 watch(searchKeyword, (newVal) => {
+  showSuggestions.value = !!newVal
   debouncedSearch(newVal)
 })
 
 const selectResult = (item) => {
+  const id = getMbId(item)
+  if (!id) return
+
   showSuggestions.value = false
   suggestions.value = []
   searchKeyword.value = item.model
-  router.push({ name: 'MotherboardDetail', params: { id: item.id } })
+  router.push({ name: 'MotherboardDetail', params: { id } })
+}
+
+const openOfficialPage = () => {
+  if (mb.value?.url) window.open(mb.value.url, '_blank', 'noopener,noreferrer')
 }
 
 const handleClickOutside = (e) => {
@@ -362,6 +387,8 @@ watch(() => route.params.id, (newId) => {
 }
 
 .suggestions-list {
+  position: static;
+  inset: auto;
   padding: 8px;
   max-height: 400px;
   overflow-y: auto;

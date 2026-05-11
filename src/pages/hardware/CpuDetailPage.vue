@@ -218,6 +218,7 @@ const debouncedSearch = debounce(async (query) => {
 }, 300)
 
 watch(searchKeyword, (newVal) => {
+  showSuggestions.value = !!newVal
   debouncedSearch(newVal)
 })
 
@@ -341,6 +342,8 @@ watch(() => route.params.id, (newId) => {
 }
 
 .suggestions-list {
+  position: static;
+  inset: auto;
   padding: 8px;
   max-height: 400px;
   overflow-y: auto;
