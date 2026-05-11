@@ -135,6 +135,36 @@ const routes = [
         }
       },
       {
+        path: 'hardware/cpu/:id?',
+        name: 'CpuDetail',
+        component: () => import('../pages/hardware/CpuDetailPage.vue'),
+        meta: {
+          title: 'CPU 详情',
+          icon: 'mdi-memory',
+          showInMenu: true,
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '硬件库', to: '/config-plan' },
+            { label: 'CPU 详情' }
+          ]
+        }
+      },
+      {
+        path: 'hardware/mb/:id?',
+        name: 'MotherboardDetail',
+        component: () => import('../pages/hardware/MotherboardDetailPage.vue'),
+        meta: {
+          title: '主板详情',
+          icon: 'mdi-developer-board',
+          showInMenu: true,
+          breadcrumbs: [
+            { label: '首页', to: '/' },
+            { label: '硬件库', to: '/config-plan' },
+            { label: '主板 详情' }
+          ]
+        }
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('../pages/SettingsPage.vue'),

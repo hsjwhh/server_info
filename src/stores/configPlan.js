@@ -144,7 +144,9 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
             if (cpuKeyword.value) params.keyword = cpuKeyword.value
             if (cpuCoresFilter.value) params.cores = cpuCoresFilter.value
 
-            cpuSuggestions.value = await searchCpu(params)
+            const results = await searchCpu(params)
+            // 后端返回格式可能为 { success: true, data: [...] } 或直接是数组
+            cpuSuggestions.value = results.data || (Array.isArray(results) ? results : [])
             showSuggestions.value = cpuSuggestions.value.length > 0
         } catch (err) {
             console.error('CPU 组合搜索失败:', err)
@@ -163,7 +165,9 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
         }
         
         try {
-            compatibleMotherboards.value = await getMbBySocket(formattedSocket.value)
+            const results = await getMbBySocket(formattedSocket.value)
+            // 后端返回格式可能为 { success: true, data: [...] } 或直接是数组
+            compatibleMotherboards.value = results.data || (Array.isArray(results) ? results : [])
         } catch (err) {
             console.error('加载兼容主板失败:', err)
             compatibleMotherboards.value = [] // 报错时清空列表，防止 UI 渲染过时数据
@@ -180,7 +184,9 @@ export const useConfigPlanStore = defineStore('configPlan', () => {
         loadingCpuDetail.value = true
         try {
             // 每次选中或更新后，都强制请求最新的详情数据
-            const cpuDetail = await getCpuDetail(cpuSummary.id)
+            const res = await getCpuDetail(cpuSummary.id)
+            // 后端返回格式可能为 { success: true, data: {...} } 或直接是对象
+            const cpuDetail = res.data || res
             
             // 更新基础状态
             selectedCpu.value = cpuDetail
